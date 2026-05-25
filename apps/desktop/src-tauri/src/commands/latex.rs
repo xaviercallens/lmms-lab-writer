@@ -1411,7 +1411,7 @@ pub async fn latex_detect_main_file(
     }
 
     // Sort by score descending
-    candidates.sort_by(|a, b| b.1.cmp(&a.1));
+    candidates.sort_by_key(|candidate| std::cmp::Reverse(candidate.1));
 
     // If we have a clear winner (significantly higher score)
     if !candidates.is_empty() {
