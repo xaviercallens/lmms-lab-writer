@@ -86,6 +86,7 @@ jobs:
             wget \
             file \
             openssl \
+            xdg-utils \
             webkit2gtk-4.1 \
             libappindicator-gtk3 \
             librsvg \
