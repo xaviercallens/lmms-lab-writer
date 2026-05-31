@@ -132,11 +132,65 @@ jobs:
           include-hidden-files: true
           retention-days: 7
 
+  build-tauri-arch-release:
+    name: Release Build (Arch Linux)
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - name: Install system dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            git \
+            nodejs \
+            npm \
+            rust \
+            cargo \
+            curl \
+            wget \
+            file \
+            openssl \
+            webkit2gtk-4.1 \
+            libappindicator-gtk3 \
+            librsvg \
+            patchelf
+          npm install -g pnpm@10.29.3
+
+      - uses: actions/checkout@v4
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Sync app version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: node scripts/sync-version.mjs --from-tag ${{ github.ref_name }}
+
+      - name: Build Tauri app on Arch Linux
+        run: pnpm --filter @lmms-lab/writer-desktop tauri build --ci -v
+
+      - name: Archive Arch Linux bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./apps/desktop/src-tauri/tauri.conf.json').version")"
+          mkdir -p arch-release
+          tar -czf "arch-release/lmms-lab-writer-v${version}-linux-arch-x64-bundle.tar.gz" \
+            -C apps/desktop/src-tauri/target/release/bundle \
+            .
+
+      - name: Upload Arch Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-Linux-Arch
+          path: arch-release/*.tar.gz
+          retention-days: 7
+
   release-github:
     name: Publish GitHub Release
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs:
       - build-tauri-release
+      - build-tauri-arch-release
       - build-aur-package
     runs-on: ubuntu-latest
     permissions:
@@ -172,12 +226,107 @@ jobs:
             release-artifacts/**/PKGBUILD
             release-artifacts/**/.SRCINFO
 
+  release-arch-package:
+    name: Build and Release Arch Package
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-')
+    needs:
+      - build-aur-package
+      - release-github
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    permissions:
+      contents: write
+    steps:
+      - name: Install system dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            git \
+            nodejs \
+            curl \
+            github-cli \
+            gtk3 \
+            webkit2gtk-4.1 \
+            libappindicator-gtk3 \
+            zstd
+
+      - name: Download AUR package files
+        uses: actions/download-artifact@v4
+        with:
+          name: build-AUR
+          path: aur-package
+
+      - name: Locate AUR package files
+        id: aur-files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          pkgbuild="$(find aur-package -type f -name PKGBUILD | head -n 1 || true)"
+          srcinfo="$(find aur-package -type f -name .SRCINFO | head -n 1 || true)"
+
+          if [[ -z "$pkgbuild" || -z "$srcinfo" ]]; then
+            archive="$(find aur-package -type f -name 'lmms-lab-writer-bin-*-aur.tar.gz' | head -n 1 || true)"
+            if [[ -z "$archive" ]]; then
+              echo "AUR package files were not found in the build-AUR artifact." >&2
+              exit 1
+            fi
+
+            mkdir -p aur-package/extracted
+            tar -xzf "$archive" -C aur-package/extracted
+            pkgbuild="$(find aur-package/extracted -type f -name PKGBUILD | head -n 1 || true)"
+            srcinfo="$(find aur-package/extracted -type f -name .SRCINFO | head -n 1 || true)"
+          fi
+
+          if [[ -z "$pkgbuild" || -z "$srcinfo" ]]; then
+            echo "PKGBUILD or .SRCINFO is missing from the AUR package artifact." >&2
+            exit 1
+          fi
+
+          package_dir="$(dirname "$pkgbuild")"
+          if [[ "$(dirname "$srcinfo")" != "$package_dir" ]]; then
+            echo "PKGBUILD and .SRCINFO are in different directories." >&2
+            exit 1
+          fi
+
+          echo "package_dir=$package_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Build Arch package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          useradd -m builder
+          install -d -m 755 -o builder -g builder /tmp/arch-package
+          cp "${{ steps.aur-files.outputs.package_dir }}/PKGBUILD" \
+            "${{ steps.aur-files.outputs.package_dir }}/.SRCINFO" \
+            /tmp/arch-package/
+          chown builder:builder /tmp/arch-package/PKGBUILD /tmp/arch-package/.SRCINFO
+
+          runuser -u builder -- bash -lc "cd /tmp/arch-package && makepkg --noconfirm --cleanbuild"
+
+          mkdir -p arch-package-output
+          cp /tmp/arch-package/*.pkg.tar.zst arch-package-output/
+
+      - name: Upload Arch package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-Arch-Package
+          path: arch-package-output/*.pkg.tar.zst
+          retention-days: 7
+
+      - name: Publish Arch package to GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.ref_name }}" arch-package-output/*.pkg.tar.zst --repo EvolvingLMMs-Lab/lmms-lab-writer --clobber
+
   publish-aur:
     name: Publish AUR Package
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-')
     needs:
       - build-aur-package
-      - release-github
+      - release-arch-package
     runs-on: ubuntu-latest
     env:
       AUR_HOME: /tmp/aur-home
