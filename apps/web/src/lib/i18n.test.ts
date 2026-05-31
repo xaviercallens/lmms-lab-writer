@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
+  interpolate,
   isLocale,
+  localeFromAcceptLanguage,
   normalizeLocale,
   stripLocalePrefix,
   withLocalePrefix,
-  interpolate,
-  localeFromAcceptLanguage,
 } from "./i18n";
 
 describe("isLocale", () => {
@@ -70,15 +70,11 @@ describe("withLocalePrefix", () => {
 
 describe("interpolate", () => {
   it("replaces a single placeholder", () => {
-    expect(interpolate("Hello {name}!", { name: "World" })).toBe(
-      "Hello World!",
-    );
+    expect(interpolate("Hello {name}!", { name: "World" })).toBe("Hello World!");
   });
 
   it("replaces multiple placeholders", () => {
-    expect(
-      interpolate("{greeting}, {name}!", { greeting: "Hi", name: "User" }),
-    ).toBe("Hi, User!");
+    expect(interpolate("{greeting}, {name}!", { greeting: "Hi", name: "User" })).toBe("Hi, User!");
   });
 
   it("replaces all occurrences of the same placeholder", () => {

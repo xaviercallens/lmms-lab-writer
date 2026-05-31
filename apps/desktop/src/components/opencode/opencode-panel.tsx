@@ -1,16 +1,16 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useOpenCode } from "@/lib/opencode/use-opencode";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ToolPart } from "@/lib/opencode/types";
-import type { Props } from "./types";
-import { parseTasks, CollapsibleTasksBar } from "./tasks-display";
-import { SessionList, EmptyState } from "./session-list";
-import { MessageList } from "./message-list";
-import { InputArea } from "./input-area";
-import { OnboardingState } from "./onboarding";
+import { useOpenCode } from "@/lib/opencode/use-opencode";
 import { ChevronIcon, PlusIcon } from "./icons";
+import { InputArea } from "./input-area";
+import { MessageList } from "./message-list";
+import { OnboardingState } from "./onboarding";
+import { EmptyState, SessionList } from "./session-list";
+import { CollapsibleTasksBar, parseTasks } from "./tasks-display";
+import type { Props } from "./types";
 
 export const OpenCodePanel = memo(function OpenCodePanel({
   className = "",
@@ -26,26 +26,35 @@ export const OpenCodePanel = memo(function OpenCodePanel({
 }: Props) {
   const opencode = useOpenCode({ baseUrl, directory, autoConnect });
   const [input, setInput] = useState("");
-  const [attachedFiles, setAttachedFiles] = useState<{ url: string; mime: string; filename: string }[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<
+    { url: string; mime: string; filename: string }[]
+  >([]);
   const [showSessionList, setShowSessionList] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pendingMessageSentRef = useRef(false);
   const [panelParent] = useAutoAnimate({ duration: 200 });
 
-
   // Extract latest tasks from message history
   const latestTasks = useMemo(() => {
     // Scan messages in reverse to find the last updated task list
     for (let i = opencode.messages.length - 1; i >= 0; i--) {
-      const msg = opencode.messages[i]!;
-      if (msg.role !== 'assistant') continue;
+      const msg = opencode.messages[i];
+      if (!msg) continue;
+      if (msg.role !== "assistant") continue;
 
       const msgParts = opencode.getPartsForMessage(msg.id);
       for (let j = msgParts.length - 1; j >= 0; j--) {
-        const p = msgParts[j]!;
-        if (p.type === 'tool') {
+        const p = msgParts[j];
+        if (!p) continue;
+        if (p.type === "tool") {
           const tp = p as ToolPart;
-          const isTaskTool = ['todowrite', 'todocreate', 'todolist', 'todoread', 'todoupdate'].includes(tp.tool.toLowerCase());
+          const isTaskTool = [
+            "todowrite",
+            "todocreate",
+            "todolist",
+            "todoread",
+            "todoupdate",
+          ].includes(tp.tool.toLowerCase());
           if (isTaskTool) {
             const output = (tp.state as { output?: string }).output;
             if (output) {
@@ -53,7 +62,9 @@ export const OpenCodePanel = memo(function OpenCodePanel({
                 const parsed = JSON.parse(output);
                 const tasks = parseTasks(parsed);
                 if (tasks) return tasks;
-              } catch { /* ignore parse errors */ }
+              } catch {
+                /* ignore parse errors */
+              }
             }
             if (tp.state.input) {
               const tasks = parseTasks(tp.state.input);
@@ -69,16 +80,12 @@ export const OpenCodePanel = memo(function OpenCodePanel({
   // Auto-scroll to bottom when messages/parts update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [opencode.messages, opencode.parts, opencode.status]);
+  }, []);
 
   // Handle pending message from external source
   useEffect(() => {
     const handlePendingMessage = async () => {
-      if (
-        !pendingMessage ||
-        pendingMessageSentRef.current ||
-        !opencode.connected
-      ) {
+      if (!pendingMessage || pendingMessageSentRef.current || !opencode.connected) {
         return;
       }
 
@@ -112,11 +119,7 @@ export const OpenCodePanel = memo(function OpenCodePanel({
     };
 
     handlePendingMessage();
-  }, [
-    pendingMessage,
-    opencode,
-    onPendingMessageSent,
-  ]);
+  }, [pendingMessage, opencode, onPendingMessageSent]);
 
   useEffect(() => {
     if (opencode.maxReconnectFailed && onMaxReconnectFailed) {
@@ -153,16 +156,18 @@ export const OpenCodePanel = memo(function OpenCodePanel({
     await opencode.sendMessage(content, filesToSend.length > 0 ? filesToSend : undefined);
   }, [input, attachedFiles, opencode]);
 
-  const handleAnswer = useCallback(async (_questionID: string, answers: string[][]) => {
-    // Use the question ID from the SSE question.asked event (que_...), not the tool part ID (prt_...)
-    const actualQuestionID = opencode.currentQuestion?.id;
-    if (!actualQuestionID) {
-      console.warn("[OpenCode] No currentQuestion available, cannot answer");
-      return;
-    }
-    await opencode.answerQuestion(actualQuestionID, answers);
-  }, [opencode]);
-
+  const handleAnswer = useCallback(
+    async (_questionID: string, answers: string[][]) => {
+      // Use the question ID from the SSE question.asked event (que_...), not the tool part ID (prt_...)
+      const actualQuestionID = opencode.currentQuestion?.id;
+      if (!actualQuestionID) {
+        console.warn("[OpenCode] No currentQuestion available, cannot answer");
+        return;
+      }
+      await opencode.answerQuestion(actualQuestionID, answers);
+    },
+    [opencode],
+  );
 
   const handleAbort = useCallback(async () => {
     await opencode.abort();
@@ -196,13 +201,20 @@ export const OpenCodePanel = memo(function OpenCodePanel({
           <h2 className="text-xs font-mono font-medium uppercase tracking-wider">Chats</h2>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handleNewSession}
               className="text-[10px] font-mono px-2 py-1 border border-border hover:border-accent transition-colors"
             >
               + New
             </button>
             {opencode.currentSessionId && (
-              <button onClick={() => setShowSessionList(false)} className="text-[10px] font-mono text-muted hover:text-foreground transition-colors">Back</button>
+              <button
+                type="button"
+                onClick={() => setShowSessionList(false)}
+                className="text-[10px] font-mono text-muted hover:text-foreground transition-colors"
+              >
+                Back
+              </button>
             )}
           </div>
         </div>
@@ -210,7 +222,10 @@ export const OpenCodePanel = memo(function OpenCodePanel({
           <SessionList
             sessions={opencode.sessions}
             currentSessionId={opencode.currentSessionId}
-            onSelect={(id) => { opencode.selectSession(id); setShowSessionList(false); }}
+            onSelect={(id) => {
+              opencode.selectSession(id);
+              setShowSessionList(false);
+            }}
             onDelete={opencode.deleteSession}
             onNewSession={async () => {
               const s = await opencode.createSession();
@@ -219,34 +234,52 @@ export const OpenCodePanel = memo(function OpenCodePanel({
           />
         </div>
       </div>
-    )
+    );
   }
 
-  const currentSession = opencode.sessions.find(s => s.id === opencode.currentSessionId);
+  const currentSession = opencode.sessions.find((s) => s.id === opencode.currentSessionId);
 
   return (
     <div ref={panelParent} className={`flex h-full flex-col bg-accent-hover/50 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border bg-background px-3 py-2">
         <div className="flex items-center gap-2 overflow-hidden">
-          <button onClick={() => setShowSessionList(true)} className="flex-shrink-0 text-muted hover:text-foreground transition-colors">
+          <button
+            type="button"
+            onClick={() => setShowSessionList(true)}
+            className="flex-shrink-0 text-muted hover:text-foreground transition-colors"
+          >
             <ChevronIcon className="size-4 rotate-90" />
           </button>
           <div className="flex flex-col min-w-0">
-            <h2 className="text-xs font-medium truncate">
-              {currentSession?.title || "New Chat"}
-            </h2>
+            <h2 className="text-xs font-medium truncate">{currentSession?.title || "New Chat"}</h2>
             <div className="flex items-center gap-1.5 text-[10px] text-muted font-mono">
-              <span className={`inline-block size-1.5 rounded-full transition-colors ${isWorking ? 'bg-accent animate-pulse' : 'bg-border'}`} />
-              <span className={isWorking ? 'text-accent' : ''}>
-                {opencode.status.type === 'running' ? 'writing' : opencode.status.type === 'busy' ? 'busy' : 'ready'}
+              <span
+                className={`inline-block size-1.5 rounded-full transition-colors ${isWorking ? "bg-accent animate-pulse" : "bg-border"}`}
+              />
+              <span className={isWorking ? "text-accent" : ""}>
+                {opencode.status.type === "running"
+                  ? "writing"
+                  : opencode.status.type === "busy"
+                    ? "busy"
+                    : "ready"}
               </span>
-              {baseUrl && <a href={baseUrl} target="_blank" rel="noopener noreferrer" className="text-muted/60 hover:text-accent hover:underline cursor-pointer transition-colors">· {baseUrl.replace(/^https?:\/\//, '')}</a>}
+              {baseUrl && (
+                <a
+                  href={baseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted/60 hover:text-accent hover:underline cursor-pointer transition-colors"
+                >
+                  · {baseUrl.replace(/^https?:\/\//, "")}
+                </a>
+              )}
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={handleNewSession}
             className="flex-shrink-0 text-muted-foreground hover:text-muted transition-colors"
             title="New Chat"

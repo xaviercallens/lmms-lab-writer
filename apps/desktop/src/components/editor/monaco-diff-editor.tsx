@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, memo, useCallback, useEffect } from "react";
-import { DiffEditor, Monaco, DiffOnMount } from "@monaco-editor/react";
+import { DiffEditor, type DiffOnMount, type Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { EDITOR_MONO_FONT_FAMILY } from "@/lib/editor/font-stacks";
 
 // Define diff themes for both light and dark

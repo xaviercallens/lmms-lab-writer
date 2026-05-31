@@ -104,9 +104,9 @@ cd apps/desktop/src-tauri && cargo check    # Check Rust
 cd apps/web && pnpm tsc --noEmit            # Check website TypeScript
 
 # Lint & Format
-pnpm lint                                   # ESLint check
-pnpm lint:fix                               # ESLint auto-fix
-pnpm format                                 # Prettier format
+pnpm lint                                   # Biome lint check
+pnpm lint:fix                               # Biome safe fixes
+pnpm format                                 # Biome formatter
 ```
 
 ## Conventions

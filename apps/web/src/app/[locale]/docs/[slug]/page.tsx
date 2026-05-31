@@ -1,23 +1,23 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Header } from "@/components/header";
-import {
-  SUPPORTED_LOCALES,
-  DEFAULT_LOCALE,
-  isLocale,
-  withLocalePrefix,
-  type Locale,
-} from "@/lib/i18n";
-import { getMessages } from "@/lib/messages";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import matter from "gray-matter";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypePrettyCode from "rehype-pretty-code";
+import rehypeSlug from "rehype-slug";
+import remarkGfm from "remark-gfm";
+import { Header } from "@/components/header";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  type Locale,
+  SUPPORTED_LOCALES,
+  withLocalePrefix,
+} from "@/lib/i18n";
+import { getMessages } from "@/lib/messages";
 
 const contentDir = path.join(process.cwd(), "content/docs");
 
@@ -36,17 +36,13 @@ function getAllDocSlugs() {
     return [];
   }
   const files = fs.readdirSync(contentDir);
-  return files
-    .filter((file) => file.endsWith(".mdx"))
-    .map((file) => file.replace(/\.mdx$/, ""));
+  return files.filter((file) => file.endsWith(".mdx")).map((file) => file.replace(/\.mdx$/, ""));
 }
 
 export function generateStaticParams() {
   const slugs = getAllDocSlugs();
   const locales = SUPPORTED_LOCALES.filter((l) => l !== DEFAULT_LOCALE);
-  return locales.flatMap((locale) =>
-    slugs.map((slug) => ({ locale, slug })),
-  );
+  return locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
 }
 
 export async function generateMetadata({
@@ -109,10 +105,7 @@ export default async function LocaleDocPage({
           </Link>
 
           <div className="prose prose-neutral max-w-none">
-            <MDXRemote
-              source={doc.content}
-              options={{ mdxOptions: mdxOptions as never }}
-            />
+            <MDXRemote source={doc.content} options={{ mdxOptions: mdxOptions as never }} />
           </div>
         </article>
       </main>

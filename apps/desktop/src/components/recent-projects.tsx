@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { FolderIcon, TrashIcon } from "@phosphor-icons/react";
+import { useState } from "react";
 import type { RecentProject } from "@/lib/recent-projects";
 import { formatRelativeTime } from "./opencode/utils";
 
@@ -16,9 +16,7 @@ export function RecentProjects({
   onRemove: (path: string) => void;
   onClearAll: () => void;
 }) {
-  const [deleteConfirmPath, setDeleteConfirmPath] = useState<string | null>(
-    null
-  );
+  const [deleteConfirmPath, setDeleteConfirmPath] = useState<string | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   if (projects.length === 0) {
@@ -30,6 +28,7 @@ export function RecentProjects({
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-muted">Recent Projects</h3>
         <button
+          type="button"
           onClick={() => setShowClearConfirm(true)}
           className="text-xs text-muted hover:text-foreground transition-colors"
         >
@@ -45,6 +44,7 @@ export function RecentProjects({
               className="flex items-center border-b border-border last:border-b-0 hover:bg-accent-hover transition-colors"
             >
               <button
+                type="button"
                 onClick={() => onSelect(project.path)}
                 className="flex-1 text-left px-3 py-2.5 flex items-center gap-3 min-w-0"
               >
@@ -53,11 +53,10 @@ export function RecentProjects({
                   <p className="text-sm font-medium truncate">{project.name}</p>
                   <p className="text-xs text-muted truncate">{project.path}</p>
                 </div>
-                <span className="text-xs text-muted flex-shrink-0">
-                  {timeStr}
-                </span>
+                <span className="text-xs text-muted flex-shrink-0">{timeStr}</span>
               </button>
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setDeleteConfirmPath(project.path);
@@ -112,12 +111,13 @@ function ConfirmDialog({
         <p className="text-sm mb-4">{message}</p>
         <div className="flex justify-end gap-2">
           <button
+            type="button"
             onClick={onCancel}
             className="px-3 py-1.5 text-sm border border-border hover:bg-surface-secondary transition-colors"
           >
             Cancel
           </button>
-          <button onClick={onConfirm} className="btn-brutalist text-sm">
+          <button type="button" onClick={onConfirm} className="btn-brutalist text-sm">
             Confirm
           </button>
         </div>

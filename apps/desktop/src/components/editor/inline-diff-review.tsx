@@ -1,15 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect, memo } from "react";
-import dynamic from "next/dynamic";
-import type { PendingEdit } from "@/lib/opencode/types";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
+import dynamic from "next/dynamic";
+import { memo, useCallback, useEffect, useState } from "react";
+import type { PendingEdit } from "@/lib/opencode/types";
 
 const MonacoDiffEditor = dynamic(
-  () =>
-    import("@/components/editor/monaco-diff-editor").then(
-      (m) => m.MonacoDiffEditor
-    ),
+  () => import("@/components/editor/monaco-diff-editor").then((m) => m.MonacoDiffEditor),
   {
     ssr: false,
     loading: () => (
@@ -17,7 +14,7 @@ const MonacoDiffEditor = dynamic(
         <div className="text-sm text-muted-foreground">Loading diff editor...</div>
       </div>
     ),
-  }
+  },
 );
 
 interface InlineDiffReviewProps {
@@ -82,23 +79,17 @@ export const InlineDiffReview = memo(function InlineDiffReview({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <PencilSimpleIcon className="w-4 h-4 text-amber-600" />
-            <span className="text-sm font-medium text-amber-800">
-              Review AI Changes
-            </span>
+            <span className="text-sm font-medium text-amber-800">Review AI Changes</span>
           </div>
           <span className="text-xs font-mono px-2 py-0.5 bg-background border border-amber-200 text-amber-700 rounded">
             {fileName}
           </span>
           <div className="flex items-center gap-1.5 text-xs font-mono">
             {edit.additions > 0 && (
-              <span className="text-green-600 font-medium">
-                +{edit.additions}
-              </span>
+              <span className="text-green-600 font-medium">+{edit.additions}</span>
             )}
             {edit.deletions > 0 && (
-              <span className="text-red-500 font-medium">
-                -{edit.deletions}
-              </span>
+              <span className="text-red-500 font-medium">-{edit.deletions}</span>
             )}
           </div>
         </div>
@@ -115,6 +106,7 @@ export const InlineDiffReview = memo(function InlineDiffReview({
             accept
           </span>
           <button
+            type="button"
             onClick={onDismiss}
             disabled={isProcessing}
             className="px-3 py-1 text-xs font-medium text-muted hover:text-foreground hover:bg-surface-secondary rounded transition-colors disabled:opacity-50"
@@ -122,6 +114,7 @@ export const InlineDiffReview = memo(function InlineDiffReview({
             Dismiss
           </button>
           <button
+            type="button"
             onClick={handleReject}
             disabled={isProcessing}
             className="px-3 py-1 text-xs font-medium border border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 rounded transition-colors disabled:opacity-50"
@@ -129,6 +122,7 @@ export const InlineDiffReview = memo(function InlineDiffReview({
             Reject
           </button>
           <button
+            type="button"
             onClick={handleAccept}
             disabled={isProcessing}
             className="px-3 py-1 text-xs font-medium bg-green-600 text-white hover:bg-green-700 rounded transition-colors disabled:opacity-50"

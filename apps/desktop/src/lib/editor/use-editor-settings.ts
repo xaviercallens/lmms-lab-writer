@@ -1,6 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { DEFAULT_EDITOR_SETTINGS, DEFAULT_MINIMAP_SETTINGS, EditorSettings, EditorTheme } from "./types";
+import { useCallback, useEffect, useState } from "react";
+import {
+  DEFAULT_EDITOR_SETTINGS,
+  DEFAULT_MINIMAP_SETTINGS,
+  type EditorSettings,
+  type EditorTheme,
+} from "./types";
 
 const STORAGE_KEY = "editor-settings";
 
@@ -30,10 +35,7 @@ function migrateSettings(parsed: Record<string, unknown>): EditorSettings {
     );
   }
 
-  if (
-    settings.terminalShellMode !== "auto" &&
-    settings.terminalShellMode !== "custom"
-  ) {
+  if (settings.terminalShellMode !== "auto" && settings.terminalShellMode !== "custom") {
     settings.terminalShellMode = DEFAULT_EDITOR_SETTINGS.terminalShellMode;
   }
 

@@ -2,13 +2,13 @@
 
 import "@/lib/monaco/config";
 
-import { useRef, memo, useCallback, useEffect, useState } from "react";
-import Editor, { Monaco, OnMount, OnChange } from "@monaco-editor/react";
+import Editor, { type Monaco, type OnChange, type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import type { EditorSettings, EditorTheme } from "@/lib/editor/types";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { EDITOR_MONO_FONT_FAMILY } from "@/lib/editor/font-stacks";
-import { defineEditorThemes } from "@/lib/monaco/themes";
+import type { EditorSettings, EditorTheme } from "@/lib/editor/types";
 import { registerLaTeXLanguage } from "@/lib/monaco/latex";
+import { defineEditorThemes } from "@/lib/monaco/themes";
 
 type Props = {
   content?: string;
@@ -63,6 +63,10 @@ export const MonacoEditor = memo(function MonacoEditor({
   const vimModeRef = useRef<VimModeController | null>(null);
   const vimStatusRef = useRef<HTMLDivElement | null>(null);
   const [editorReady, setEditorReady] = useState(false);
+  const loadingRows = [70, 45, 60, 80, 35, 55, 40, 65].map((width) => ({
+    id: `monaco-loading-${width}`,
+    width,
+  }));
 
   const pendingGoToLineRef = useRef<number>(0);
 
@@ -79,10 +83,19 @@ export const MonacoEditor = memo(function MonacoEditor({
         editor.revealLineInCenter(line);
         editor.setPosition({ lineNumber: line, column: 1 });
         editor.focus();
-        const decorations = editor.deltaDecorations([], [{
-          range: { startLineNumber: line, startColumn: 1, endLineNumber: line, endColumn: 1 },
-          options: { isWholeLine: true, className: "synctex-line-highlight", overviewRuler: { color: "rgba(255, 200, 0, 0.6)", position: 1 } },
-        }]);
+        const decorations = editor.deltaDecorations(
+          [],
+          [
+            {
+              range: { startLineNumber: line, startColumn: 1, endLineNumber: line, endColumn: 1 },
+              options: {
+                isWholeLine: true,
+                className: "synctex-line-highlight",
+                overviewRuler: { color: "rgba(255, 200, 0, 0.6)", position: 1 },
+              },
+            },
+          ],
+        );
         setTimeout(() => editor.deltaDecorations(decorations, []), 1500);
       }, 50);
     }
@@ -286,8 +299,7 @@ export const MonacoEditor = memo(function MonacoEditor({
             side: editorSettings?.minimap?.side ?? "right",
             size: editorSettings?.minimap?.size ?? "proportional",
             maxColumn: 120,
-            renderCharacters:
-              editorSettings?.minimap?.renderCharacters ?? false,
+            renderCharacters: editorSettings?.minimap?.renderCharacters ?? false,
             scale: editorSettings?.minimap?.scale ?? 1,
             showSlider: editorSettings?.minimap?.showSlider ?? "mouseover",
           },
@@ -299,10 +311,8 @@ export const MonacoEditor = memo(function MonacoEditor({
           cursorWidth: 2,
           formatOnPaste: editorSettings?.formatOnPaste ?? false,
           formatOnType: editorSettings?.formatOnSave ?? false,
-          autoClosingBrackets:
-            editorSettings?.autoClosingBrackets ?? "languageDefined",
-          autoClosingQuotes:
-            editorSettings?.autoClosingQuotes ?? "languageDefined",
+          autoClosingBrackets: editorSettings?.autoClosingBrackets ?? "languageDefined",
+          autoClosingQuotes: editorSettings?.autoClosingQuotes ?? "languageDefined",
           renderLineHighlight: "line",
           renderLineHighlightOnlyWhenFocus: false,
           selectOnLineNumbers: true,
@@ -369,8 +379,8 @@ export const MonacoEditor = memo(function MonacoEditor({
         loading={
           <div className="flex flex-col h-full bg-background">
             <div className="flex-1 p-4 space-y-2">
-              {[70, 45, 60, 80, 35, 55, 40, 65].map((width, i) => (
-                <div key={i} className="flex gap-4">
+              {loadingRows.map(({ id, width }) => (
+                <div key={id} className="flex gap-4">
                   <div className="w-8 h-4 bg-surface-secondary animate-pulse" />
                   <div
                     className="flex-1 h-4 bg-surface-secondary animate-pulse"

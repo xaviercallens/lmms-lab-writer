@@ -1,28 +1,28 @@
-import { Suspense } from "react";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/server";
-import { Header } from "@/components/header";
-import {
-  StarredRepo,
-  GITHUB_CONFIG,
-  getAllPopularRepos,
-  getTopRepos,
-  canDownload,
-} from "@/lib/github/config";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { GitHubLoginButton } from "@/components/auth/github-login-button";
 import { RefreshStarsButton } from "@/components/auth/refresh-stars-button";
+import { Header } from "@/components/header";
+import { InkDropAnimation } from "@/components/ink-drop-animation";
 import {
   ProfileCard,
   ProfileSection,
   ProfileTitle,
-  RepoList,
   RepoItem,
+  RepoList,
 } from "@/components/profile-sections";
-import { InkDropAnimation } from "@/components/ink-drop-animation";
+import {
+  canDownload,
+  GITHUB_CONFIG,
+  getAllPopularRepos,
+  getTopRepos,
+  type StarredRepo,
+} from "@/lib/github/config";
 import { getServerLocale, interpolate } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
+import { createClient } from "@/lib/supabase/server";
 
 function formatStarCount(count: number): string {
   if (count >= 1000) {
@@ -144,8 +144,7 @@ async function ProfileUserCard() {
   const user = session.user;
   const metadata = user.user_metadata || {};
   const email = user.email ?? "";
-  const name =
-    metadata.full_name || metadata.name || metadata.user_name || null;
+  const name = metadata.full_name || metadata.name || metadata.user_name || null;
   const avatarUrl = metadata.avatar_url || metadata.picture || null;
   const displayName = name || email.split("@")[0] || "User";
   const initial = displayName.charAt(0).toUpperCase();
@@ -163,9 +162,7 @@ async function ProfileUserCard() {
           />
         ) : (
           <div className="size-16 border border-border bg-neutral-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl font-light text-neutral-600">
-              {initial}
-            </span>
+            <span className="text-2xl font-light text-neutral-600">{initial}</span>
           </div>
         )}
 
@@ -213,7 +210,7 @@ async function ConnectedAccountsSection() {
         <div className="flex flex-wrap gap-3">
           {provider === "github" ? (
             <div className="inline-flex items-center gap-2 px-4 py-2 border border-black bg-neutral-50">
-              <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
+              <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
               <span className="text-sm font-medium">GitHub</span>
@@ -221,6 +218,7 @@ async function ConnectedAccountsSection() {
           ) : (
             <div className="inline-flex items-center gap-2 px-4 py-2 border border-black bg-neutral-50">
               <svg
+                aria-hidden="true"
                 className="size-4"
                 fill="none"
                 stroke="currentColor"
@@ -239,7 +237,7 @@ async function ConnectedAccountsSection() {
 
           {isGitHubConnected && provider !== "github" && (
             <div className="inline-flex items-center gap-2 px-4 py-2 border border-black bg-neutral-50">
-              <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
+              <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
               <span className="text-sm font-medium">GitHub</span>
@@ -303,10 +301,7 @@ async function InksSection() {
               {t.userDropdown.download}
             </Link>
           ) : (
-            <a
-              href="#earn-inks"
-              className="text-sm text-muted hover:text-black transition-colors"
-            >
+            <a href="#earn-inks" className="text-sm text-muted hover:text-black transition-colors">
               {t.profile.earnInksArrow}
             </a>
           )}
@@ -357,16 +352,12 @@ async function AccountDetailsSection() {
   return (
     <ProfileSection delay={0.2} className="border border-border mb-8">
       <div className="px-6 py-4 border-b border-border bg-neutral-50">
-        <h2 className="text-sm font-mono uppercase tracking-wider">
-          {t.profile.accountDetails}
-        </h2>
+        <h2 className="text-sm font-mono uppercase tracking-wider">{t.profile.accountDetails}</h2>
       </div>
       <div className="divide-y divide-border">
         <div className="px-6 py-4 flex items-center justify-between">
           <span className="text-sm text-muted">{t.profile.userId}</span>
-          <code className="text-sm font-mono bg-neutral-100 px-2 py-1">
-            {user.id.slice(0, 8)}
-          </code>
+          <code className="text-sm font-mono bg-neutral-100 px-2 py-1">{user.id.slice(0, 8)}</code>
         </div>
         <div className="px-6 py-4 flex items-center justify-between">
           <span className="text-sm text-muted">{t.profile.email}</span>
@@ -402,44 +393,34 @@ async function SuggestedReposSection() {
   const user = session.user;
   const provider = user.app_metadata?.provider || null;
 
-  const [membershipResult, githubTokenResult, allRepos, topRepos] =
-    await Promise.all([
-      supabase
-        .from("user_memberships")
-        .select("total_star_count, starred_repos")
-        .eq("user_id", user.id)
-        .single(),
-      supabase
-        .from("user_github_tokens")
-        .select("id")
-        .eq("user_id", user.id)
-        .single(),
-      getAllPopularRepos(),
-      getTopRepos(),
-    ]);
+  const [membershipResult, githubTokenResult, allRepos, topRepos] = await Promise.all([
+    supabase
+      .from("user_memberships")
+      .select("total_star_count, starred_repos")
+      .eq("user_id", user.id)
+      .single(),
+    supabase.from("user_github_tokens").select("id").eq("user_id", user.id).single(),
+    getAllPopularRepos(),
+    getTopRepos(),
+  ]);
 
   const isGitHubConnected = provider === "github" || !!githubTokenResult.data;
   const totalStars = membershipResult.data?.total_star_count || 0;
-  const starredRepos =
-    (membershipResult.data?.starred_repos as unknown as StarredRepo[]) || [];
+  const starredRepos = (membershipResult.data?.starred_repos as unknown as StarredRepo[]) || [];
   const starredRepoNames = new Set(starredRepos.map((r) => r.repo));
   const eligibleRepoNames = new Set(topRepos.map((r) => r.name));
 
   const inks = totalStars * GITHUB_CONFIG.INKS_PER_STAR;
 
   return (
-    <ProfileSection
-      delay={0.25}
-      className="border border-border scroll-mt-6"
-      id="earn-inks"
-    >
+    <ProfileSection delay={0.25} className="border border-border scroll-mt-6" id="earn-inks">
       <div className="px-6 py-4 border-b border-border bg-neutral-50 flex items-center justify-between">
-        <h2 className="text-sm font-mono uppercase tracking-wider">
-          {t.profile.earnInksTitle}
-        </h2>
+        <h2 className="text-sm font-mono uppercase tracking-wider">{t.profile.earnInksTitle}</h2>
         <div className="flex items-center gap-4">
           {isGitHubConnected && <RefreshStarsButton />}
-          <span className="text-xs text-muted font-mono">{inks} {t.userDropdown.inks}</span>
+          <span className="text-xs text-muted font-mono">
+            {inks} {t.userDropdown.inks}
+          </span>
         </div>
       </div>
 
@@ -447,6 +428,7 @@ async function SuggestedReposSection() {
         {!isGitHubConnected && (
           <div className="border-2 border-dashed border-neutral-300 p-8 text-center mb-6">
             <svg
+              aria-hidden="true"
               className="size-10 mx-auto mb-4 text-neutral-400"
               viewBox="0 0 24 24"
               fill="currentColor"
@@ -471,6 +453,7 @@ async function SuggestedReposSection() {
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {isStarred ? (
                     <svg
+                      aria-hidden="true"
                       className="size-5 text-black flex-shrink-0"
                       viewBox="0 0 24 24"
                       fill="currentColor"
@@ -479,6 +462,7 @@ async function SuggestedReposSection() {
                     </svg>
                   ) : (
                     <svg
+                      aria-hidden="true"
                       className="size-5 text-neutral-400 flex-shrink-0"
                       viewBox="0 0 24 24"
                       fill="none"
@@ -505,9 +489,7 @@ async function SuggestedReposSection() {
                       )}
                     </div>
                     {repo.description && (
-                      <p className="text-xs text-muted truncate mt-0.5">
-                        {repo.description}
-                      </p>
+                      <p className="text-xs text-muted truncate mt-0.5">{repo.description}</p>
                     )}
                   </div>
                   {repo.stargazers_count > 0 && (

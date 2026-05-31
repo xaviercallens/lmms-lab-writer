@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import type { User, Session } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
+import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 
 export type MembershipTier = "free" | "supporter";
@@ -41,38 +41,34 @@ export function useAuth() {
     isConfigured: false,
   });
 
-  const fetchProfile = useCallback(
-    async (session: Session): Promise<UserProfile | null> => {
-      try {
-        const supabase = getSupabaseClient();
-        const metadata = session.user.user_metadata || {};
+  const fetchProfile = useCallback(async (session: Session): Promise<UserProfile | null> => {
+    try {
+      const supabase = getSupabaseClient();
+      const metadata = session.user.user_metadata || {};
 
-        const { data: membership } = await supabase
-          .from("user_memberships")
-          .select("tier, expires_at, total_star_count")
-          .eq("user_id", session.user.id)
-          .single();
+      const { data: membership } = await supabase
+        .from("user_memberships")
+        .select("tier, expires_at, total_star_count")
+        .eq("user_id", session.user.id)
+        .single();
 
-        const totalStarCount = membership?.total_star_count || 0;
-        const inks = totalStarCount * INKS_PER_STAR;
+      const totalStarCount = membership?.total_star_count || 0;
+      const inks = totalStarCount * INKS_PER_STAR;
 
-        return {
-          email: session.user.email ?? "",
-          name:
-            metadata.full_name || metadata.name || metadata.user_name || null,
-          avatarUrl: metadata.avatar_url || metadata.picture || null,
-          tier: (membership?.tier as MembershipTier) || "free",
-          expiresAt: membership?.expires_at ?? null,
-          inks,
-          canDownload: inks >= INKS_TO_DOWNLOAD,
-          totalStarCount,
-        };
-      } catch {
-        return null;
-      }
-    },
-    [],
-  );
+      return {
+        email: session.user.email ?? "",
+        name: metadata.full_name || metadata.name || metadata.user_name || null,
+        avatarUrl: metadata.avatar_url || metadata.picture || null,
+        tier: (membership?.tier as MembershipTier) || "free",
+        expiresAt: membership?.expires_at ?? null,
+        inks,
+        canDownload: inks >= INKS_TO_DOWNLOAD,
+        totalStarCount,
+      };
+    } catch {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -111,7 +107,7 @@ export function useAuth() {
 
         const {
           data: { subscription },
-        } = supabase.auth.onAuthStateChange((event, session) => {
+        } = supabase.auth.onAuthStateChange((_event, session) => {
           // IMPORTANT: Do NOT await async operations here!
           // Blocking on database queries in this callback causes deadlock with setSession.
           // See: https://github.com/supabase/auth-js/issues/762
@@ -161,8 +157,7 @@ export function useAuth() {
           session: null,
           profile: null,
           loading: false,
-          error:
-            err instanceof Error ? err.message : "Auth initialization failed",
+          error: err instanceof Error ? err.message : "Auth initialization failed",
           isConfigured: false,
         });
       }
@@ -189,28 +184,25 @@ export function useAuth() {
     }
   }, []);
 
-  const signInWithEmail = useCallback(
-    async (email: string, password: string) => {
-      try {
-        setState((prev) => ({ ...prev, loading: true, error: null }));
-        const supabase = getSupabaseClient();
+  const signInWithEmail = useCallback(async (email: string, password: string) => {
+    try {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+      const supabase = getSupabaseClient();
 
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) throw error;
-      } catch (err) {
-        setState((prev) => ({
-          ...prev,
-          loading: false,
-          error: err instanceof Error ? err.message : "Login failed",
-        }));
-      }
-    },
-    [],
-  );
+      if (error) throw error;
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        error: err instanceof Error ? err.message : "Login failed",
+      }));
+    }
+  }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
     try {
@@ -267,7 +259,9 @@ export function useAuth() {
       const supabase = getSupabaseClient();
 
       // First try getSession which checks stored session
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (session) {
         const profile = await fetchProfile(session);
@@ -281,7 +275,10 @@ export function useAuth() {
         });
         return;
       }
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
       if (user && !userError) {
         // We have a valid user but no proper session
@@ -323,43 +320,49 @@ export function useAuth() {
   }, [fetchProfile]);
 
   // Set auth state using an access token directly (used when setSession fails)
-  const setAuthWithToken = useCallback(async (accessToken: string) => {
-    try {
-      const supabase = getSupabaseClient();
+  const setAuthWithToken = useCallback(
+    async (accessToken: string) => {
+      try {
+        const supabase = getSupabaseClient();
 
-      // Validate the access token and get user data
-      const { data: { user }, error: userError } = await supabase.auth.getUser(accessToken);
+        // Validate the access token and get user data
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser(accessToken);
 
-      if (userError || !user) {
-        console.error("[useAuth] Token validation failed:", userError?.message);
+        if (userError || !user) {
+          console.error("[useAuth] Token validation failed:", userError?.message);
+          return false;
+        }
+
+        // Create a minimal session for profile fetching
+        const minimalSession = {
+          user,
+          access_token: accessToken,
+          refresh_token: "",
+          expires_in: 3600,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+          token_type: "bearer",
+        } as Session;
+
+        const profile = await fetchProfile(minimalSession);
+        setState({
+          user,
+          session: minimalSession,
+          profile,
+          loading: false,
+          error: null,
+          isConfigured: true,
+        });
+        return true;
+      } catch (err) {
+        console.error("[useAuth] setAuthWithToken error:", err);
         return false;
       }
-
-      // Create a minimal session for profile fetching
-      const minimalSession = {
-        user,
-        access_token: accessToken,
-        refresh_token: "",
-        expires_in: 3600,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        token_type: "bearer",
-      } as Session;
-
-      const profile = await fetchProfile(minimalSession);
-      setState({
-        user,
-        session: minimalSession,
-        profile,
-        loading: false,
-        error: null,
-        isConfigured: true,
-      });
-      return true;
-    } catch (err) {
-      console.error("[useAuth] setAuthWithToken error:", err);
-      return false;
-    }
-  }, [fetchProfile]);
+    },
+    [fetchProfile],
+  );
 
   return {
     ...state,

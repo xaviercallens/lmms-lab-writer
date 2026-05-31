@@ -1,17 +1,17 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
+import fs from "node:fs";
+import path from "node:path";
+import matter from "gray-matter";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypePrettyCode from "rehype-pretty-code";
+import rehypeSlug from "rehype-slug";
+import remarkGfm from "remark-gfm";
 import { Header } from "@/components/header";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
-import { MDXRemote } from "next-mdx-remote/rsc";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypePrettyCode from "rehype-pretty-code";
 
 const contentDir = path.join(process.cwd(), "content/docs");
 
@@ -30,9 +30,7 @@ function getAllDocSlugs() {
     return [];
   }
   const files = fs.readdirSync(contentDir);
-  return files
-    .filter((file) => file.endsWith(".mdx"))
-    .map((file) => file.replace(/\.mdx$/, ""));
+  return files.filter((file) => file.endsWith(".mdx")).map((file) => file.replace(/\.mdx$/, ""));
 }
 
 export async function generateStaticParams() {
@@ -40,11 +38,7 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const doc = getDocBySlug(slug);
   if (!doc) {
@@ -65,11 +59,7 @@ const mdxOptions = {
   ],
 };
 
-export default async function DocPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function DocPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const doc = getDocBySlug(slug);
 
@@ -95,10 +85,7 @@ export default async function DocPage({
           </Link>
 
           <div className="prose prose-neutral max-w-none">
-            <MDXRemote
-              source={doc.content}
-              options={{ mdxOptions: mdxOptions as never }}
-            />
+            <MDXRemote source={doc.content} options={{ mdxOptions: mdxOptions as never }} />
           </div>
         </article>
       </main>

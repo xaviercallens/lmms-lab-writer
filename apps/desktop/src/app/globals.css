@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "overlayscrollbars/overlayscrollbars.css";
+@import "@xterm/xterm/css/xterm.css";
+@import "dockview-react/dist/styles/dockview.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -67,10 +70,6 @@
     "Noto Sans CJK SC",
     monospace;
 }
-
-@import "overlayscrollbars/overlayscrollbars.css";
-@import "@xterm/xterm/css/xterm.css";
-@import "dockview-react/dist/styles/dockview.css";
 
 .dockview-editor-layout {
   --dv-group-view-background-color: var(--background);
@@ -193,7 +192,7 @@ body {
 }
 
 .scrollbar-sharp {
-  overflow: auto !important;
+  overflow: auto;
 }
 
 .scrollbar-sharp::-webkit-scrollbar {
@@ -226,35 +225,35 @@ body {
 }
 
 .os-theme-monochrome .os-scrollbar {
-  padding: 0 !important;
+  padding: 0;
 }
 
 .os-theme-monochrome .os-scrollbar .os-scrollbar-track {
-  background: transparent !important;
+  background: transparent;
 }
 
 .os-theme-monochrome .os-scrollbar-vertical .os-scrollbar-track {
-  border-left: none !important;
+  border-left: none;
 }
 
 .os-theme-monochrome .os-scrollbar-horizontal .os-scrollbar-track {
-  border-top: none !important;
+  border-top: none;
 }
 
 .os-theme-monochrome .os-scrollbar .os-scrollbar-handle {
-  border-radius: 0 !important;
-  border: none !important;
-  background: color-mix(in srgb, var(--foreground) 8%, transparent) !important;
-  transition: background-color 0.15s ease !important;
+  border-radius: 0;
+  border: none;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+  transition: background-color 0.15s ease;
 }
 
 .os-theme-monochrome .os-scrollbar .os-scrollbar-handle:hover {
-  background: color-mix(in srgb, var(--foreground) 20%, transparent) !important;
+  background: color-mix(in srgb, var(--foreground) 20%, transparent);
 }
 
 .os-theme-monochrome .os-scrollbar .os-scrollbar-handle:active,
 .os-theme-monochrome .os-scrollbar .os-scrollbar-handle.active {
-  background: color-mix(in srgb, var(--foreground) 30%, transparent) !important;
+  background: color-mix(in srgb, var(--foreground) 30%, transparent);
 }
 
 kbd {
@@ -707,13 +706,13 @@ kbd {
 }
 
 [data-react-arborist-drop-target="true"] {
-  background-color: color-mix(in srgb, var(--foreground) 8%, transparent) !important;
+  background-color: color-mix(in srgb, var(--foreground) 8%, transparent);
   outline: 2px dashed color-mix(in srgb, var(--foreground) 30%, transparent);
   outline-offset: -2px;
 }
 
 [data-react-arborist-drop-target="true"][data-react-arborist-drop-position="inside"] {
-  background-color: color-mix(in srgb, var(--foreground) 12%, transparent) !important;
+  background-color: color-mix(in srgb, var(--foreground) 12%, transparent);
   outline: 2px solid color-mix(in srgb, var(--foreground) 40%, transparent);
 }
 
@@ -744,28 +743,60 @@ kbd {
 
 /* Radix UI animations */
 @keyframes radix-overlay-show {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes radix-overlay-hide {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 @keyframes radix-content-show {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 @keyframes radix-content-hide {
-  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  to { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
 }
 @keyframes radix-select-show {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes radix-select-hide {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-4px); }
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 
 [data-radix-dialog-overlay][data-state="open"] {
@@ -789,10 +820,12 @@ kbd {
 
 /* File tree highlight animation */
 @keyframes file-highlight {
-  0%, 100% {
+  0%,
+  100% {
     background-color: transparent;
   }
-  25%, 75% {
+  25%,
+  75% {
     background-color: color-mix(in srgb, var(--foreground) 15%, transparent);
   }
 }

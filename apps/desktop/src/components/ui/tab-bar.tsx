@@ -1,15 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import {
-  XIcon,
-  XCircleIcon,
   CaretLineLeftIcon,
   CaretLineRightIcon,
   TrashIcon,
+  XCircleIcon,
+  XIcon,
 } from "@phosphor-icons/react";
-import { ContextMenu, ContextMenuItem } from "./context-menu";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { ContextMenu, type ContextMenuItem } from "./context-menu";
 
 export interface TabItem {
   id: string;
@@ -46,11 +46,7 @@ export interface TabBarProps<T extends TabItem> {
   activeTab: string;
   onTabSelect: (id: string) => void;
   onTabClose?: (id: string) => void;
-  onTabReorder?: (
-    draggedId: string,
-    targetId: string,
-    position: TabReorderPosition,
-  ) => void;
+  onTabReorder?: (draggedId: string, targetId: string, position: TabReorderPosition) => void;
   onTabDragMove?: (payload: TabDragMovePayload | null) => void;
   onTabDragEnd?: (payload: TabDragEndPayload) => void;
   onCloseOthers?: (id: string) => void;
@@ -224,16 +220,13 @@ export function TabBar<T extends TabItem>({
     };
   }, [resetDragState]);
 
-  const setTabRef = useCallback(
-    (tabId: string, element: HTMLDivElement | null) => {
-      if (element) {
-        tabRefs.current.set(tabId, element);
-        return;
-      }
-      tabRefs.current.delete(tabId);
-    },
-    [],
-  );
+  const setTabRef = useCallback((tabId: string, element: HTMLDivElement | null) => {
+    if (element) {
+      tabRefs.current.set(tabId, element);
+      return;
+    }
+    tabRefs.current.delete(tabId);
+  }, []);
 
   const isPointInsideContainer = useCallback((x: number, y: number): boolean => {
     const container = containerRef.current;
@@ -243,11 +236,7 @@ export function TabBar<T extends TabItem>({
   }, []);
 
   const findDropIndicator = useCallback(
-    (
-      pointerX: number,
-      pointerY: number,
-      draggedTabId: string,
-    ): TabDropIndicator | null => {
+    (pointerX: number, pointerY: number, draggedTabId: string): TabDropIndicator | null => {
       if (!isPointInsideContainer(pointerX, pointerY)) return null;
 
       const availableTabs = tabs.filter((tab) => tab.id !== draggedTabId);
@@ -382,13 +371,7 @@ export function TabBar<T extends TabItem>({
       document.addEventListener("mousemove", handleDocumentMouseMove);
       document.addEventListener("mouseup", handleDocumentMouseUp);
     },
-    [
-      onTabReorder,
-      resetDragState,
-      tabLabelById,
-      handleDocumentMouseMove,
-      handleDocumentMouseUp,
-    ],
+    [onTabReorder, resetDragState, tabLabelById, handleDocumentMouseMove, handleDocumentMouseUp],
   );
 
   const handleTabClick = useCallback(
@@ -406,6 +389,7 @@ export function TabBar<T extends TabItem>({
           const isActive = tab.id === activeTab;
           return (
             <button
+              type="button"
               key={tab.id}
               onClick={() => onTabSelect(tab.id)}
               className={`flex-1 px-3 py-2 text-xs font-medium uppercase tracking-wider transition-colors ${
@@ -428,7 +412,7 @@ export function TabBar<T extends TabItem>({
   }
 
   const dropTargetLabel = dragState.dropIndicator
-    ? tabLabelById.get(dragState.dropIndicator.tabId) ?? dragState.dropIndicator.tabId
+    ? (tabLabelById.get(dragState.dropIndicator.tabId) ?? dragState.dropIndicator.tabId)
     : null;
 
   return (
@@ -437,14 +421,12 @@ export function TabBar<T extends TabItem>({
         ref={containerRef}
         className={`flex items-center border-b border-border bg-accent-hover overflow-x-auto min-h-[34px] ${className}`}
         style={{
-          cursor:
-            onTabReorder && dragState.isDragging ? "grabbing" : undefined,
+          cursor: onTabReorder && dragState.isDragging ? "grabbing" : undefined,
         }}
       >
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
-          const isDragged =
-            dragState.isDragging && dragState.draggedTabId === tab.id;
+          const isDragged = dragState.isDragging && dragState.draggedTabId === tab.id;
           const showDropBefore =
             dragState.dropIndicator?.tabId === tab.id &&
             dragState.dropIndicator.position === "before";
@@ -463,16 +445,17 @@ export function TabBar<T extends TabItem>({
                   : "text-muted hover:text-foreground hover:bg-background/50"
               } ${onTabReorder ? "cursor-grab" : ""} ${isDragged ? "opacity-40" : ""}`}
               title={tab.title ?? tab.label}
-              onMouseDown={(e) => {
-                handleMouseDown(e, tab.id);
-                handleTabPointerDown(e, tab.id);
-              }}
-              onContextMenu={(e) => handleContextMenu(e, tab.id)}
             >
               {showDropBefore && (
                 <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-0.5 bg-accent z-10" />
               )}
               <button
+                type="button"
+                onMouseDown={(e) => {
+                  handleMouseDown(e, tab.id);
+                  handleTabPointerDown(e, tab.id);
+                }}
+                onContextMenu={(e) => handleContextMenu(e, tab.id)}
                 onClick={() => handleTabClick(tab.id)}
                 className="px-3 py-1.5 text-sm truncate max-w-[120px]"
               >
@@ -480,6 +463,7 @@ export function TabBar<T extends TabItem>({
               </button>
               {onTabClose && (
                 <button
+                  type="button"
                   onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -487,9 +471,7 @@ export function TabBar<T extends TabItem>({
                   }}
                   data-tab-close="true"
                   className={`w-6 h-full flex items-center justify-center hover:bg-surface-tertiary ${
-                    isActive
-                      ? "opacity-100"
-                      : "opacity-0 group-hover:opacity-100"
+                    isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                   }`}
                   aria-label="Close tab"
                 >
@@ -504,21 +486,23 @@ export function TabBar<T extends TabItem>({
         })}
       </div>
 
-      {dragState.isDragging && dragState.draggedTabLabel && createPortal(
-        <div
-          className="fixed pointer-events-none z-[9999] flex items-center gap-2 px-3 py-1 border border-border bg-background text-xs"
-          style={{
-            left: dragState.mouseX + 14,
-            top: dragState.mouseY + 14,
-          }}
-        >
-          <span className="truncate max-w-[220px]">{dragState.draggedTabLabel}</span>
-          {dropTargetLabel && (
-            <span className="text-muted whitespace-nowrap">-&gt; {dropTargetLabel}</span>
-          )}
-        </div>,
-        document.body,
-      )}
+      {dragState.isDragging &&
+        dragState.draggedTabLabel &&
+        createPortal(
+          <div
+            className="fixed pointer-events-none z-[9999] flex items-center gap-2 px-3 py-1 border border-border bg-background text-xs"
+            style={{
+              left: dragState.mouseX + 14,
+              top: dragState.mouseY + 14,
+            }}
+          >
+            <span className="truncate max-w-[220px]">{dragState.draggedTabLabel}</span>
+            {dropTargetLabel && (
+              <span className="text-muted whitespace-nowrap">-&gt; {dropTargetLabel}</span>
+            )}
+          </div>,
+          document.body,
+        )}
 
       {contextMenu && (
         <ContextMenu

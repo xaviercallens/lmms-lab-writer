@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import Link from "next/link";
-import { Search, Copy, Check, Download, ArrowRight } from "lucide-react";
 import { m } from "framer-motion";
+import { ArrowRight, Check, Copy, Download, Search } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useState } from "react";
 
 interface ErrorMatch {
   pattern: RegExp;
@@ -101,31 +101,27 @@ const LATEX_ERRORS: ErrorMatch[] = [
     title: "Double Superscript/Subscript",
     explanation: "You wrote something like x^2^3 or x_1_2, which is ambiguous.",
     fix: "Use braces to group: x^{2^3} or x_{1_2}\nOr clarify: x^{23} if that's what you mean",
-    example: "Wrong: $x^2^3$\nRight: $x^{2^3}$ or ${x^2}^3$",
+    example: `Wrong: $x^2^3$\nRight: $x^{2^3}$ or \${x^2}^3$`,
   },
   {
     pattern: /Command .* already defined/i,
     title: "Command Already Defined",
-    explanation:
-      "You're trying to define a command that already exists (from LaTeX or a package).",
+    explanation: "You're trying to define a command that already exists (from LaTeX or a package).",
     fix: "1. Use \\renewcommand instead of \\newcommand to override\n2. Or choose a different name for your command\n3. Check which package defines the conflicting command",
   },
   {
     pattern: /Citation .* undefined/i,
     title: "Undefined Citation",
-    explanation:
-      "You're citing a reference that doesn't exist in your bibliography.",
+    explanation: "You're citing a reference that doesn't exist in your bibliography.",
     fix: "1. Check the citation key matches exactly (case-sensitive)\n2. Make sure your .bib file is included\n3. Run: pdflatex → bibtex → pdflatex → pdflatex",
-    example:
-      "\\cite{smith2020} requires an entry with key 'smith2020' in your .bib file",
+    example: "\\cite{smith2020} requires an entry with key 'smith2020' in your .bib file",
   },
   {
     pattern: /Reference .* undefined/i,
     title: "Undefined Reference",
     explanation: "You're referencing a label (\\ref{...}) that doesn't exist.",
     fix: "1. Check the label exists: \\label{...}\n2. Check spelling matches exactly\n3. Compile twice to resolve references",
-    example:
-      "\\ref{fig:example} requires \\label{fig:example} on a figure/table/section",
+    example: "\\ref{fig:example} requires \\label{fig:example} on a figure/table/section",
   },
   {
     pattern: /LaTeX Error: \\begin{.*} on input line .* ended by \\end{.*}/i,
@@ -196,8 +192,7 @@ export default function LaTeXErrorExplainerPage() {
               LaTeX Error Explainer
             </h1>
             <p className="text-muted">
-              Paste your LaTeX error message and get a human-readable
-              explanation with fixes.
+              Paste your LaTeX error message and get a human-readable explanation with fixes.
             </p>
           </m.div>
 
@@ -222,6 +217,7 @@ l.42 \includegraphic
             </div>
 
             <button
+              type="button"
               onClick={handleSearch}
               disabled={!input.trim()}
               className="w-full py-3 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -243,15 +239,12 @@ l.42 \includegraphic
                   <div className="p-4 border-b border-border bg-neutral-50 flex items-center justify-between">
                     <h2 className="font-medium">{result.title}</h2>
                     <button
+                      type="button"
                       onClick={handleCopy}
                       className="text-muted hover:text-foreground transition-colors"
                       title="Copy explanation"
                     >
-                      {copied ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </button>
                   </div>
 
@@ -286,12 +279,9 @@ l.42 \includegraphic
                 </div>
               ) : (
                 <div className="border border-border p-6 text-center">
-                  <p className="text-muted mb-2">
-                    No match found for this error.
-                  </p>
+                  <p className="text-muted mb-2">No match found for this error.</p>
                   <p className="text-sm text-muted">
-                    Try pasting the exact error message from your LaTeX compiler
-                    output.
+                    Try pasting the exact error message from your LaTeX compiler output.
                   </p>
                 </div>
               )}
@@ -304,12 +294,10 @@ l.42 \includegraphic
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mt-12 p-6 border border-border bg-cream text-center"
           >
-            <h3 className="font-medium mb-2">
-              Tired of debugging LaTeX errors?
-            </h3>
+            <h3 className="font-medium mb-2">Tired of debugging LaTeX errors?</h3>
             <p className="text-sm text-muted mb-4">
-              Let AI write your LaTeX while you focus on research. LMMs-Lab
-              Writer lets Claude, Cursor, and Codex edit your papers directly.
+              Let AI write your LaTeX while you focus on research. LMMs-Lab Writer lets Claude,
+              Cursor, and Codex edit your papers directly.
             </p>
             <Link
               href="/download"
@@ -326,6 +314,7 @@ l.42 \includegraphic
             <div className="grid gap-2">
               {LATEX_ERRORS.slice(0, 8).map((error) => (
                 <button
+                  type="button"
                   key={error.title}
                   onClick={() => {
                     setResult(error);

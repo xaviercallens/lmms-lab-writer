@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useLatexInstaller } from "@/lib/latex";
-import { Spinner } from "@/components/ui/spinner";
 import { ArrowClockwiseIcon, WarningIcon } from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect } from "react";
+import { Spinner } from "@/components/ui/spinner";
+import { useLatexInstaller } from "@/lib/latex";
 
 interface LaTeXInstallPromptProps {
   onRefreshCompilers?: () => void;
@@ -50,11 +50,13 @@ export function LaTeXInstallPrompt({ onRefreshCompilers }: LaTeXInstallPromptPro
             <div>
               <h3 className="font-bold text-amber-800">LaTeX Not Detected</h3>
               <p className="text-sm text-amber-700 mt-1">
-                No LaTeX compiler was found on your system. Install a LaTeX distribution to compile documents.
+                No LaTeX compiler was found on your system. Install a LaTeX distribution to compile
+                documents.
               </p>
             </div>
             {!isInstalling && !result && (
               <button
+                type="button"
                 onClick={handleRefresh}
                 className="flex-shrink-0 p-1.5 text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors"
                 title="Refresh compiler detection"
@@ -95,19 +97,20 @@ export function LaTeXInstallPrompt({ onRefreshCompilers }: LaTeXInstallPromptPro
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 className={`mt-3 p-3 border ${
-                  result.success
-                    ? "bg-green-50 border-green-300"
-                    : "bg-background border-amber-300"
+                  result.success ? "bg-green-50 border-green-300" : "bg-background border-amber-300"
                 }`}
               >
-                <p className={`text-sm whitespace-pre-wrap ${
-                  result.success ? "text-green-700" : "text-foreground-secondary"
-                }`}>
+                <p
+                  className={`text-sm whitespace-pre-wrap ${
+                    result.success ? "text-green-700" : "text-foreground-secondary"
+                  }`}
+                >
                   {result.message}
                 </p>
                 {result.success && (
                   <div className="mt-3 flex items-center gap-3">
                     <button
+                      type="button"
                       onClick={handleRefresh}
                       className="btn btn-sm border-2 border-green-600 bg-green-600 text-white hover:bg-green-700 transition-colors"
                     >
@@ -120,6 +123,7 @@ export function LaTeXInstallPrompt({ onRefreshCompilers }: LaTeXInstallPromptPro
                 )}
                 {!result.success && (
                   <button
+                    type="button"
                     onClick={reset}
                     className="mt-2 text-sm text-amber-700 hover:text-amber-900 underline"
                   >
@@ -133,54 +137,60 @@ export function LaTeXInstallPrompt({ onRefreshCompilers }: LaTeXInstallPromptPro
           {/* Distribution Options */}
           {!isInstalling && !result && distributions.length > 0 && (
             <div className="mt-4 space-y-2">
-              {distributions.map((dist, index) => (
-                <div
-                  key={dist.id}
-                  className={`flex items-center justify-between gap-3 p-3 bg-background border transition-colors ${
-                    index === 0
-                      ? "border-green-400 hover:border-green-500"
-                      : "border-amber-200 hover:border-amber-400"
-                  }`}
-                >
-                  <div className="min-w-0">
-                    <div className="font-medium text-sm flex items-center gap-2">
-                      {dist.name}
-                      {index === 0 && (
-                        <span className="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 font-normal">
-                          Recommended
-                        </span>
+              {distributions.map((dist, index) => {
+                const downloadUrl = dist.download_url;
+
+                return (
+                  <div
+                    key={dist.id}
+                    className={`flex items-center justify-between gap-3 p-3 bg-background border transition-colors ${
+                      index === 0
+                        ? "border-green-400 hover:border-green-500"
+                        : "border-amber-200 hover:border-amber-400"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm flex items-center gap-2">
+                        {dist.name}
+                        {index === 0 && (
+                          <span className="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 font-normal">
+                            Recommended
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted mt-0.5">{dist.description}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {dist.install_command && (
+                        <button
+                          type="button"
+                          onClick={() => handleInstall(dist.id)}
+                          className={`btn btn-sm border-2 transition-all ${
+                            index === 0
+                              ? "border-green-600 bg-green-600 text-white shadow-[2px_2px_0_0_#22c55e] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                              : "border-foreground bg-foreground text-background shadow-[2px_2px_0_0_#fbbf24] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                          }`}
+                        >
+                          Install
+                        </button>
+                      )}
+                      {downloadUrl && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDownload(downloadUrl)}
+                          className={`btn btn-sm border-2 transition-colors ${
+                            index === 0 && !dist.install_command
+                              ? "border-green-600 bg-green-600 text-white hover:bg-green-700"
+                              : "border-amber-600 bg-background text-amber-700 hover:bg-amber-50"
+                          }`}
+                        >
+                          Download
+                        </button>
                       )}
                     </div>
-                    <p className="text-xs text-muted mt-0.5">{dist.description}</p>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {dist.install_command && (
-                      <button
-                        onClick={() => handleInstall(dist.id)}
-                        className={`btn btn-sm border-2 transition-all ${
-                          index === 0
-                            ? "border-green-600 bg-green-600 text-white shadow-[2px_2px_0_0_#22c55e] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-                            : "border-foreground bg-foreground text-background shadow-[2px_2px_0_0_#fbbf24] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-                        }`}
-                      >
-                        Install
-                      </button>
-                    )}
-                    {dist.download_url && (
-                      <button
-                        onClick={() => handleOpenDownload(dist.download_url!)}
-                        className={`btn btn-sm border-2 transition-colors ${
-                          index === 0 && !dist.install_command
-                            ? "border-green-600 bg-green-600 text-white hover:bg-green-700"
-                            : "border-amber-600 bg-background text-amber-700 hover:bg-amber-50"
-                        }`}
-                      >
-                        Download
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 

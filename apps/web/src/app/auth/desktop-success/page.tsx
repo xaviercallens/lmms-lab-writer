@@ -1,25 +1,34 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useLocale } from "@/lib/useLocale";
-import { getMessages } from "@/lib/messages";
 import { createClient as createStandardClient } from "@supabase/supabase-js";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/lib/useLocale";
 
 type CallbackStatus = "pending" | "sending" | "sent" | "failed";
 
+function getSupabaseConfig() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Missing Supabase public environment variables");
+  }
+
+  return { supabaseUrl, supabaseAnonKey };
+}
+
 function createDesktopSupabaseClient() {
-  return createStandardClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        flowType: "pkce",
-        persistSession: true,
-        storage: window.localStorage,
-      },
+  const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
+
+  return createStandardClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      flowType: "pkce",
+      persistSession: true,
+      storage: window.localStorage,
     },
-  );
+  });
 }
 
 function DesktopSuccessContent() {
@@ -53,7 +62,6 @@ function DesktopSuccessContent() {
 
   useEffect(() => {
     const loadTokens = async () => {
-
       // Check for error in query params
       const errorParam = searchParams.get("error");
 
@@ -86,27 +94,23 @@ function DesktopSuccessContent() {
         }
 
         // Legacy fallback: read code_verifier manually from storage
-        const allKeys = [
-          ...Object.keys(localStorage),
-          ...Object.keys(sessionStorage),
-        ];
+        const allKeys = [...Object.keys(localStorage), ...Object.keys(sessionStorage)];
 
-        const codeVerifierKey = allKeys.find(k => k.includes('code-verifier'));
+        const codeVerifierKey = allKeys.find((k) => k.includes("code-verifier"));
         if (!codeVerifierKey) {
           setError("Authentication data missing. Please try logging in again.");
           return;
         }
 
         const codeVerifierRaw =
-          localStorage.getItem(codeVerifierKey) ||
-          sessionStorage.getItem(codeVerifierKey);
+          localStorage.getItem(codeVerifierKey) || sessionStorage.getItem(codeVerifierKey);
 
         // Parse the code_verifier (it's stored as JSON string)
         let codeVerifier: string;
         try {
           codeVerifier = JSON.parse(codeVerifierRaw || '""');
         } catch {
-          codeVerifier = codeVerifierRaw || '';
+          codeVerifier = codeVerifierRaw || "";
         }
 
         if (!codeVerifier) {
@@ -115,14 +119,15 @@ function DesktopSuccessContent() {
         }
 
         try {
+          const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
           // Call Supabase token endpoint directly with PKCE
-          const tokenUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=pkce`;
+          const tokenUrl = `${supabaseUrl}/auth/v1/token?grant_type=pkce`;
 
           const response = await fetch(tokenUrl, {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+              "Content-Type": "application/json",
+              apikey: supabaseAnonKey,
             },
             body: JSON.stringify({
               auth_code: authCode,
@@ -138,10 +143,12 @@ function DesktopSuccessContent() {
           }
 
           // Create login code from tokens
-          const code = btoa(JSON.stringify({
-            accessToken: data.access_token,
-            refreshToken: data.refresh_token
-          }));
+          const code = btoa(
+            JSON.stringify({
+              accessToken: data.access_token,
+              refreshToken: data.refresh_token,
+            }),
+          );
 
           // Clear the code_verifier from storage
           localStorage.removeItem(codeVerifierKey);
@@ -237,6 +244,7 @@ function DesktopSuccessContent() {
         <div className="max-w-md w-full p-8 text-center">
           <div className="w-12 h-12 border-2 border-red-500 flex items-center justify-center mx-auto mb-4">
             <svg
+              aria-hidden="true"
               className="w-6 h-6 text-red-500"
               fill="none"
               stroke="currentColor"
@@ -279,13 +287,16 @@ function DesktopSuccessContent() {
       <div className="max-w-md w-full p-8">
         {/* Success Header */}
         <div className="text-center mb-8">
-          <div className={`w-12 h-12 border-2 flex items-center justify-center mx-auto mb-4 ${
-            callbackStatus === "sent" ? "border-green-600" : "border-black"
-          }`}>
+          <div
+            className={`w-12 h-12 border-2 flex items-center justify-center mx-auto mb-4 ${
+              callbackStatus === "sent" ? "border-green-600" : "border-black"
+            }`}
+          >
             {callbackStatus === "sending" ? (
               <div className="w-5 h-5 border-2 border-black border-t-transparent animate-spin" />
             ) : (
               <svg
+                aria-hidden="true"
                 className={`w-6 h-6 ${callbackStatus === "sent" ? "text-green-600" : ""}`}
                 fill="none"
                 stroke="currentColor"
@@ -301,7 +312,9 @@ function DesktopSuccessContent() {
             )}
           </div>
           <h1 className="text-xl font-medium mb-2">
-            {callbackStatus === "sent" ? t.desktopSuccess.loggedIn : t.desktopSuccess.loginSuccessful}
+            {callbackStatus === "sent"
+              ? t.desktopSuccess.loggedIn
+              : t.desktopSuccess.loginSuccessful}
           </h1>
           <p className="text-muted text-sm">
             {callbackStatus === "sending" && t.desktopSuccess.sendingCode}
@@ -317,10 +330,11 @@ function DesktopSuccessContent() {
             <input
               type="text"
               readOnly
-              value={loginCode.slice(0, 30) + "..."}
+              value={`${loginCode.slice(0, 30)}...`}
               className="flex-1 px-3 py-2 text-sm font-mono bg-neutral-100 border border-neutral-200 truncate"
             />
             <button
+              type="button"
               onClick={handleCopy}
               className={`px-4 py-2 border-2 transition-colors text-sm whitespace-nowrap font-medium ${
                 copied

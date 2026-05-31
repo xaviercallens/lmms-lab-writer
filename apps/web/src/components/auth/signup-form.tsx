@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 import { GithubIcon } from "@/components/icons/github-icon";
+import { getMessages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/client";
 import { useLocale } from "@/lib/useLocale";
-import { getMessages } from "@/lib/messages";
 
 export function SignupForm() {
   const [loading, setLoading] = useState(false);
@@ -30,9 +30,7 @@ export function SignupForm() {
         return;
       }
       if (!data?.url) {
-        setError(
-          "GitHub OAuth not configured. Please check Supabase settings.",
-        );
+        setError("GitHub OAuth not configured. Please check Supabase settings.");
         setLoading(false);
         return;
       }
@@ -46,6 +44,7 @@ export function SignupForm() {
   return (
     <>
       <button
+        type="button"
         onClick={handleGitHubSignup}
         disabled={loading}
         className="btn btn-secondary w-full"
@@ -56,16 +55,11 @@ export function SignupForm() {
 
       {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
 
-      <p className="text-xs text-muted text-center mt-6">
-        {t.auth.githubAccountRequired}
-      </p>
+      <p className="text-xs text-muted text-center mt-6">{t.auth.githubAccountRequired}</p>
 
       <p className="text-sm text-muted text-center mt-4">
         {t.auth.alreadyHaveAccount}{" "}
-        <Link
-          href="/login"
-          className="underline underline-offset-2 hover:text-foreground"
-        >
+        <Link href="/login" className="underline underline-offset-2 hover:text-foreground">
           {t.auth.signInLink}
         </Link>
       </p>

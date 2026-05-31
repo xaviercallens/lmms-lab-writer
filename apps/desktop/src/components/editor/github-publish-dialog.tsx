@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useId } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/ui/spinner";
 
 interface GitHubPublishDialogProps {
@@ -72,10 +72,14 @@ export function GitHubPublishDialog({
           <div className="px-5 py-4 space-y-4">
             {/* Repo name */}
             <div>
-              <label className="block text-xs font-mono text-muted mb-1.5">
+              <label
+                htmlFor="github-repo-name"
+                className="block text-xs font-mono text-muted mb-1.5"
+              >
                 Repository name
               </label>
               <input
+                id="github-repo-name"
                 ref={inputRef}
                 type="text"
                 value={repoName}
@@ -98,9 +102,7 @@ export function GitHubPublishDialog({
 
             {/* Visibility toggle */}
             <div>
-              <label className="block text-xs font-mono text-muted mb-1.5">
-                Visibility
-              </label>
+              <span className="block text-xs font-mono text-muted mb-1.5">Visibility</span>
               <div className="flex border border-border">
                 <button
                   type="button"
@@ -131,10 +133,14 @@ export function GitHubPublishDialog({
 
             {/* Description */}
             <div>
-              <label className="block text-xs font-mono text-muted mb-1.5">
+              <label
+                htmlFor="github-repo-description"
+                className="block text-xs font-mono text-muted mb-1.5"
+              >
                 Description (optional)
               </label>
               <input
+                id="github-repo-description"
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}

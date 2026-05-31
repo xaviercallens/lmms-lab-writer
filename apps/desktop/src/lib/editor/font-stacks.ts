@@ -22,7 +22,7 @@ const APPLE_GOOGLE_MONO_FONTS = [
   '"SF Pro Mono"',
   '"Google Sans Code"',
   '"Roboto Mono"',
-  'var(--font-geist-mono)',
+  "var(--font-geist-mono)",
   "ui-monospace",
   "Menlo",
   "Consolas",

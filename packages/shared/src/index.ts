@@ -271,30 +271,31 @@ export function parseLatexLog(log: string): {
   let currentFile = "";
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
+    const line = lines[i];
+    if (line === undefined) continue;
 
     // Track current file
     const fileMatch = line.match(/^\(([^)]+\.tex)/);
-    if (fileMatch) {
-      currentFile = fileMatch[1]!;
+    if (fileMatch?.[1]) {
+      currentFile = fileMatch[1];
     }
 
     // Parse errors
     const errorMatch = line.match(/^! (.+)/);
-    if (errorMatch) {
+    if (errorMatch?.[1]) {
       // Look for line number in following lines
       let lineNum = 0;
       for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
         const lineNumMatch = lines[j]?.match(/^l\.(\d+)/);
-        if (lineNumMatch) {
-          lineNum = parseInt(lineNumMatch[1]!, 10);
+        if (lineNumMatch?.[1]) {
+          lineNum = parseInt(lineNumMatch[1], 10);
           break;
         }
       }
       errors.push({
         file: currentFile,
         line: lineNum,
-        message: errorMatch[1]!,
+        message: errorMatch[1],
         type: "error",
       });
     }

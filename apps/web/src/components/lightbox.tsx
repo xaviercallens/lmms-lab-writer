@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { m, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 
 const SPRING = { type: "spring", stiffness: 300, damping: 28, mass: 0.8 } as const;
 
@@ -43,7 +43,9 @@ export function LightboxImage({
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = ""; };
+      return () => {
+        document.body.style.overflow = "";
+      };
     }
   }, [open]);
 
@@ -69,16 +71,23 @@ export function LightboxImage({
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
             onClick={close}
           >
-            <m.img
-              src={src}
-              alt={alt}
+            <m.div
+              onClick={(e) => e.stopPropagation()}
               className="max-w-[90vw] max-h-[90vh] object-contain rounded-md shadow-2xl"
               initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.92 }}
               transition={prefersReducedMotion ? { duration: 0 } : SPRING}
-              onClick={(e) => e.stopPropagation()}
-            />
+            >
+              <Image
+                src={src}
+                alt={alt}
+                width={width}
+                height={height}
+                sizes="90vw"
+                className="max-w-[90vw] max-h-[90vh] object-contain rounded-md"
+              />
+            </m.div>
           </m.div>
         )}
       </AnimatePresence>

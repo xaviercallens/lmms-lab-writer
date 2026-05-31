@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { ArrowClockwiseIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { motion, AnimatePresence } from "framer-motion";
-import { WarningIcon, XIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
 import { invoke } from "@tauri-apps/api/core";
-import { useLatexInstaller } from "@/lib/latex";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { useLatexInstaller } from "@/lib/latex";
 
 type QuickInstallStatus = "idle" | "checking" | "installing" | "success" | "error" | "no_texdist";
 
@@ -123,8 +123,7 @@ export function SynctexInstallDialog({
           {/* Content */}
           <div className="flex-1 overflow-y-auto px-5 py-4">
             <p className="text-sm text-foreground-secondary leading-relaxed">
-              SyncTeX is required for PDF-to-source navigation but was not found
-              on your system.
+              SyncTeX is required for PDF-to-source navigation but was not found on your system.
             </p>
 
             <AnimatePresence mode="wait">
@@ -138,13 +137,16 @@ export function SynctexInstallDialog({
                   className="mt-4"
                 >
                   <button
+                    type="button"
                     onClick={handleQuickInstall}
                     className="btn btn-sm border-2 border-green-600 bg-green-600 text-white shadow-[2px_2px_0_0_#22c55e] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                   >
                     Install SyncTeX
                   </button>
                   <p className="text-xs text-muted mt-2">
-                    Will run <code className="bg-accent-hover px-1 py-0.5">tlmgr install synctex</code> to install the missing package.
+                    Will run{" "}
+                    <code className="bg-accent-hover px-1 py-0.5">tlmgr install synctex</code> to
+                    install the missing package.
                   </p>
                 </motion.div>
               )}
@@ -167,7 +169,10 @@ export function SynctexInstallDialog({
                     </span>
                   </div>
                   <p className="text-sm text-muted mt-1">
-                    Running <code className="text-xs bg-accent-hover px-1 py-0.5">tlmgr install synctex</code>
+                    Running{" "}
+                    <code className="text-xs bg-accent-hover px-1 py-0.5">
+                      tlmgr install synctex
+                    </code>
                   </p>
                 </motion.div>
               )}
@@ -181,19 +186,16 @@ export function SynctexInstallDialog({
                   exit={{ opacity: 0, height: 0 }}
                   className="mt-4 p-3 bg-green-50 border border-green-300"
                 >
-                  <p className="text-sm text-green-700">
-                    SyncTeX installed successfully.
-                  </p>
+                  <p className="text-sm text-green-700">SyncTeX installed successfully.</p>
                   <div className="mt-3 flex items-center gap-3">
                     <button
+                      type="button"
                       onClick={handleRetry}
                       className="btn btn-sm border-2 border-green-600 bg-green-600 text-white hover:bg-green-700 transition-colors"
                     >
                       Retry SyncTeX
                     </button>
-                    <span className="text-xs text-green-600">
-                      Click to navigate to source
-                    </span>
+                    <span className="text-xs text-green-600">Click to navigate to source</span>
                   </div>
                 </motion.div>
               )}
@@ -211,6 +213,7 @@ export function SynctexInstallDialog({
                     {quickError}
                   </p>
                   <button
+                    type="button"
                     onClick={handleRetryQuick}
                     className="mt-2 text-sm text-amber-700 hover:text-amber-900 underline flex items-center gap-1"
                   >
@@ -229,8 +232,8 @@ export function SynctexInstallDialog({
                   exit={{ opacity: 0, height: 0 }}
                 >
                   <p className="mt-3 text-sm text-amber-700">
-                    No TeX distribution was found. Install one below to get SyncTeX
-                    and LaTeX compilation support.
+                    No TeX distribution was found. Install one below to get SyncTeX and LaTeX
+                    compilation support.
                   </p>
 
                   {/* Installation Progress (full distro) */}
@@ -240,9 +243,7 @@ export function SynctexInstallDialog({
                         <Spinner className="size-4" />
                         <span className="text-sm font-medium">{progress.stage}</span>
                       </div>
-                      <p className="text-sm text-muted mt-1 break-words">
-                        {progress.message}
-                      </p>
+                      <p className="text-sm text-muted mt-1 break-words">{progress.message}</p>
                       {progress.progress !== null && (
                         <div className="mt-2 h-1.5 bg-amber-100 rounded-full overflow-hidden">
                           <div
@@ -264,9 +265,7 @@ export function SynctexInstallDialog({
                     >
                       <p
                         className={`text-sm whitespace-pre-wrap ${
-                          result.success
-                            ? "text-green-700"
-                            : "text-foreground-secondary"
+                          result.success ? "text-green-700" : "text-foreground-secondary"
                         }`}
                       >
                         {result.message}
@@ -274,6 +273,7 @@ export function SynctexInstallDialog({
                       {result.success && (
                         <div className="mt-3 flex items-center gap-3">
                           <button
+                            type="button"
                             onClick={handleRetry}
                             className="btn btn-sm border-2 border-green-600 bg-green-600 text-white hover:bg-green-700 transition-colors"
                           >
@@ -286,6 +286,7 @@ export function SynctexInstallDialog({
                       )}
                       {!result.success && (
                         <button
+                          type="button"
                           onClick={resetInstaller}
                           className="mt-2 text-sm text-amber-700 hover:text-amber-900 underline flex items-center gap-1"
                         >
@@ -299,56 +300,60 @@ export function SynctexInstallDialog({
                   {/* Distribution Options */}
                   {!isInstalling && !result && distributions.length > 0 && (
                     <div className="mt-4 space-y-2">
-                      {distributions.map((dist, index) => (
-                        <div
-                          key={dist.id}
-                          className={`flex items-center justify-between gap-3 p-3 bg-background border transition-colors ${
-                            index === 0
-                              ? "border-green-400 hover:border-green-500"
-                              : "border-border hover:border-foreground/30"
-                          }`}
-                        >
-                          <div className="min-w-0">
-                            <div className="font-medium text-sm flex items-center gap-2">
-                              {dist.name}
-                              {index === 0 && (
-                                <span className="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 font-normal">
-                                  Recommended
-                                </span>
+                      {distributions.map((dist, index) => {
+                        const downloadUrl = dist.download_url;
+
+                        return (
+                          <div
+                            key={dist.id}
+                            className={`flex items-center justify-between gap-3 p-3 bg-background border transition-colors ${
+                              index === 0
+                                ? "border-green-400 hover:border-green-500"
+                                : "border-border hover:border-foreground/30"
+                            }`}
+                          >
+                            <div className="min-w-0">
+                              <div className="font-medium text-sm flex items-center gap-2">
+                                {dist.name}
+                                {index === 0 && (
+                                  <span className="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 font-normal">
+                                    Recommended
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted mt-0.5">{dist.description}</p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {dist.install_command && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleInstall(dist.id)}
+                                  className={`btn btn-sm border-2 transition-all ${
+                                    index === 0
+                                      ? "border-green-600 bg-green-600 text-white shadow-[2px_2px_0_0_#22c55e] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                                      : "border-foreground bg-foreground text-background shadow-[2px_2px_0_0_var(--foreground)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                                  }`}
+                                >
+                                  Install
+                                </button>
+                              )}
+                              {downloadUrl && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenDownload(downloadUrl)}
+                                  className={`btn btn-sm border-2 transition-colors ${
+                                    index === 0 && !dist.install_command
+                                      ? "border-green-600 bg-green-600 text-white hover:bg-green-700"
+                                      : "border-border bg-background text-muted hover:bg-accent-hover"
+                                  }`}
+                                >
+                                  Download
+                                </button>
                               )}
                             </div>
-                            <p className="text-xs text-muted mt-0.5">
-                              {dist.description}
-                            </p>
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {dist.install_command && (
-                              <button
-                                onClick={() => handleInstall(dist.id)}
-                                className={`btn btn-sm border-2 transition-all ${
-                                  index === 0
-                                    ? "border-green-600 bg-green-600 text-white shadow-[2px_2px_0_0_#22c55e] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-                                    : "border-foreground bg-foreground text-background shadow-[2px_2px_0_0_var(--foreground)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-                                }`}
-                              >
-                                Install
-                              </button>
-                            )}
-                            {dist.download_url && (
-                              <button
-                                onClick={() => handleOpenDownload(dist.download_url!)}
-                                className={`btn btn-sm border-2 transition-colors ${
-                                  index === 0 && !dist.install_command
-                                    ? "border-green-600 bg-green-600 text-white hover:bg-green-700"
-                                    : "border-border bg-background text-muted hover:bg-accent-hover"
-                                }`}
-                              >
-                                Download
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -368,6 +373,7 @@ export function SynctexInstallDialog({
           <div className="flex items-center justify-end px-5 py-4 border-t border-border">
             {!isBusy && (
               <button
+                type="button"
                 onClick={handleClose}
                 className="px-6 py-2 text-sm font-medium bg-background text-foreground border-2 border-foreground shadow-[3px_3px_0_0_var(--foreground)] hover:shadow-[1px_1px_0_0_var(--foreground)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
               >

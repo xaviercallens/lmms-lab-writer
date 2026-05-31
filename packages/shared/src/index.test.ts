@@ -1,10 +1,5 @@
-import { describe, it, expect } from "vitest";
-import {
-  generatePresenceColor,
-  sha256,
-  parseLatexLog,
-  DEFAULT_CLI_CONFIG,
-} from "./index";
+import { describe, expect, it } from "vitest";
+import { DEFAULT_CLI_CONFIG, generatePresenceColor, parseLatexLog, sha256 } from "./index";
 
 describe("generatePresenceColor", () => {
   it("returns a valid HSL color string", () => {
@@ -33,24 +28,18 @@ describe("generatePresenceColor", () => {
 describe("sha256", () => {
   it("produces known hash for 'hello'", async () => {
     const hash = await sha256("hello");
-    expect(hash).toBe(
-      "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
-    );
+    expect(hash).toBe("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824");
   });
 
   it("produces known hash for empty string", async () => {
     const hash = await sha256("");
-    expect(hash).toBe(
-      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    );
+    expect(hash).toBe("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
   });
 
   it("handles Uint8Array input", async () => {
     const data = new Uint8Array([104, 101, 108, 108, 111]); // "hello"
     const hash = await sha256(data);
-    expect(hash).toBe(
-      "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
-    );
+    expect(hash).toBe("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824");
   });
 
   it("handles unicode content", async () => {
@@ -90,8 +79,8 @@ l.20 some math
 `;
     const result = parseLatexLog(log);
     expect(result.errors).toHaveLength(2);
-    expect(result.errors[0]!.line).toBe(10);
-    expect(result.errors[1]!.line).toBe(20);
+    expect(result.errors[0]?.line).toBe(10);
+    expect(result.errors[1]?.line).toBe(20);
   });
 
   it("parses warnings", () => {
@@ -117,8 +106,8 @@ LaTeX Warning: Citation 'missing' undefined.`;
     const log = `! Emergency stop.`;
     const result = parseLatexLog(log);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]!.line).toBe(0);
-    expect(result.errors[0]!.message).toBe("Emergency stop.");
+    expect(result.errors[0]?.line).toBe(0);
+    expect(result.errors[0]?.message).toBe("Emergency stop.");
   });
 
   it("tracks current file from parenthesized paths", () => {
@@ -126,7 +115,7 @@ LaTeX Warning: Citation 'missing' undefined.`;
 ! Undefined control sequence.
 l.3 \\badcmd`;
     const result = parseLatexLog(log);
-    expect(result.errors[0]!.file).toBe("./chapter1.tex");
+    expect(result.errors[0]?.file).toBe("./chapter1.tex");
   });
 });
 
@@ -136,9 +125,7 @@ describe("DEFAULT_CLI_CONFIG", () => {
   });
 
   it("has the expected API URL", () => {
-    expect(DEFAULT_CLI_CONFIG.apiUrl).toBe(
-      "https://lmms-lab-writer.vercel.app",
-    );
+    expect(DEFAULT_CLI_CONFIG.apiUrl).toBe("https://lmms-lab-writer.vercel.app");
   });
 
   it("has watchIgnore patterns including common aux files", () => {

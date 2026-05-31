@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { m, AnimatePresence, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 
 const STORAGE_KEY = "hasSeenInkExplanation";
 
@@ -10,10 +10,7 @@ interface InkDropAnimationProps {
   inks: number;
 }
 
-export function InkDropAnimation({
-  triggerOnInks = true,
-  inks,
-}: InkDropAnimationProps) {
+export function InkDropAnimation({ triggerOnInks = true, inks }: InkDropAnimationProps) {
   const [isVisible, setIsVisible] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
@@ -23,7 +20,6 @@ export function InkDropAnimation({
     localStorage.setItem(STORAGE_KEY, "true");
   }, []);
 
-   
   useEffect(() => {
     if (!triggerOnInks || inks <= 0) return;
 
@@ -51,13 +47,9 @@ export function InkDropAnimation({
           onClick={dismiss}
         >
           <m.div
-            initial={
-              prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }
-            }
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={
-              prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 }
-            }
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
             transition={
               prefersReducedMotion
                 ? { duration: 0 }
@@ -77,6 +69,7 @@ export function InkDropAnimation({
               className="mb-6"
             >
               <svg
+                aria-hidden="true"
                 className="w-16 h-16 mx-auto"
                 viewBox="0 0 16 16"
                 fill="none"
@@ -84,9 +77,7 @@ export function InkDropAnimation({
                 style={{ imageRendering: "pixelated" }}
               >
                 <m.g
-                  initial={
-                    prefersReducedMotion ? {} : { opacity: 0, scale: 0.8 }
-                  }
+                  initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={
                     prefersReducedMotion
@@ -119,9 +110,7 @@ export function InkDropAnimation({
                   initial={prefersReducedMotion ? {} : { opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={
-                    prefersReducedMotion
-                      ? { duration: 0 }
-                      : { duration: 0.4, delay: 0.8 }
+                    prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 0.8 }
                   }
                 />
               </svg>
@@ -144,11 +133,7 @@ export function InkDropAnimation({
             <m.h2
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0 }
-                  : { duration: 0.4, delay: 0.6 }
-              }
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 0.6 }}
               className="text-xl font-medium mb-2"
             >
               You earned your first ink!
@@ -157,25 +142,16 @@ export function InkDropAnimation({
             <m.p
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0 }
-                  : { duration: 0.4, delay: 0.8 }
-              }
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 0.8 }}
               className="text-sm text-muted mb-6"
             >
-              Ink fuels your writing. Earn inks by starring repos to unlock our
-              beta version app.
+              Ink fuels your writing. Earn inks by starring repos to unlock our beta version app.
             </m.p>
 
             <m.p
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0 }
-                  : { duration: 0.4, delay: 1 }
-              }
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 1 }}
               className="text-3xl font-light tabular-nums mb-4"
             >
               {inks}
@@ -185,11 +161,7 @@ export function InkDropAnimation({
             <m.button
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0 }
-                  : { duration: 0.4, delay: 1.2 }
-              }
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 1.2 }}
               onClick={dismiss}
               className="px-6 py-2 border-2 border-black text-sm font-mono uppercase tracking-wider hover:bg-neutral-100 transition-colors"
             >
@@ -199,11 +171,7 @@ export function InkDropAnimation({
             <m.p
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0 }
-                  : { duration: 0.4, delay: 1.4 }
-              }
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, delay: 1.4 }}
               className="text-xs text-muted mt-4"
             >
               Click anywhere to dismiss
@@ -218,7 +186,6 @@ export function InkDropAnimation({
 export function useHasSeenInkExplanation(): boolean {
   const [hasSeen, setHasSeen] = useState(true);
 
-   
   useEffect(() => {
     setHasSeen(localStorage.getItem(STORAGE_KEY) === "true");
   }, []);

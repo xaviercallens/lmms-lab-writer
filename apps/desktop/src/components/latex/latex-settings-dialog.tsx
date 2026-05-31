@@ -1,30 +1,26 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { ArrowCounterClockwiseIcon, MinusIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
-import {
-  ArrowCounterClockwiseIcon,
-  MinusIcon,
-  PlusIcon,
-  XIcon,
-} from "@phosphor-icons/react";
 import { useTheme } from "next-themes";
-import type { UserProfile } from "@/lib/auth";
-import {
-  LaTeXSettings,
-  DEFAULT_LATEX_SETTINGS,
-} from "@/lib/latex/types";
-import { EditorSettings, MinimapSettings, DEFAULT_EDITOR_SETTINGS } from "@/lib/editor/types";
-import { Switch } from "@/components/ui/switch";
+import { useCallback, useId, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import type { UserProfile } from "@/lib/auth";
+import {
+  DEFAULT_EDITOR_SETTINGS,
+  type EditorSettings,
+  type MinimapSettings,
+} from "@/lib/editor/types";
+import { DEFAULT_LATEX_SETTINGS, type LaTeXSettings } from "@/lib/latex/types";
 
 interface LaTeXSettingsDialogProps {
   open: boolean;
@@ -64,9 +60,12 @@ function CheckboxItem({
   label: string;
   description: string;
 }) {
+  const checkboxId = useId();
+
   return (
-    <label className="flex items-start gap-3 cursor-pointer group py-2">
+    <label htmlFor={checkboxId} className="flex items-start gap-3 cursor-pointer group py-2">
       <Checkbox
+        id={checkboxId}
         checked={checked}
         onCheckedChange={(v) => onChange(v === true)}
         className="mt-0.5"
@@ -97,15 +96,11 @@ function SelectField({
   return (
     <div className="flex items-center justify-between py-2 gap-8">
       <div className="shrink-0">
-        <label className="text-sm font-medium text-foreground-secondary block">
-          {label}
-        </label>
-        {description && (
-          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-        )}
+        <span className="text-sm font-medium text-foreground-secondary block">{label}</span>
+        {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
       </div>
       <Select value={String(value)} onValueChange={onChange}>
-        <SelectTrigger>
+        <SelectTrigger aria-label={label}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -125,15 +120,16 @@ function AppearanceToggle() {
 
   return (
     <div className="py-2">
-      <label className="text-sm font-medium block mb-2 text-foreground-secondary">
-        Color Mode
-      </label>
+      <span className="text-sm font-medium block mb-2 text-foreground-secondary">Color Mode</span>
       <div className="flex">
-        {([
-          { value: "light", label: "Light" },
-          { value: "dark", label: "Dark" },
-        ] as const).map((mode, index) => (
+        {(
+          [
+            { value: "light", label: "Light" },
+            { value: "dark", label: "Dark" },
+          ] as const
+        ).map((mode, index) => (
           <button
+            type="button"
             key={mode.value}
             onClick={() => setTheme(mode.value)}
             className={`flex-1 px-4 py-2.5 text-sm font-medium border transition-all ${
@@ -146,9 +142,7 @@ function AppearanceToggle() {
           </button>
         ))}
       </div>
-      <p className="text-xs text-muted mt-1.5">
-        Controls the app and editor theme
-      </p>
+      <p className="text-xs text-muted mt-1.5">Controls the app and editor theme</p>
     </div>
   );
 }
@@ -200,19 +194,24 @@ export function LaTeXSettingsDialog({
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <div className="flex items-center gap-3">
-              <Dialog.Title className="text-lg font-bold tracking-tight">
-                Settings
-              </Dialog.Title>
+              <Dialog.Title className="text-lg font-bold tracking-tight">Settings</Dialog.Title>
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                 Auto-saved
               </span>
             </div>
-            <Dialog.Close className="p-1.5 hover:bg-accent-hover transition-colors border border-transparent hover:border-border" aria-label="Close">
+            <Dialog.Close
+              className="p-1.5 hover:bg-accent-hover transition-colors border border-transparent hover:border-border"
+              aria-label="Close"
+            >
               <XIcon className="size-4" />
             </Dialog.Close>
           </div>
 
-          <Tabs.Root value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+          <Tabs.Root
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="flex-1 flex flex-col overflow-hidden"
+          >
             {/* Tabs */}
             <Tabs.List className="flex border-b border-border shrink-0">
               <Tabs.Trigger
@@ -249,11 +248,13 @@ export function LaTeXSettingsDialog({
 
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 border flex items-center justify-center font-mono text-xs font-bold tracking-tight transition-colors ${
-                    editorSettings.vimMode
-                      ? "bg-foreground border-foreground text-background"
-                      : "bg-accent-hover border-border text-muted-foreground"
-                  }`}>
+                  <div
+                    className={`w-8 h-8 border flex items-center justify-center font-mono text-xs font-bold tracking-tight transition-colors ${
+                      editorSettings.vimMode
+                        ? "bg-foreground border-foreground text-background"
+                        : "bg-accent-hover border-border text-muted-foreground"
+                    }`}
+                  >
                     Vi
                   </div>
                   <div>
@@ -274,26 +275,25 @@ export function LaTeXSettingsDialog({
                 </div>
                 <Switch
                   checked={editorSettings.vimMode}
-                  onCheckedChange={(v) =>
-                    onUpdateEditorSettings({ vimMode: v })
-                  }
+                  onCheckedChange={(v) => onUpdateEditorSettings({ vimMode: v })}
                 />
               </div>
 
               <SectionHeader>Display</SectionHeader>
 
               <div className="flex items-center justify-between py-2">
-                <label className="text-sm font-medium text-foreground-secondary">
+                <label
+                  htmlFor="editor-font-size"
+                  className="text-sm font-medium text-foreground-secondary"
+                >
                   Font Size
                 </label>
                 <div className="flex items-center border border-border hover:border-border-dark transition-colors">
                   <button
+                    type="button"
                     onClick={() =>
                       onUpdateEditorSettings({
-                        fontSize: Math.max(
-                          8,
-                          editorSettings.fontSize - 1,
-                        ),
+                        fontSize: Math.max(8, editorSettings.fontSize - 1),
                       })
                     }
                     className="w-8 h-8 flex items-center justify-center text-muted hover:text-foreground hover:bg-accent-hover transition-colors border-r border-border"
@@ -302,27 +302,23 @@ export function LaTeXSettingsDialog({
                     <MinusIcon className="size-3" />
                   </button>
                   <input
+                    id="editor-font-size"
                     type="number"
                     min="8"
                     max="32"
                     value={editorSettings.fontSize}
                     onChange={(e) =>
                       onUpdateEditorSettings({
-                        fontSize: Math.min(
-                          32,
-                          Math.max(8, parseInt(e.target.value) || 14),
-                        ),
+                        fontSize: Math.min(32, Math.max(8, parseInt(e.target.value, 10) || 14)),
                       })
                     }
                     className="w-12 h-8 text-sm text-center border-0 focus:outline-none focus:ring-0 font-mono bg-transparent"
                   />
                   <button
+                    type="button"
                     onClick={() =>
                       onUpdateEditorSettings({
-                        fontSize: Math.min(
-                          32,
-                          editorSettings.fontSize + 1,
-                        ),
+                        fontSize: Math.min(32, editorSettings.fontSize + 1),
                       })
                     }
                     className="w-8 h-8 flex items-center justify-center text-muted hover:text-foreground hover:bg-accent-hover transition-colors border-l border-border"
@@ -337,18 +333,20 @@ export function LaTeXSettingsDialog({
               </div>
 
               <div className="flex items-center justify-between py-2">
-                <label className="text-sm font-medium text-foreground-secondary">
+                <label
+                  htmlFor="editor-line-height"
+                  className="text-sm font-medium text-foreground-secondary"
+                >
                   Line Height
                 </label>
                 <div className="flex items-center border border-border hover:border-border-dark transition-colors">
                   <button
+                    type="button"
                     onClick={() =>
                       onUpdateEditorSettings({
                         lineHeight: Math.max(
                           1.0,
-                          Math.round(
-                            (editorSettings.lineHeight - 0.1) * 10,
-                          ) / 10,
+                          Math.round((editorSettings.lineHeight - 0.1) * 10) / 10,
                         ),
                       })
                     }
@@ -358,6 +356,7 @@ export function LaTeXSettingsDialog({
                     <MinusIcon className="size-3" />
                   </button>
                   <input
+                    id="editor-line-height"
                     type="number"
                     min="1.0"
                     max="3.0"
@@ -365,25 +364,18 @@ export function LaTeXSettingsDialog({
                     value={editorSettings.lineHeight.toFixed(1)}
                     onChange={(e) =>
                       onUpdateEditorSettings({
-                        lineHeight: Math.min(
-                          3.0,
-                          Math.max(
-                            1.0,
-                            parseFloat(e.target.value) || 1.6,
-                          ),
-                        ),
+                        lineHeight: Math.min(3.0, Math.max(1.0, parseFloat(e.target.value) || 1.6)),
                       })
                     }
                     className="w-12 h-8 text-sm text-center border-0 focus:outline-none focus:ring-0 font-mono bg-transparent"
                   />
                   <button
+                    type="button"
                     onClick={() =>
                       onUpdateEditorSettings({
                         lineHeight: Math.min(
                           3.0,
-                          Math.round(
-                            (editorSettings.lineHeight + 0.1) * 10,
-                          ) / 10,
+                          Math.round((editorSettings.lineHeight + 0.1) * 10) / 10,
                         ),
                       })
                     }
@@ -416,8 +408,7 @@ export function LaTeXSettingsDialog({
                 value={editorSettings.renderWhitespace}
                 onChange={(v) =>
                   onUpdateEditorSettings({
-                    renderWhitespace:
-                      v as EditorSettings["renderWhitespace"],
+                    renderWhitespace: v as EditorSettings["renderWhitespace"],
                   })
                 }
                 options={[
@@ -432,9 +423,7 @@ export function LaTeXSettingsDialog({
               <div className="space-y-3 pt-1">
                 <CheckboxItem
                   checked={editorSettings.smoothScrolling}
-                  onChange={(v) =>
-                    onUpdateEditorSettings({ smoothScrolling: v })
-                  }
+                  onChange={(v) => onUpdateEditorSettings({ smoothScrolling: v })}
                   label="Smooth Scrolling"
                   description="Enable smooth scroll animation"
                 />
@@ -452,9 +441,7 @@ export function LaTeXSettingsDialog({
                       Preview
                     </span>
                   </div>
-                  <p className="text-xs text-muted mt-0.5">
-                    Code overview panel
-                  </p>
+                  <p className="text-xs text-muted mt-0.5">Code overview panel</p>
                 </div>
                 <Switch
                   checked={editorSettings.minimap.enabled}
@@ -472,12 +459,11 @@ export function LaTeXSettingsDialog({
               {editorSettings.minimap.enabled && (
                 <div className="space-y-1 pl-4 border-l-2 border-border ml-1">
                   <div className="flex items-center justify-between py-2">
-                    <label className="text-sm font-medium text-foreground-secondary">
-                      Position
-                    </label>
+                    <span className="text-sm font-medium text-foreground-secondary">Position</span>
                     <div className="flex">
                       {(["left", "right"] as const).map((side, index) => (
                         <button
+                          type="button"
                           key={side}
                           onClick={() =>
                             onUpdateEditorSettings({
@@ -599,9 +585,7 @@ export function LaTeXSettingsDialog({
               <SelectField
                 label="Tab Size"
                 value={editorSettings.tabSize}
-                onChange={(v) =>
-                  onUpdateEditorSettings({ tabSize: parseInt(v) })
-                }
+                onChange={(v) => onUpdateEditorSettings({ tabSize: parseInt(v, 10) })}
                 options={[
                   { value: 2, label: "2 spaces" },
                   { value: 4, label: "4 spaces" },
@@ -628,17 +612,21 @@ export function LaTeXSettingsDialog({
               {editorSettings.wordWrap === "wordWrapColumn" && (
                 <div className="pl-4 border-l-2 border-border ml-1 py-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-foreground-secondary">
+                    <label
+                      htmlFor="editor-word-wrap-column"
+                      className="text-sm font-medium text-foreground-secondary"
+                    >
                       Wrap Column
                     </label>
                     <input
+                      id="editor-word-wrap-column"
                       type="number"
                       min="40"
                       max="200"
                       value={editorSettings.wordWrapColumn}
                       onChange={(e) =>
                         onUpdateEditorSettings({
-                          wordWrapColumn: parseInt(e.target.value) || 80,
+                          wordWrapColumn: parseInt(e.target.value, 10) || 80,
                         })
                       }
                       className="w-20 px-3 py-2 text-sm text-center border border-border hover:border-border-dark focus:outline-none focus:border-foreground font-mono"
@@ -652,8 +640,7 @@ export function LaTeXSettingsDialog({
                 value={editorSettings.autoClosingBrackets}
                 onChange={(v) =>
                   onUpdateEditorSettings({
-                    autoClosingBrackets:
-                      v as EditorSettings["autoClosingBrackets"],
+                    autoClosingBrackets: v as EditorSettings["autoClosingBrackets"],
                   })
                 }
                 options={[
@@ -672,8 +659,7 @@ export function LaTeXSettingsDialog({
                 value={editorSettings.autoClosingQuotes}
                 onChange={(v) =>
                   onUpdateEditorSettings({
-                    autoClosingQuotes:
-                      v as EditorSettings["autoClosingQuotes"],
+                    autoClosingQuotes: v as EditorSettings["autoClosingQuotes"],
                   })
                 }
                 options={[
@@ -690,9 +676,7 @@ export function LaTeXSettingsDialog({
               <div className="space-y-3 pt-1">
                 <CheckboxItem
                   checked={editorSettings.insertSpaces}
-                  onChange={(v) =>
-                    onUpdateEditorSettings({ insertSpaces: v })
-                  }
+                  onChange={(v) => onUpdateEditorSettings({ insertSpaces: v })}
                   label="Insert Spaces"
                   description="Use spaces instead of tabs for indentation"
                 />
@@ -703,17 +687,13 @@ export function LaTeXSettingsDialog({
               <div className="space-y-3">
                 <CheckboxItem
                   checked={editorSettings.formatOnSave}
-                  onChange={(v) =>
-                    onUpdateEditorSettings({ formatOnSave: v })
-                  }
+                  onChange={(v) => onUpdateEditorSettings({ formatOnSave: v })}
                   label="Format on Save"
                   description="Automatically format code when saving"
                 />
                 <CheckboxItem
                   checked={editorSettings.formatOnPaste}
-                  onChange={(v) =>
-                    onUpdateEditorSettings({ formatOnPaste: v })
-                  }
+                  onChange={(v) => onUpdateEditorSettings({ formatOnPaste: v })}
                   label="Format on Paste"
                   description="Automatically format pasted code"
                 />
@@ -739,10 +719,14 @@ export function LaTeXSettingsDialog({
               {editorSettings.terminalShellMode === "custom" && (
                 <div className="pl-4 border-l-2 border-border ml-1 py-2">
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-sm font-medium text-foreground-secondary shrink-0">
+                    <label
+                      htmlFor="editor-terminal-shell-path"
+                      className="text-sm font-medium text-foreground-secondary shrink-0"
+                    >
                       Shell Command
                     </label>
                     <input
+                      id="editor-terminal-shell-path"
                       type="text"
                       value={editorSettings.terminalShellPath}
                       onChange={(e) =>
@@ -767,9 +751,9 @@ export function LaTeXSettingsDialog({
 
               <div className="py-2">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-foreground-secondary">
+                  <span className="text-sm font-medium text-foreground-secondary">
                     Main .tex File
-                  </label>
+                  </span>
                 </div>
                 {texFiles.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-2">
@@ -778,11 +762,9 @@ export function LaTeXSettingsDialog({
                 ) : (
                   <Select
                     value={settings.mainFile || ""}
-                    onValueChange={(v) =>
-                      onUpdateSettings({ mainFile: v || null })
-                    }
+                    onValueChange={(v) => onUpdateSettings({ mainFile: v || null })}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full" aria-label="Main .tex file">
                       <SelectValue placeholder="Select main .tex file..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -803,14 +785,36 @@ export function LaTeXSettingsDialog({
 
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 border flex items-center justify-center transition-colors ${
-                    editorSettings.gitAutoFetchEnabled
-                      ? "bg-foreground border-foreground"
-                      : "bg-accent-hover border-border"
-                  }`}>
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className={editorSettings.gitAutoFetchEnabled ? "text-background" : "text-muted-foreground"}>
-                      <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 2.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM4.5 8a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm7 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z" fill="currentColor" fillRule="evenodd"/>
-                      <path d="M8 5.75v2.5M6 9l-1-.5M10 9l1-.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                  <div
+                    className={`w-8 h-8 border flex items-center justify-center transition-colors ${
+                      editorSettings.gitAutoFetchEnabled
+                        ? "bg-foreground border-foreground"
+                        : "bg-accent-hover border-border"
+                    }`}
+                  >
+                    <svg
+                      aria-hidden="true"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      className={
+                        editorSettings.gitAutoFetchEnabled
+                          ? "text-background"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      <path
+                        d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 2.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM4.5 8a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm7 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z"
+                        fill="currentColor"
+                        fillRule="evenodd"
+                      />
+                      <path
+                        d="M8 5.75v2.5M6 9l-1-.5M10 9l1-.5"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
                     </svg>
                   </div>
                   <div>
@@ -831,9 +835,7 @@ export function LaTeXSettingsDialog({
                 </div>
                 <Switch
                   checked={editorSettings.gitAutoFetchEnabled}
-                  onCheckedChange={(v) =>
-                    onUpdateEditorSettings({ gitAutoFetchEnabled: v })
-                  }
+                  onCheckedChange={(v) => onUpdateEditorSettings({ gitAutoFetchEnabled: v })}
                 />
               </div>
 
@@ -894,9 +896,7 @@ export function LaTeXSettingsDialog({
                           {authProfile.name || authProfile.email}
                         </p>
                         {authProfile.name && (
-                          <p className="text-xs text-muted mt-0.5 truncate">
-                            {authProfile.email}
-                          </p>
+                          <p className="text-xs text-muted mt-0.5 truncate">{authProfile.email}</p>
                         )}
                       </>
                     ) : (
@@ -908,6 +908,7 @@ export function LaTeXSettingsDialog({
 
                   {authProfile ? (
                     <button
+                      type="button"
                       onClick={() => {
                         void handleSignOut();
                       }}
@@ -918,6 +919,7 @@ export function LaTeXSettingsDialog({
                     </button>
                   ) : (
                     <button
+                      type="button"
                       onClick={onOpenLogin}
                       disabled={authLoading || !authConfigured}
                       className="px-3 py-2 text-sm border-2 border-foreground bg-background text-foreground shadow-[3px_3px_0_0_var(--foreground)] hover:shadow-[1px_1px_0_0_var(--foreground)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[3px_3px_0_0_var(--foreground)]"
@@ -933,9 +935,7 @@ export function LaTeXSettingsDialog({
                     Authentication is not configured in this desktop build.
                   </p>
                 )}
-                {authError && (
-                  <p className="text-xs text-red-600 mt-2 break-words">{authError}</p>
-                )}
+                {authError && <p className="text-xs text-red-600 mt-2 break-words">{authError}</p>}
               </div>
             </Tabs.Content>
           </Tabs.Root>
@@ -944,10 +944,9 @@ export function LaTeXSettingsDialog({
           <div className="flex items-center justify-between px-5 py-4 border-t border-border">
             {canResetActiveTab ? (
               <button
+                type="button"
                 onClick={
-                  activeTab === "editor"
-                    ? handleResetEditorSettings
-                    : handleResetLatexSettings
+                  activeTab === "editor" ? handleResetEditorSettings : handleResetLatexSettings
                 }
                 className="text-xs text-muted hover:text-foreground transition-colors flex items-center gap-1.5 group"
               >
@@ -955,9 +954,7 @@ export function LaTeXSettingsDialog({
                 Reset to Defaults
               </button>
             ) : (
-              <div className="text-xs text-muted-foreground">
-                Account settings are in preview.
-              </div>
+              <div className="text-xs text-muted-foreground">Account settings are in preview.</div>
             )}
             <Dialog.Close className="px-6 py-2 text-sm font-medium bg-background text-foreground border-2 border-foreground shadow-[3px_3px_0_0_var(--foreground)] hover:shadow-[1px_1px_0_0_var(--foreground)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all">
               Done

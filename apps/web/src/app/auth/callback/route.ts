@@ -1,9 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { getGitHubUser, storeGitHubToken } from "@/lib/github/stars";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
-
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const error_param = searchParams.get("error");

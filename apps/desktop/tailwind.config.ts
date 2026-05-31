@@ -1,45 +1,45 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: 'class',
+  darkMode: "class",
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       fontFamily: {
         sans: [
-          '-apple-system',
-          'BlinkMacSystemFont',
+          "-apple-system",
+          "BlinkMacSystemFont",
           '"SF Pro Text"',
           '"SF Pro Display"',
           '"Google Sans Text"',
           '"Google Sans"',
-          'var(--font-geist-sans)',
-          'Roboto',
-          'system-ui',
+          "var(--font-geist-sans)",
+          "Roboto",
+          "system-ui",
           '"Segoe UI"',
           '"Helvetica Neue"',
-          'Arial',
+          "Arial",
           '"PingFang SC"',
           '"Hiragino Sans GB"',
           '"Microsoft YaHei UI"',
           '"Microsoft YaHei"',
           '"Noto Sans CJK SC"',
-          'sans-serif'
+          "sans-serif",
         ],
         mono: [
           '"SF Mono"',
-          'SFMono-Regular',
+          "SFMono-Regular",
           '"SF Pro Mono"',
           '"Google Sans Code"',
           '"Roboto Mono"',
-          'var(--font-geist-mono)',
-          'ui-monospace',
-          'Menlo',
-          'Consolas',
+          "var(--font-geist-mono)",
+          "ui-monospace",
+          "Menlo",
+          "Consolas",
           '"Liberation Mono"',
           '"Courier New"',
           '"Maple Mono NF CN"',
@@ -54,10 +54,10 @@ export default {
           '"Microsoft YaHei UI"',
           '"Microsoft YaHei"',
           '"Noto Sans CJK SC"',
-          'monospace'
+          "monospace",
         ],
       },
     },
   },
   plugins: [],
-} satisfies Config
+} satisfies Config;

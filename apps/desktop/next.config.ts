@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
-import type { Configuration } from "webpack";
 import TerserPlugin from "terser-webpack-plugin";
+import type { Configuration } from "webpack";
 import WebpackObfuscator from "webpack-obfuscator";
 
 const isProd = process.env.NODE_ENV === "production";

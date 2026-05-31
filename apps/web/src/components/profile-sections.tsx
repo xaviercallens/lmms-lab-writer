@@ -1,7 +1,7 @@
 "use client";
 
 import { m, useReducedMotion } from "framer-motion";
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 const INSTANT_TRANSITION = { duration: 0 } as const;
 
@@ -85,13 +85,7 @@ export function ProfileSection({
   );
 }
 
-export function ProfileTitle({
-  children,
-  delay = 0,
-}: {
-  children: ReactNode;
-  delay?: number;
-}) {
+export function ProfileTitle({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const fadeIn = useFadeInVariants();
 
   return (
@@ -129,12 +123,7 @@ function useStaggerVariants() {
           ? INSTANT_TRANSITION
           : {
               duration: 0.25,
-              ease: [0.25, 0.46, 0.45, 0.94] as [
-                number,
-                number,
-                number,
-                number,
-              ],
+              ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
             },
       },
     },
@@ -156,27 +145,17 @@ export function RepoList({ children }: { children: ReactNode }) {
   );
 }
 
-export function RepoItem({
-  children,
-  isStarred,
-}: {
-  children: ReactNode;
-  isStarred: boolean;
-}) {
+export function RepoItem({ children, isStarred }: { children: ReactNode; isStarred: boolean }) {
   const prefersReducedMotion = useReducedMotion();
   const { item } = useStaggerVariants();
 
   return (
     <m.div
       className={`flex items-center justify-between p-4 border transition-colors ${
-        isStarred
-          ? "border-black bg-neutral-50"
-          : "border-neutral-200 hover:border-neutral-400"
+        isStarred ? "border-black bg-neutral-50" : "border-neutral-200 hover:border-neutral-400"
       }`}
       variants={item}
-      whileHover={
-        prefersReducedMotion ? undefined : { x: 2, transition: GPU_SPRING }
-      }
+      whileHover={prefersReducedMotion ? undefined : { x: 2, transition: GPU_SPRING }}
       style={prefersReducedMotion ? undefined : { willChange: "transform" }}
     >
       {children}

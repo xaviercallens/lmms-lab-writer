@@ -1,24 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Globe } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, Globe } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { GithubIcon } from "@/components/icons/github-icon";
 import { UserDropdown } from "@/components/user-dropdown";
-import { getUserCacheFromCookie, type CachedUser } from "@/lib/user-cache";
 import {
   DEFAULT_LOCALE,
   LOCALE_LABELS,
+  type Locale,
   SUPPORTED_LOCALES,
   setLocaleCookie,
   stripLocalePrefix,
   withLocalePrefix,
-  type Locale,
 } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
+import { type CachedUser, getUserCacheFromCookie } from "@/lib/user-cache";
 
 function AuthButtonFallback({ label }: { label: string }) {
   return (
@@ -28,13 +28,7 @@ function AuthButtonFallback({ label }: { label: string }) {
   );
 }
 
-function LanguageSwitcher({
-  locale,
-  label,
-}: {
-  locale: Locale;
-  label: string;
-}) {
+function LanguageSwitcher({ locale, label }: { locale: Locale; label: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const basePath = stripLocalePrefix(pathname || "/");
@@ -60,6 +54,7 @@ function LanguageSwitcher({
   return (
     <div className="relative" ref={ref}>
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border text-xs text-muted hover:text-foreground hover:bg-neutral-100 transition-colors"
         aria-label={label}
@@ -73,6 +68,7 @@ function LanguageSwitcher({
         <div className="absolute right-0 top-full mt-1 min-w-[7rem] bg-white border border-border shadow-[2px_2px_0_0_rgba(0,0,0,1)] z-50">
           {SUPPORTED_LOCALES.map((targetLocale) => (
             <button
+              type="button"
               key={targetLocale}
               onClick={() => handleSelect(targetLocale)}
               className={`w-full text-left px-3 py-2 text-xs transition-colors ${
@@ -100,7 +96,6 @@ export function Header({
   const [user, setUser] = useState<CachedUser | null | undefined>(undefined);
   const messages = getMessages(locale);
 
-   
   useEffect(() => {
     setUser(getUserCacheFromCookie());
   }, []);

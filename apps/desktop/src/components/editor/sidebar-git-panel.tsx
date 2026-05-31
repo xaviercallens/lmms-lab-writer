@@ -1,31 +1,27 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { Spinner } from "@/components/ui/spinner";
-import type {
-  GitFileChange,
-  GitLogEntry,
-  GitStatus,
-} from "@lmms-lab/writer-shared";
+import type { GitFileChange, GitLogEntry, GitStatus } from "@lmms-lab/writer-shared";
 import {
   ArrowClockwiseIcon,
   ArrowCounterClockwiseIcon,
-  GitBranchIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CheckIcon,
   ClockCounterClockwiseIcon,
+  CopyIcon,
+  FileIcon,
+  GitBranchIcon,
+  GitCommitIcon,
+  GithubLogoIcon,
+  GlobeIcon,
   MinusIcon,
   PlusIcon,
-  CheckIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  GlobeIcon,
   SparkleIcon,
-  FileIcon,
-  GitCommitIcon,
-  CopyIcon,
-  GithubLogoIcon,
 } from "@phosphor-icons/react";
+import { useCallback, useMemo, useState } from "react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Spinner } from "@/components/ui/spinner";
 
 type SelectedChange = {
   path: string;
@@ -119,9 +115,7 @@ function CommitEntry({
               <CopyIcon className="w-2.5 h-2.5 opacity-0 group-hover/hash:opacity-100 transition-opacity" />
             )}
           </button>
-          <span className="text-[10px] font-mono text-muted-foreground">
-            {entry.author}
-          </span>
+          <span className="text-[10px] font-mono text-muted-foreground">{entry.author}</span>
           <span className="text-[10px] font-mono text-muted-foreground ml-auto flex-shrink-0">
             {formatRelativeDate(entry.date)}
           </span>
@@ -207,9 +201,7 @@ export function GitSidebarPanel({
   isPulling,
   isAuthenticatingGh = false,
 }: GitSidebarPanelProps) {
-  const [selectedChange, setSelectedChange] = useState<SelectedChange | null>(
-    null,
-  );
+  const [selectedChange, setSelectedChange] = useState<SelectedChange | null>(null);
   const [historyCollapsed, setHistoryCollapsed] = useState(false);
   const [showAllCommits, setShowAllCommits] = useState(false);
   const [showDiscardAllConfirm, setShowDiscardAllConfirm] = useState(false);
@@ -236,8 +228,7 @@ export function GitSidebarPanel({
 
   const renderChangeRow = useCallback(
     (change: GitFileChange, staged: boolean) => {
-      const isSelected =
-        selectedChange?.path === change.path && selectedChange.staged === staged;
+      const isSelected = selectedChange?.path === change.path && selectedChange.staged === staged;
       return (
         <div
           key={`${staged ? "staged" : "unstaged"}:${change.path}`}
@@ -260,9 +251,7 @@ export function GitSidebarPanel({
               </span>
               <span
                 className={`truncate text-xs font-mono ${
-                  change.status === "deleted"
-                    ? "line-through text-muted"
-                    : "text-foreground"
+                  change.status === "deleted" ? "line-through text-muted" : "text-foreground"
                 }`}
               >
                 {change.path}
@@ -317,9 +306,7 @@ export function GitSidebarPanel({
         <div className="w-12 h-12 border-2 border-border flex items-center justify-center mb-3">
           <GitBranchIcon className="w-6 h-6 opacity-30" />
         </div>
-        <p className="text-xs font-mono uppercase tracking-wider">
-          No folder open
-        </p>
+        <p className="text-xs font-mono uppercase tracking-wider">No folder open</p>
       </div>
     );
   }
@@ -330,10 +317,9 @@ export function GitSidebarPanel({
         <div className="w-12 h-12 border-2 border-border flex items-center justify-center mb-3">
           <GitBranchIcon className="w-6 h-6 opacity-30" />
         </div>
-        <p className="text-xs font-mono uppercase tracking-wider mb-4">
-          Not a git repository
-        </p>
+        <p className="text-xs font-mono uppercase tracking-wider mb-4">Not a git repository</p>
         <button
+          type="button"
           onClick={onInitGit}
           disabled={isInitializingGit}
           className="btn btn-sm btn-primary"
@@ -347,20 +333,16 @@ export function GitSidebarPanel({
   const changeCount = gitStatus.changes.length;
   const showPushButton = Boolean(gitStatus.remote);
   const showPullButton = Boolean(gitStatus.remote);
-  const canPush = gitStatus.hasUpstream
-    ? gitStatus.ahead > 0
-    : gitStatus.hasCommits;
+  const canPush = gitStatus.hasUpstream ? gitStatus.ahead > 0 : gitStatus.hasCommits;
   const canPull = gitStatus.hasUpstream ? gitStatus.behind > 0 : true;
-  const pushTitle =
-    !canPush
-      ? "Nothing to push"
-      : gitStatus.hasUpstream
+  const pushTitle = !canPush
+    ? "Nothing to push"
+    : gitStatus.hasUpstream
       ? `Push ${gitStatus.ahead} commit${gitStatus.ahead > 1 ? "s" : ""}`
       : "Push current branch to origin";
-  const pullTitle =
-    !canPull
-      ? "Nothing to pull"
-      : gitStatus.hasUpstream
+  const pullTitle = !canPull
+    ? "Nothing to pull"
+    : gitStatus.hasUpstream
       ? `Pull ${gitStatus.behind} commit${gitStatus.behind > 1 ? "s" : ""}`
       : "Pull and set upstream from origin";
 
@@ -386,11 +368,10 @@ export function GitSidebarPanel({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <GitBranchIcon className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="font-mono text-xs font-medium truncate">
-              {gitStatus.branch}
-            </span>
+            <span className="font-mono text-xs font-medium truncate">{gitStatus.branch}</span>
           </div>
           <button
+            type="button"
             onClick={onRefreshStatus}
             className="p-1 text-muted hover:text-foreground hover:bg-foreground/5 transition-colors"
             aria-label="Refresh git status"
@@ -416,12 +397,12 @@ export function GitSidebarPanel({
                     onHideRemoteInput();
                   }
                 }}
-                autoFocus
               />
             ) : (
               <>
                 {onPublishToGitHub && (
                   <button
+                    type="button"
                     onClick={onPublishToGitHub}
                     disabled={isAuthenticatingGh}
                     className="flex items-center gap-1.5 w-full px-2.5 py-1.5 text-[11px] font-mono bg-foreground text-background hover:bg-foreground/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
@@ -431,6 +412,7 @@ export function GitSidebarPanel({
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={onShowRemoteInput}
                   className="flex items-center gap-1.5 text-[11px] font-mono text-muted hover:text-foreground transition-colors"
                 >
@@ -461,6 +443,7 @@ export function GitSidebarPanel({
         </div>
         <div className="flex items-center gap-1.5">
           <button
+            type="button"
             onClick={onCommit}
             disabled={!commitMessage.trim() || stagedChanges.length === 0}
             className="flex-1 text-[11px] font-mono py-1.5 bg-foreground text-background border border-foreground hover:bg-foreground/90 disabled:opacity-30 disabled:hover:bg-foreground transition-colors flex items-center justify-center gap-1.5"
@@ -472,6 +455,7 @@ export function GitSidebarPanel({
             )}
           </button>
           <button
+            type="button"
             onClick={() => {
               void onGenerateCommitMessageAI();
             }}
@@ -484,6 +468,7 @@ export function GitSidebarPanel({
           </button>
           {showPushButton && (
             <button
+              type="button"
               onClick={() => {
                 void onPush();
               }}
@@ -503,6 +488,7 @@ export function GitSidebarPanel({
           )}
           {showPullButton && (
             <button
+              type="button"
               onClick={() => {
                 void onPull();
               }}
@@ -582,9 +568,7 @@ export function GitSidebarPanel({
                 </span>
               </div>
               <div className="border-t border-surface-secondary">
-                {unstagedChanges.map((change) =>
-                  renderChangeRow(change, false),
-                )}
+                {unstagedChanges.map((change) => renderChangeRow(change, false))}
               </div>
             </div>
           )}
@@ -615,57 +599,48 @@ export function GitSidebarPanel({
                   </span>
                 )}
               </span>
-              <span className="text-[10px]">
-                {historyCollapsed ? "+" : "\u2212"}
-              </span>
+              <span className="text-[10px]">{historyCollapsed ? "+" : "\u2212"}</span>
             </button>
-            {!historyCollapsed && (
-              <>
-                {gitLogEntries.length > 0 ? (
-                  <div className="border-t border-surface-secondary">
-                    {visibleCommits.map((entry, i) => (
-                      <CommitEntry
-                        key={entry.hash}
-                        entry={entry}
-                        isFirst={i === 0}
-                        isLast={
-                          i === visibleCommits.length - 1 && !hasMoreCommits
-                        }
-                      />
-                    ))}
-                    {hasMoreCommits && (
-                      <button
-                        type="button"
-                        onClick={() => setShowAllCommits(!showAllCommits)}
-                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] font-mono text-muted hover:text-foreground hover:bg-accent-hover transition-colors"
-                      >
-                        <div className="flex flex-col items-center w-3 flex-shrink-0">
-                          <div className="w-px flex-1 bg-surface-tertiary" />
-                          <GitCommitIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                        </div>
-                        <span>
-                          {showAllCommits
-                            ? "Show less"
-                            : `${gitLogEntries.length - 5} more commits...`}
-                        </span>
-                      </button>
-                    )}
-                  </div>
-                ) : gitGraph.length > 0 ? (
-                  <div className="px-3 py-2 overflow-x-auto border-t border-surface-secondary">
-                    <pre className="text-[11px] leading-[18px] font-mono whitespace-pre text-muted">
-                      {gitGraph.join("\n")}
-                    </pre>
-                  </div>
-                ) : (
-                  <div className="px-3 py-4 text-center">
-                    <p className="text-[11px] font-mono text-muted">
-                      No commits yet
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
+            {!historyCollapsed &&
+              (gitLogEntries.length > 0 ? (
+                <div className="border-t border-surface-secondary">
+                  {visibleCommits.map((entry, i) => (
+                    <CommitEntry
+                      key={entry.hash}
+                      entry={entry}
+                      isFirst={i === 0}
+                      isLast={i === visibleCommits.length - 1 && !hasMoreCommits}
+                    />
+                  ))}
+                  {hasMoreCommits && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllCommits(!showAllCommits)}
+                      className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] font-mono text-muted hover:text-foreground hover:bg-accent-hover transition-colors"
+                    >
+                      <div className="flex flex-col items-center w-3 flex-shrink-0">
+                        <div className="w-px flex-1 bg-surface-tertiary" />
+                        <GitCommitIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      </div>
+                      <span>
+                        {showAllCommits
+                          ? "Show less"
+                          : `${gitLogEntries.length - 5} more commits...`}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              ) : gitGraph.length > 0 ? (
+                <div className="px-3 py-2 overflow-x-auto border-t border-surface-secondary">
+                  <pre className="text-[11px] leading-[18px] font-mono whitespace-pre text-muted">
+                    {gitGraph.join("\n")}
+                  </pre>
+                </div>
+              ) : (
+                <div className="px-3 py-4 text-center">
+                  <p className="text-[11px] font-mono text-muted">No commits yet</p>
+                </div>
+              ))}
           </div>
         </ScrollArea>
 
@@ -677,9 +652,7 @@ export function GitSidebarPanel({
                 <FileIcon className="w-3 h-3 flex-shrink-0" />
                 {selectedChange.path}
               </div>
-              <div className="text-[10px] font-mono text-muted mt-0.5">
-                Diff shown in editor
-              </div>
+              <div className="text-[10px] font-mono text-muted mt-0.5">Diff shown in editor</div>
             </div>
             {onOpenFile && (
               <button

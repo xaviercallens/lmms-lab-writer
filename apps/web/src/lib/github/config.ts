@@ -118,9 +118,7 @@ export async function getTopRepos(): Promise<RepoInfo[]> {
  */
 export async function getAllPopularRepos(): Promise<RepoInfo[]> {
   const allRepos = await fetchAllOrgRepos();
-  return allRepos.filter(
-    (repo) => repo.stargazers_count >= GITHUB_CONFIG.MIN_STARS_TO_SHOW,
-  );
+  return allRepos.filter((repo) => repo.stargazers_count >= GITHUB_CONFIG.MIN_STARS_TO_SHOW);
 }
 
 export type MembershipTier = "free" | "supporter";

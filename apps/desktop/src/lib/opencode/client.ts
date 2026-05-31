@@ -53,10 +53,7 @@ export class OpenCodeClient {
    * Safely parse JSON response, with content-type validation
    * Returns null if the response is not valid JSON
    */
-  private async safeParseJson<T>(
-    response: Response,
-    context: string,
-  ): Promise<T | null> {
+  private async safeParseJson<T>(response: Response, context: string): Promise<T | null> {
     const contentType = response.headers.get("content-type");
     if (!contentType?.includes("application/json")) {
       // Try to get a preview of the response for debugging
@@ -82,13 +79,10 @@ export class OpenCodeClient {
   async waitForApiReady(maxRetries = 5, initialDelay = 500): Promise<boolean> {
     for (let i = 0; i < maxRetries; i++) {
       try {
-        const response = await fetch(
-          `${this.baseUrl}/session${this.getQueryParams()}`,
-          {
-            headers: this.getHeaders(),
-            signal: AbortSignal.timeout(2000),
-          },
-        );
+        const response = await fetch(`${this.baseUrl}/session${this.getQueryParams()}`, {
+          headers: this.getHeaders(),
+          signal: AbortSignal.timeout(2000),
+        });
         const contentType = response.headers.get("content-type");
         if (contentType?.includes("application/json")) {
           return true;
@@ -97,7 +91,7 @@ export class OpenCodeClient {
         /* ignore */
       }
       // Exponential backoff
-      const delay = initialDelay * Math.pow(2, i);
+      const delay = initialDelay * 2 ** i;
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
     console.error("[OpenCode] API did not become ready after retries");
@@ -145,11 +139,8 @@ export class OpenCodeClient {
     try {
       this.eventSource = new EventSource(url);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to create EventSource";
-      this.options.onError?.(
-        new Error(`Connection failed: ${message}. URL: ${url}`),
-      );
+      const message = error instanceof Error ? error.message : "Failed to create EventSource";
+      this.options.onError?.(new Error(`Connection failed: ${message}. URL: ${url}`));
       return;
     }
 
@@ -165,11 +156,7 @@ export class OpenCodeClient {
         this.handleEvent(data);
         this.options.onEvent?.(data);
       } catch (error) {
-        console.error(
-          "[OpenCode Client] Failed to parse event:",
-          error,
-          event.data,
-        );
+        console.error("[OpenCode Client] Failed to parse event:", error, event.data);
       }
     };
 
@@ -190,7 +177,7 @@ export class OpenCodeClient {
       return;
     }
 
-    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
+    const delay = this.reconnectDelay * 2 ** this.reconnectAttempts;
     this.reconnectAttempts++;
 
     this.reconnectTimeout = setTimeout(() => {
@@ -201,9 +188,7 @@ export class OpenCodeClient {
   disconnect(): void {
     // Abort all pending fetch requests
     if (this.abortController) {
-      this.abortController.abort(
-        new DOMException("OpenCode client disconnected", "AbortError"),
-      );
+      this.abortController.abort(new DOMException("OpenCode client disconnected", "AbortError"));
       this.abortController = null;
     }
 
@@ -221,17 +206,13 @@ export class OpenCodeClient {
   }
 
   private handleEvent(event: Event): void {
-
     switch (event.type) {
       case "server.connected":
         this.store.connected = true;
         break;
 
       case "session.updated":
-        this.store.sessions.set(
-          event.properties.info.id,
-          event.properties.info,
-        );
+        this.store.sessions.set(event.properties.info.id, event.properties.info);
         break;
 
       case "session.deleted":
@@ -241,16 +222,12 @@ export class OpenCodeClient {
         break;
 
       case "session.status":
-        this.store.status.set(
-          event.properties.sessionID,
-          event.properties.status,
-        );
+        this.store.status.set(event.properties.sessionID, event.properties.status);
         break;
 
       case "session.error":
         {
-          const sessionID = (event.properties as { sessionID?: string })
-            .sessionID;
+          const sessionID = (event.properties as { sessionID?: string }).sessionID;
           const error = (event.properties as { error?: unknown }).error;
           // Some OpenCode builds emit empty session.error events; suppress noisy console errors.
           if (sessionID || error) {
@@ -278,11 +255,8 @@ export class OpenCodeClient {
       }
 
       case "message.removed": {
-        const messages =
-          this.store.messages.get(event.properties.sessionID) || [];
-        const filtered = messages.filter(
-          (m) => m.id !== event.properties.messageID,
-        );
+        const messages = this.store.messages.get(event.properties.sessionID) || [];
+        const filtered = messages.filter((m) => m.id !== event.properties.messageID);
         this.store.messages.set(event.properties.sessionID, filtered);
         break;
       }
@@ -315,21 +289,15 @@ export class OpenCodeClient {
 
   async listSessions(): Promise<SessionInfo[]> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/session${this.getQueryParams()}`,
-        {
-          headers: this.getHeaders(),
-          signal: this.getSignal(),
-        },
-      );
+      const response = await fetch(`${this.baseUrl}/session${this.getQueryParams()}`, {
+        headers: this.getHeaders(),
+        signal: this.getSignal(),
+      });
       if (!response.ok) {
         console.error(`Failed to list sessions: ${response.statusText}`);
         return [];
       }
-      const data = await this.safeParseJson<SessionInfo[]>(
-        response,
-        "listSessions",
-      );
+      const data = await this.safeParseJson<SessionInfo[]>(response, "listSessions");
       return Array.isArray(data) ? data : [];
     } catch (error) {
       if (isAbortError(error)) return [];
@@ -339,51 +307,36 @@ export class OpenCodeClient {
   }
 
   async getSession(sessionID: string): Promise<SessionInfo> {
-    const response = await fetch(
-      `${this.baseUrl}/session/${sessionID}${this.getQueryParams()}`,
-      {
-        headers: this.getHeaders(),
-        signal: this.getSignal(),
-      },
-    );
-    if (!response.ok)
-      throw new Error(`Failed to get session: ${response.statusText}`);
+    const response = await fetch(`${this.baseUrl}/session/${sessionID}${this.getQueryParams()}`, {
+      headers: this.getHeaders(),
+      signal: this.getSignal(),
+    });
+    if (!response.ok) throw new Error(`Failed to get session: ${response.statusText}`);
     const data = await this.safeParseJson<SessionInfo>(response, "getSession");
     if (!data) throw new Error("Invalid response from server (expected JSON)");
     return data;
   }
 
   async createSession(): Promise<SessionInfo> {
-    const response = await fetch(
-      `${this.baseUrl}/session${this.getQueryParams()}`,
-      {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({}),
-        signal: this.getSignal(),
-      },
-    );
-    if (!response.ok)
-      throw new Error(`Failed to create session: ${response.statusText}`);
-    const data = await this.safeParseJson<SessionInfo>(
-      response,
-      "createSession",
-    );
+    const response = await fetch(`${this.baseUrl}/session${this.getQueryParams()}`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify({}),
+      signal: this.getSignal(),
+    });
+    if (!response.ok) throw new Error(`Failed to create session: ${response.statusText}`);
+    const data = await this.safeParseJson<SessionInfo>(response, "createSession");
     if (!data) throw new Error("Invalid response from server (expected JSON)");
     return data;
   }
 
   async deleteSession(sessionID: string): Promise<void> {
-    const response = await fetch(
-      `${this.baseUrl}/session/${sessionID}${this.getQueryParams()}`,
-      {
-        method: "DELETE",
-        headers: this.getHeaders(),
-        signal: this.getSignal(),
-      },
-    );
-    if (!response.ok)
-      throw new Error(`Failed to delete session: ${response.statusText}`);
+    const response = await fetch(`${this.baseUrl}/session/${sessionID}${this.getQueryParams()}`, {
+      method: "DELETE",
+      headers: this.getHeaders(),
+      signal: this.getSignal(),
+    });
+    if (!response.ok) throw new Error(`Failed to delete session: ${response.statusText}`);
   }
 
   async getMessages(sessionID: string): Promise<Message[]> {
@@ -394,8 +347,7 @@ export class OpenCodeClient {
         signal: this.getSignal(),
       },
     );
-    if (!response.ok)
-      throw new Error(`Failed to get messages: ${response.statusText}`);
+    if (!response.ok) throw new Error(`Failed to get messages: ${response.statusText}`);
     const data = await this.safeParseJson<unknown[]>(response, "getMessages");
     const items = Array.isArray(data) ? data : [];
 
@@ -423,8 +375,7 @@ export class OpenCodeClient {
         signal: this.getSignal(),
       },
     );
-    if (!response.ok)
-      throw new Error(`Failed to get parts: ${response.statusText}`);
+    if (!response.ok) throw new Error(`Failed to get parts: ${response.statusText}`);
     const data = await this.safeParseJson<Part[]>(response, "getParts");
     const parts = Array.isArray(data) ? data : [];
     this.store.parts.set(`${sessionID}:${messageID}`, parts);
@@ -440,7 +391,8 @@ export class OpenCodeClient {
       files?: { url: string; mime: string; filename?: string }[];
     },
   ): Promise<void> {
-    const parts: { type: string; text?: string; url?: string; mime?: string; filename?: string }[] = [];
+    const parts: { type: string; text?: string; url?: string; mime?: string; filename?: string }[] =
+      [];
 
     // Add file parts first (images)
     if (options?.files && options.files.length > 0) {
@@ -484,9 +436,7 @@ export class OpenCodeClient {
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");
       console.error("[OpenCode Client] chat error response:", errorText);
-      throw new Error(
-        `Failed to send message: ${response.statusText} - ${errorText}`,
-      );
+      throw new Error(`Failed to send message: ${response.statusText} - ${errorText}`);
     }
 
     // Try to read response body for debugging
@@ -502,14 +452,10 @@ export class OpenCodeClient {
         signal: this.getSignal(),
       },
     );
-    if (!response.ok)
-      throw new Error(`Failed to abort: ${response.statusText}`);
+    if (!response.ok) throw new Error(`Failed to abort: ${response.statusText}`);
   }
 
-  async answerQuestion(
-    requestID: string,
-    answers: string[][],
-  ): Promise<void> {
+  async answerQuestion(requestID: string, answers: string[][]): Promise<void> {
     const response = await fetch(
       `${this.baseUrl}/question/${requestID}/reply${this.getQueryParams()}`,
       {
@@ -525,9 +471,7 @@ export class OpenCodeClient {
     }
   }
 
-  async getAgents(): Promise<
-    { id: string; name: string; description?: string }[]
-  > {
+  async getAgents(): Promise<{ id: string; name: string; description?: string }[]> {
     try {
       const url = `${this.baseUrl}/agent${this.getQueryParams()}`;
       const response = await fetch(url, {
@@ -560,8 +504,7 @@ export class OpenCodeClient {
         } else {
           // Try to extract values if it's a map-like object
           agents = Object.values(obj).filter(
-            (v) =>
-              v && typeof v === "object" && (v as Record<string, unknown>).id,
+            (v) => v && typeof v === "object" && (v as Record<string, unknown>).id,
           );
         }
       } else {
@@ -612,23 +555,14 @@ export class OpenCodeClient {
         connected?: string[];
       }>(response, "getProviders");
       if (!data) return [];
-      const allProviders = (Array.isArray(data?.all) ? data.all : []) as Record<
-        string,
-        unknown
-      >[];
-      const connectedIds = new Set(
-        Array.isArray(data?.connected) ? data.connected : [],
-      );
+      const allProviders = (Array.isArray(data?.all) ? data.all : []) as Record<string, unknown>[];
+      const connectedIds = new Set(Array.isArray(data?.connected) ? data.connected : []);
 
-      const connectedProviders = allProviders.filter((p) =>
-        connectedIds.has(String(p?.id || "")),
-      );
+      const connectedProviders = allProviders.filter((p) => connectedIds.has(String(p?.id || "")));
       const result = connectedProviders.map((provider) => {
         const modelsObj = provider?.models;
         const modelsArray =
-          modelsObj &&
-          typeof modelsObj === "object" &&
-          !Array.isArray(modelsObj)
+          modelsObj && typeof modelsObj === "object" && !Array.isArray(modelsObj)
             ? Object.values(
                 modelsObj as Record<
                   string,
@@ -659,8 +593,6 @@ export class OpenCodeClient {
   }
 }
 
-export function createOpenCodeClient(
-  options: OpenCodeClientOptions,
-): OpenCodeClient {
+export function createOpenCodeClient(options: OpenCodeClientOptions): OpenCodeClient {
   return new OpenCodeClient(options);
 }

@@ -1,12 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  OpenCodeClient,
-  createOpenCodeClient,
-  isAbortError,
-} from "./client";
-import type { Event, Message, Part, SessionInfo, SessionStatus, QuestionAsked } from "./types";
+import { createOpenCodeClient, isAbortError, type OpenCodeClient } from "./client";
+import type { Event, Message, Part, QuestionAsked, SessionInfo, SessionStatus } from "./types";
 
 export type UseOpenCodeOptions = {
   baseUrl?: string;
@@ -53,15 +49,16 @@ export type UseOpenCodeReturn = {
   createSession: () => Promise<SessionInfo | null>;
   selectSession: (sessionId: string) => Promise<void>;
   deleteSession: (sessionId: string) => Promise<void>;
-  sendMessage: (content: string, files?: { url: string; mime: string; filename?: string }[]) => Promise<void>;
+  sendMessage: (
+    content: string,
+    files?: { url: string; mime: string; filename?: string }[],
+  ) => Promise<void>;
   answerQuestion: (questionID: string, answers: string[][]) => Promise<void>;
   abort: () => Promise<void>;
   getPartsForMessage: (messageId: string) => Part[];
   resetReconnectState: () => void;
   setSelectedAgent: (agentId: string | null) => void;
-  setSelectedModel: (
-    model: { providerId: string; modelId: string } | null,
-  ) => void;
+  setSelectedModel: (model: { providerId: string; modelId: string } | null) => void;
 };
 
 const DEFAULT_BASE_URL = "http://localhost:4096";
@@ -79,14 +76,8 @@ const PREFERRED_PROVIDER_ORDER = [
   "google", // Put Google last since it often lacks API key
 ];
 
-export function useOpenCode(
-  options: UseOpenCodeOptions = {},
-): UseOpenCodeReturn {
-  const {
-    baseUrl = DEFAULT_BASE_URL,
-    directory,
-    autoConnect = false,
-  } = options;
+export function useOpenCode(options: UseOpenCodeOptions = {}): UseOpenCodeReturn {
+  const { baseUrl = DEFAULT_BASE_URL, directory, autoConnect = false } = options;
 
   const clientRef = useRef<OpenCodeClient | null>(null);
   const [connected, setConnected] = useState(false);
@@ -177,7 +168,6 @@ export function useOpenCode(
 
   const handleEventRef = useRef<(event: Event) => void>(() => {});
   handleEventRef.current = (event: Event) => {
-
     if ("properties" in event) {
       const props = event.properties as Record<string, unknown>;
       const eventSessionId =
@@ -185,19 +175,13 @@ export function useOpenCode(
         (props.info as { sessionID?: string })?.sessionID ||
         (props.part as { sessionID?: string })?.sessionID;
 
-      if (
-        event.type === "session.updated" ||
-        event.type === "session.deleted"
-      ) {
+      if (event.type === "session.updated" || event.type === "session.deleted") {
         syncFromStoreRef.current();
         return;
       }
 
       // Handle session.status events immediately for responsive UI
-      if (
-        event.type === "session.status" &&
-        eventSessionId === currentSessionIdRef.current
-      ) {
+      if (event.type === "session.status" && eventSessionId === currentSessionIdRef.current) {
         const statusData = props.status as SessionStatus | undefined;
         if (statusData) {
           setStatus(statusData);
@@ -219,8 +203,7 @@ export function useOpenCode(
           const errorData = event.properties.error;
 
           // Parse error message
-          let errorMessage =
-            errorData?.data?.message || errorData?.name || "Unknown error";
+          let errorMessage = errorData?.data?.message || errorData?.name || "Unknown error";
 
           // Check if this is a non-recoverable error (billing, credits, etc.)
           const isNonRecoverable =
@@ -340,18 +323,14 @@ export function useOpenCode(
       setSessions(safeSessions);
 
       if (safeSessions.length > 0 && !currentSessionIdRef.current) {
-        const sorted = [...safeSessions].sort(
-          (a, b) => b.time.updated - a.time.updated,
-        );
+        const sorted = [...safeSessions].sort((a, b) => b.time.updated - a.time.updated);
         const firstSession = sorted[0];
         if (firstSession) {
           currentSessionIdRef.current = firstSession.id;
           setCurrentSessionId(firstSession.id);
           const msgs = await client.getMessages(firstSession.id);
           setMessages(msgs);
-          setStatus(
-            client.store.status.get(firstSession.id) || { type: "idle" },
-          );
+          setStatus(client.store.status.get(firstSession.id) || { type: "idle" });
 
           // Parts are already included in messages
           const sessionParts = new Map<string, Part[]>();
@@ -414,12 +393,8 @@ export function useOpenCode(
       if (!selectedModelRef.current) {
         // Check if saved model is still valid
         if (savedModel) {
-          const savedProvider = safeProviders.find(
-            (p) => p.id === savedModel!.providerId,
-          );
-          const savedModelValid = savedProvider?.models?.some(
-            (m) => m.id === savedModel!.modelId,
-          );
+          const savedProvider = safeProviders.find((p) => p.id === savedModel?.providerId);
+          const savedModelValid = savedProvider?.models?.some((m) => m.id === savedModel?.modelId);
           if (savedModelValid) {
             setSelectedModel(savedModel);
             return;
@@ -434,11 +409,7 @@ export function useOpenCode(
           const provider = safeProviders.find((p) =>
             p.id.toLowerCase().includes(preferredId.toLowerCase()),
           );
-          if (
-            provider &&
-            Array.isArray(provider.models) &&
-            provider.models.length > 0
-          ) {
+          if (provider && Array.isArray(provider.models) && provider.models.length > 0) {
             selectedProvider = provider;
             selectedProviderModel = provider.models[0];
             break;
@@ -567,10 +538,7 @@ export function useOpenCode(
           if (lastUserMessage.agent) {
             setSelectedAgent(lastUserMessage.agent);
           }
-          if (
-            lastUserMessage.model?.providerID &&
-            lastUserMessage.model?.modelID
-          ) {
+          if (lastUserMessage.model?.providerID && lastUserMessage.model?.modelID) {
             setSelectedModel({
               providerId: lastUserMessage.model.providerID,
               modelId: lastUserMessage.model.modelID,
@@ -601,9 +569,7 @@ export function useOpenCode(
         syncFromStore();
       } catch (err) {
         if (isAbortError(err)) return;
-        setError(
-          err instanceof Error ? err.message : "Failed to delete session",
-        );
+        setError(err instanceof Error ? err.message : "Failed to delete session");
       }
     },
     [connected, currentSessionId, syncFromStore],
@@ -653,15 +619,7 @@ export function useOpenCode(
         setError(err instanceof Error ? err.message : "Failed to send message");
       }
     },
-    [
-      connected,
-      currentSessionId,
-      syncMessagesAndParts,
-      selectedAgent,
-      selectedModel,
-      agents,
-      providers,
-    ],
+    [connected, currentSessionId, syncMessagesAndParts, selectedAgent, selectedModel, agents],
   );
 
   const abort = useCallback(async () => {

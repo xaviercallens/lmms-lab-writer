@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { GithubIcon } from "@/components/icons/github-icon";
-import { createClient as createSSRClient } from "@/lib/supabase/client";
 import { createClient as createStandardClient } from "@supabase/supabase-js";
-import { useLocale } from "@/lib/useLocale";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { GithubIcon } from "@/components/icons/github-icon";
 import { getMessages } from "@/lib/messages";
+import { createClient as createSSRClient } from "@/lib/supabase/client";
+import { useLocale } from "@/lib/useLocale";
+
+function getSupabaseConfig() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Missing Supabase public environment variables");
+  }
+
+  return { supabaseUrl, supabaseAnonKey };
+}
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -19,17 +30,15 @@ export function LoginForm() {
   // Get appropriate Supabase client based on flow
   const getSupabaseClient = () => {
     if (source === "desktop") {
-      return createStandardClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          auth: {
-            flowType: "pkce",
-            persistSession: true,
-            storage: window.localStorage,
-          },
-        }
-      );
+      const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
+
+      return createStandardClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          flowType: "pkce",
+          persistSession: true,
+          storage: window.localStorage,
+        },
+      });
     }
     // Use SSR client (cookies) for web flow
     return createSSRClient();
@@ -61,9 +70,10 @@ export function LoginForm() {
 
       // For desktop flow, redirect directly to desktop-success to keep PKCE state
       // For web flow, use callback route to handle session cookies
-      const callbackUrl = source === "desktop"
-        ? `${window.location.origin}/auth/desktop-success`
-        : `${window.location.origin}/auth/callback`;
+      const callbackUrl =
+        source === "desktop"
+          ? `${window.location.origin}/auth/desktop-success`
+          : `${window.location.origin}/auth/callback`;
 
       // For desktop flow, store code_verifier in sessionStorage as backup
       // since cookie storage might not work across page navigations
@@ -86,9 +96,7 @@ export function LoginForm() {
         return;
       }
       if (!data?.url) {
-        setError(
-          "GitHub OAuth not configured. Please check Supabase settings.",
-        );
+        setError("GitHub OAuth not configured. Please check Supabase settings.");
         setLoading(false);
         return;
       }
@@ -103,6 +111,7 @@ export function LoginForm() {
   return (
     <>
       <button
+        type="button"
         onClick={handleGitHubLogin}
         disabled={loading}
         className="btn btn-secondary w-full"
@@ -113,9 +122,7 @@ export function LoginForm() {
 
       {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
 
-      <p className="text-xs text-muted text-center mt-6">
-        {t.auth.githubAccountRequired}
-      </p>
+      <p className="text-xs text-muted text-center mt-6">{t.auth.githubAccountRequired}</p>
     </>
   );
 }

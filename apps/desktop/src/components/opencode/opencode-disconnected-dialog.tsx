@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
 import { WarningIcon, XIcon } from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef } from "react";
 
 type Props = {
   open: boolean;
@@ -9,11 +9,7 @@ type Props = {
   onRestart: () => void;
 };
 
-export function OpenCodeDisconnectedDialog({
-  open,
-  onClose,
-  onRestart,
-}: Props) {
+export function OpenCodeDisconnectedDialog({ open, onClose, onRestart }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,11 +66,7 @@ export function OpenCodeDisconnectedDialog({
       aria-modal="true"
       aria-labelledby="dialog-title"
     >
-      <div
-        className="absolute inset-0 bg-foreground/50"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0 bg-foreground/50" onClick={onClose} aria-hidden="true" />
 
       <div
         ref={dialogRef}
@@ -85,6 +77,7 @@ export function OpenCodeDisconnectedDialog({
             OpenCode Disconnected
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="p-1 text-muted hover:text-foreground transition-colors"
             aria-label="Close dialog"
@@ -100,8 +93,7 @@ export function OpenCodeDisconnectedDialog({
             </div>
             <div className="flex-1">
               <p className="text-sm text-foreground">
-                The connection to OpenCode has been lost and could not be
-                re-established.
+                The connection to OpenCode has been lost and could not be re-established.
               </p>
               <p className="text-xs text-muted mt-2">
                 Please restart OpenCode to continue using AI features.
@@ -112,12 +104,14 @@ export function OpenCodeDisconnectedDialog({
 
         <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border bg-accent-hover">
           <button
+            type="button"
             onClick={onClose}
             className="px-3 py-1.5 text-xs border border-border hover:border-foreground transition-colors"
           >
             Dismiss
           </button>
           <button
+            type="button"
             onClick={handleRestart}
             className="px-3 py-1.5 text-xs bg-background text-foreground border border-foreground shadow-[2px_2px_0px_0px_var(--foreground)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
           >

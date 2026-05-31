@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
 import type { FileNode } from "@lmms-lab/writer-shared";
+import { describe, expect, it } from "vitest";
 import {
-  findTexFiles,
   findMainTexFile,
+  findTexFiles,
+  formatCompilationTime,
   getPdfPathFromTex,
   isTexFile,
-  formatCompilationTime,
 } from "./utils";
 
 function file(name: string, path?: string): FileNode {
@@ -25,16 +25,9 @@ describe("findTexFiles", () => {
   it("finds .tex files recursively in directories", () => {
     const files = [
       file("main.tex"),
-      dir("chapters", [
-        file("ch1.tex", "chapters/ch1.tex"),
-        file("ch2.tex", "chapters/ch2.tex"),
-      ]),
+      dir("chapters", [file("ch1.tex", "chapters/ch1.tex"), file("ch2.tex", "chapters/ch2.tex")]),
     ];
-    expect(findTexFiles(files)).toEqual([
-      "main.tex",
-      "chapters/ch1.tex",
-      "chapters/ch2.tex",
-    ]);
+    expect(findTexFiles(files)).toEqual(["main.tex", "chapters/ch1.tex", "chapters/ch2.tex"]);
   });
 
   it("returns empty array when no .tex files exist", () => {
@@ -60,10 +53,7 @@ describe("findMainTexFile", () => {
   });
 
   it("searches recursively when no root .tex files", () => {
-    const files = [
-      file("README.md"),
-      dir("src", [file("main.tex", "src/main.tex")]),
-    ];
+    const files = [file("README.md"), dir("src", [file("main.tex", "src/main.tex")])];
     expect(findMainTexFile(files)).toBe("src/main.tex");
   });
 

@@ -1,10 +1,10 @@
 import {
   AbsoluteFill,
   interpolate,
+  Sequence,
   spring,
   useCurrentFrame,
   useVideoConfig,
-  Sequence,
 } from "remotion";
 import { z } from "zod";
 
@@ -26,12 +26,9 @@ const FadeWrapper: React.FC<{
   const fadeIn = interpolate(frame, [0, FADE_FRAMES], [0, 1], {
     extrapolateRight: "clamp",
   });
-  const fadeOut = interpolate(
-    frame,
-    [durationInFrames - FADE_FRAMES, durationInFrames],
-    [1, 0],
-    { extrapolateLeft: "clamp" },
-  );
+  const fadeOut = interpolate(frame, [durationInFrames - FADE_FRAMES, durationInFrames], [1, 0], {
+    extrapolateLeft: "clamp",
+  });
   const opacity = Math.min(fadeIn, fadeOut);
 
   return <AbsoluteFill style={{ opacity }}>{children}</AbsoluteFill>;
@@ -170,9 +167,7 @@ const ProductMockup: React.FC = () => {
               {"  "}
               Recent advances in vision-language...
             </div>
-            <div style={{ marginTop: 8, color: "#999", fontSize: 11 }}>
-              ▌ Claude is typing...
-            </div>
+            <div style={{ marginTop: 8, color: "#999", fontSize: 11 }}>▌ Claude is typing...</div>
           </div>
         </div>
       </div>
@@ -215,7 +210,7 @@ const Title: React.FC<{ text: string; delay: number }> = ({ text, delay }) => {
 
         return (
           <div
-            key={i}
+            key={line}
             style={{
               fontSize: 80,
               fontWeight: 600,
@@ -234,10 +229,7 @@ const Title: React.FC<{ text: string; delay: number }> = ({ text, delay }) => {
   );
 };
 
-const Subtitle: React.FC<{ text: string; delay: number }> = ({
-  text,
-  delay,
-}) => {
+const Subtitle: React.FC<{ text: string; delay: number }> = ({ text, delay }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -308,7 +300,7 @@ const ProblemScene: React.FC = () => {
 
           return (
             <div
-              key={i}
+              key={line}
               style={{
                 fontSize: isLast ? 48 : 56,
                 fontFamily: isLast ? "monospace" : "system-ui, sans-serif",
@@ -328,10 +320,7 @@ const ProblemScene: React.FC = () => {
   );
 };
 
-const SolutionScene: React.FC<MarketingVideoProps> = ({
-  headline,
-  subheadline,
-}) => {
+const SolutionScene: React.FC<MarketingVideoProps> = ({ headline, subheadline }) => {
   return (
     <AbsoluteFill
       style={{
@@ -425,10 +414,7 @@ export const MarketingVideo: React.FC<MarketingVideoProps> = (props) => {
         </FadeWrapper>
       </Sequence>
 
-      <Sequence
-        from={scene1Duration + scene2Duration}
-        durationInFrames={scene3Duration}
-      >
+      <Sequence from={scene1Duration + scene2Duration} durationInFrames={scene3Duration}>
         <FadeWrapper durationInFrames={scene3Duration}>
           <CTAScene />
         </FadeWrapper>

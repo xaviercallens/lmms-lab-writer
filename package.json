@@ -13,9 +13,9 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "clean": "turbo clean && rm -rf node_modules",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
     "test": "turbo test",
     "test:ci": "turbo test -- --reporter=verbose",
     "version:sync": "node scripts/sync-version.mjs",
@@ -24,19 +24,9 @@
     "tauri:build": "pnpm --filter @lmms-lab/writer-desktop tauri:build"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^9.39.4",
-    "@next/eslint-plugin-next": "^16.2.6",
-    "@typescript-eslint/eslint-plugin": "^8.60.0",
-    "@typescript-eslint/parser": "^8.60.0",
-    "eslint": "^9.39.4",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "globals": "^17.6.0",
-    "prettier": "^3.8.3",
+    "@biomejs/biome": "^2.4.16",
     "turbo": "^2.9.16",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.60.0",
     "vitest": "^4.1.7"
   }
 }

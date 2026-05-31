@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  motion,
-  AnimatePresence,
-  useReducedMotion,
-  type HTMLMotionProps,
-} from "framer-motion";
-import { forwardRef, type ReactNode } from "react";
 import { CaretRightIcon } from "@phosphor-icons/react";
+import { AnimatePresence, type HTMLMotionProps, motion, useReducedMotion } from "framer-motion";
+import { forwardRef, type ReactNode } from "react";
 
 const GPU_SPRING = {
   type: "spring",
@@ -54,34 +49,33 @@ type MotionListItemProps = HTMLMotionProps<"button"> & {
   isSelected?: boolean;
 };
 
-export const MotionListItem = forwardRef<
-  HTMLButtonElement,
-  MotionListItemProps
->(({ children, className, isSelected, ...props }, ref) => {
-  const prefersReducedMotion = useReducedMotion();
+export const MotionListItem = forwardRef<HTMLButtonElement, MotionListItemProps>(
+  ({ children, className, isSelected, ...props }, ref) => {
+    const prefersReducedMotion = useReducedMotion();
 
-  return (
-    <motion.button
-      ref={ref}
-      className={className}
-      initial={false}
-      whileHover={
-        prefersReducedMotion
-          ? undefined
-          : {
-              x: 2,
-              backgroundColor: isSelected ? undefined : "rgba(0,0,0,0.04)",
-            }
-      }
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
-      transition={prefersReducedMotion ? INSTANT_TRANSITION : GPU_SPRING}
-      style={prefersReducedMotion ? undefined : { willChange: "transform" }}
-      {...props}
-    >
-      {children}
-    </motion.button>
-  );
-});
+    return (
+      <motion.button
+        ref={ref}
+        className={className}
+        initial={false}
+        whileHover={
+          prefersReducedMotion
+            ? undefined
+            : {
+                x: 2,
+                backgroundColor: isSelected ? undefined : "rgba(0,0,0,0.04)",
+              }
+        }
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
+        transition={prefersReducedMotion ? INSTANT_TRANSITION : GPU_SPRING}
+        style={prefersReducedMotion ? undefined : { willChange: "transform" }}
+        {...props}
+      >
+        {children}
+      </motion.button>
+    );
+  },
+);
 MotionListItem.displayName = "MotionListItem";
 
 type SlidePanelProps = {
@@ -92,13 +86,7 @@ type SlidePanelProps = {
   className?: string;
 };
 
-export function SlidePanel({
-  show,
-  direction,
-  width,
-  children,
-  className,
-}: SlidePanelProps) {
+export function SlidePanel({ show, direction, width, children, className }: SlidePanelProps) {
   const prefersReducedMotion = useReducedMotion();
   const xOffset = direction === "left" ? -width : width;
 
@@ -106,16 +94,10 @@ export function SlidePanel({
     <AnimatePresence mode="wait">
       {show && (
         <motion.aside
-          initial={
-            prefersReducedMotion ? { opacity: 1 } : { x: xOffset, opacity: 0 }
-          }
+          initial={prefersReducedMotion ? { opacity: 1 } : { x: xOffset, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          exit={
-            prefersReducedMotion ? { opacity: 0 } : { x: xOffset, opacity: 0 }
-          }
-          transition={
-            prefersReducedMotion ? INSTANT_TRANSITION : PANEL_TRANSITION
-          }
+          exit={prefersReducedMotion ? { opacity: 0 } : { x: xOffset, opacity: 0 }}
+          transition={prefersReducedMotion ? INSTANT_TRANSITION : PANEL_TRANSITION}
           style={{
             width,
             willChange: prefersReducedMotion ? undefined : "transform, opacity",
@@ -143,9 +125,7 @@ export const MotionTab = forwardRef<HTMLButtonElement, MotionTabProps>(
         ref={ref}
         className={className}
         whileHover={
-          isActive || prefersReducedMotion
-            ? undefined
-            : { backgroundColor: "rgba(0,0,0,0.04)" }
+          isActive || prefersReducedMotion ? undefined : { backgroundColor: "rgba(0,0,0,0.04)" }
         }
         whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
         transition={prefersReducedMotion ? INSTANT_TRANSITION : GPU_SPRING}
@@ -174,11 +154,7 @@ export function MotionChevron({ expanded }: { expanded: boolean }) {
       className="w-3 h-3 flex-shrink-0"
       initial={false}
       animate={{ rotate: expanded ? 90 : 0 }}
-      transition={
-        prefersReducedMotion
-          ? INSTANT_TRANSITION
-          : { duration: 0.15, ease: "easeOut" }
-      }
+      transition={prefersReducedMotion ? INSTANT_TRANSITION : { duration: 0.15, ease: "easeOut" }}
       style={prefersReducedMotion ? undefined : { willChange: "transform" }}
     >
       <CaretRightIcon className="w-3 h-3" weight="fill" />
@@ -209,4 +185,4 @@ export const MotionFadeIn = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
 );
 MotionFadeIn.displayName = "MotionFadeIn";
 
-export { motion, AnimatePresence };
+export { AnimatePresence, motion };

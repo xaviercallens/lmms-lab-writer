@@ -1,18 +1,17 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { m } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { m } from "framer-motion";
-import { useLocale } from "@/lib/useLocale";
+import { Suspense, useEffect, useState } from "react";
 import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/lib/useLocale";
 
-const LoginForm = dynamic(
-  () => import("@/components/auth/login-form").then((m) => m.LoginForm),
-  { ssr: false },
-);
+const LoginForm = dynamic(() => import("@/components/auth/login-form").then((m) => m.LoginForm), {
+  ssr: false,
+});
 
 const fadeIn = {
   hidden: { opacity: 0, y: 16 },
@@ -104,12 +103,7 @@ function LoginPageContent() {
           <ErrorMessage />
         </Suspense>
 
-        <m.div
-          initial="hidden"
-          animate="visible"
-          custom={0.2}
-          variants={fadeIn}
-        >
+        <m.div initial="hidden" animate="visible" custom={0.2} variants={fadeIn}>
           <Suspense fallback={null}>
             <LoginForm />
           </Suspense>

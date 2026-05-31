@@ -1,25 +1,25 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { CheckIcon, DisclosureTriangle } from "./icons";
+import { useMemo, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { CheckIcon, DisclosureTriangle } from "./icons";
 import type { TaskItem } from "./types";
 
 export function parseTasks(data: unknown): TaskItem[] | null {
   if (!data) return null;
 
   if (Array.isArray(data)) {
-    return data.every(item => typeof item === 'object' && item?.content)
-      ? data as TaskItem[]
+    return data.every((item) => typeof item === "object" && item?.content)
+      ? (data as TaskItem[])
       : null;
   }
 
-  if (typeof data === 'object' && data !== null && 'todos' in data) {
+  if (typeof data === "object" && data !== null && "todos" in data) {
     const todos = (data as { todos: unknown }).todos;
     if (Array.isArray(todos)) {
-      return todos.every(item => typeof item === 'object' && item?.content)
-        ? todos as TaskItem[]
+      return todos.every((item) => typeof item === "object" && item?.content)
+        ? (todos as TaskItem[])
         : null;
     }
   }
@@ -64,33 +64,43 @@ export function CollapsibleTasksBar({ tasks }: { tasks: TaskItem[] }) {
             style={{ width: `${percent}%` }}
           />
         </div>
-        {inProgress > 0 && (
-          <Spinner className="size-3 flex-shrink-0" />
-        )}
+        {inProgress > 0 && <Spinner className="size-3 flex-shrink-0" />}
       </button>
 
       {expanded && (
-        <div ref={tasksParent} className="border-t border-border divide-y divide-border max-h-48 overflow-y-auto">
+        <div
+          ref={tasksParent}
+          className="border-t border-border divide-y divide-border max-h-48 overflow-y-auto"
+        >
           {tasks.map((task) => (
-            <div key={task.id} className="px-3 py-1.5 flex items-start gap-2 hover:bg-accent-hover transition-colors">
-              <div className={`size-3.5 flex-shrink-0 mt-0.5 border flex items-center justify-center ${
-                task.status === 'completed'
-                  ? 'border-accent bg-accent'
-                  : task.status === 'in_progress'
-                    ? 'border-accent'
-                    : task.status === 'cancelled'
-                      ? 'border-border bg-surface-secondary'
-                      : 'border-border'
-              }`}>
-                {task.status === 'completed' && <CheckIcon className="size-2.5 text-background" />}
-                {task.status === 'in_progress' && <Spinner className="size-2" />}
-                {task.status === 'cancelled' && <span className="text-[9px] text-muted-foreground">&times;</span>}
+            <div
+              key={task.id}
+              className="px-3 py-1.5 flex items-start gap-2 hover:bg-accent-hover transition-colors"
+            >
+              <div
+                className={`size-3.5 flex-shrink-0 mt-0.5 border flex items-center justify-center ${
+                  task.status === "completed"
+                    ? "border-accent bg-accent"
+                    : task.status === "in_progress"
+                      ? "border-accent"
+                      : task.status === "cancelled"
+                        ? "border-border bg-surface-secondary"
+                        : "border-border"
+                }`}
+              >
+                {task.status === "completed" && <CheckIcon className="size-2.5 text-background" />}
+                {task.status === "in_progress" && <Spinner className="size-2" />}
+                {task.status === "cancelled" && (
+                  <span className="text-[9px] text-muted-foreground">&times;</span>
+                )}
               </div>
-              <span className={`text-[11px] leading-tight ${
-                task.status === 'completed' || task.status === 'cancelled'
-                  ? 'text-muted line-through'
-                  : ''
-              }`}>
+              <span
+                className={`text-[11px] leading-tight ${
+                  task.status === "completed" || task.status === "cancelled"
+                    ? "text-muted line-through"
+                    : ""
+                }`}
+              >
                 {task.content}
               </span>
             </div>
@@ -107,38 +117,51 @@ export function TasksDisplay({ tasks }: { tasks: TaskItem[] }) {
   return (
     <div className="border-2 border-border bg-background my-2 overflow-hidden">
       <div className="bg-accent-hover px-3 py-1.5 border-b border-border flex justify-between items-center">
-        <span className="text-[10px] font-mono font-medium text-muted uppercase tracking-wider">Tasks</span>
+        <span className="text-[10px] font-mono font-medium text-muted uppercase tracking-wider">
+          Tasks
+        </span>
         <span className="text-[10px] font-mono text-muted">{tasks.length}</span>
       </div>
       <div ref={tasksListParent} className="divide-y divide-border">
         {tasks.map((task) => (
-          <div key={task.id} className="px-3 py-2 flex items-start gap-2 hover:bg-accent-hover transition-colors">
-            <div className={`size-4 flex-shrink-0 mt-0.5 border flex items-center justify-center ${
-              task.status === 'completed'
-                ? 'border-accent bg-accent'
-                : task.status === 'in_progress'
-                  ? 'border-accent'
-                  : task.status === 'cancelled'
-                    ? 'border-border bg-surface-secondary'
-                    : 'border-border'
-            }`}>
-              {task.status === 'completed' && <CheckIcon className="size-3 text-background" />}
-              {task.status === 'in_progress' && <Spinner className="size-2.5" />}
-              {task.status === 'cancelled' && <span className="text-[10px] text-muted-foreground">&times;</span>}
+          <div
+            key={task.id}
+            className="px-3 py-2 flex items-start gap-2 hover:bg-accent-hover transition-colors"
+          >
+            <div
+              className={`size-4 flex-shrink-0 mt-0.5 border flex items-center justify-center ${
+                task.status === "completed"
+                  ? "border-accent bg-accent"
+                  : task.status === "in_progress"
+                    ? "border-accent"
+                    : task.status === "cancelled"
+                      ? "border-border bg-surface-secondary"
+                      : "border-border"
+              }`}
+            >
+              {task.status === "completed" && <CheckIcon className="size-3 text-background" />}
+              {task.status === "in_progress" && <Spinner className="size-2.5" />}
+              {task.status === "cancelled" && (
+                <span className="text-[10px] text-muted-foreground">&times;</span>
+              )}
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className={`text-xs ${
-                task.status === 'completed' || task.status === 'cancelled'
-                  ? 'text-muted line-through'
-                  : ''
-              }`}>
+              <div
+                className={`text-xs ${
+                  task.status === "completed" || task.status === "cancelled"
+                    ? "text-muted line-through"
+                    : ""
+                }`}
+              >
                 {task.content}
               </div>
               {task.priority && (
-                <span className={`text-[9px] font-mono uppercase tracking-wider mt-1 inline-block ${
-                  task.priority === 'high' ? 'text-accent font-bold' : 'text-muted'
-                }`}>
+                <span
+                  className={`text-[9px] font-mono uppercase tracking-wider mt-1 inline-block ${
+                    task.priority === "high" ? "text-accent font-bold" : "text-muted"
+                  }`}
+                >
                   {task.priority}
                 </span>
               )}

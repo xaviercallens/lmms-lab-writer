@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { useMemo, useState } from "react";
 import type { SessionInfo } from "@/lib/opencode/types";
 import { TrashIcon } from "./icons";
 import { formatRelativeTime } from "./utils";
@@ -31,7 +31,7 @@ export function SessionList({
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="text-center space-y-3">
           <p className="text-sm text-muted">No sessions yet</p>
-          <button onClick={onNewSession} className="btn-brutalist">
+          <button type="button" onClick={onNewSession} className="btn-brutalist">
             Create First Session
           </button>
         </div>
@@ -51,14 +51,13 @@ export function SessionList({
             className={`w-full flex items-center border-b border-border hover:bg-accent-hover transition-colors ${isActive ? "bg-surface-secondary" : ""}`}
           >
             <button
+              type="button"
               onClick={() => onSelect(session.id)}
               className="flex-1 text-left px-3 py-2"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm truncate">
-                    {session.title || "Untitled"}
-                  </p>
+                  <p className="text-sm truncate">{session.title || "Untitled"}</p>
                   {session.summary?.files !== undefined && (
                     <p className="text-xs text-muted mt-0.5">
                       {session.summary.files} file
@@ -66,12 +65,11 @@ export function SessionList({
                     </p>
                   )}
                 </div>
-                <span className="text-xs text-muted flex-shrink-0">
-                  {timeStr}
-                </span>
+                <span className="text-xs text-muted flex-shrink-0">{timeStr}</span>
               </div>
             </button>
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setDeleteConfirmId(session.id);
@@ -122,12 +120,13 @@ export function ConfirmDialog({
         <p className="text-sm mb-4">{message}</p>
         <div className="flex justify-end gap-2">
           <button
+            type="button"
             onClick={onCancel}
             className="px-3 py-1.5 text-sm border border-border hover:bg-surface-secondary transition-colors"
           >
             Cancel
           </button>
-          <button onClick={onConfirm} className="btn-brutalist text-sm">
+          <button type="button" onClick={onConfirm} className="btn-brutalist text-sm">
             Delete
           </button>
         </div>

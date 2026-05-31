@@ -1,8 +1,8 @@
-import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
+import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { useMemo } from "react";
 
@@ -36,6 +36,7 @@ export function MarkdownText({
           if (onFileClick && filePattern.test(content)) {
             return (
               <button
+                type="button"
                 onClick={() => onFileClick(content)}
                 className="text-foreground font-medium font-mono text-[12px] hover:underline cursor-pointer bg-surface-secondary px-1"
               >
@@ -98,9 +99,7 @@ export function MarkdownText({
       table({ children }) {
         return (
           <div className="my-2 overflow-x-auto">
-            <table className="text-xs border-collapse w-full">
-              {children}
-            </table>
+            <table className="text-xs border-collapse w-full">{children}</table>
           </div>
         );
       },
@@ -115,11 +114,7 @@ export function MarkdownText({
         );
       },
       td({ children }) {
-        return (
-          <td className="border border-border px-2 py-1 text-muted">
-            {children}
-          </td>
-        );
+        return <td className="border border-border px-2 py-1 text-muted">{children}</td>;
       },
     };
   }, [onFileClick]);

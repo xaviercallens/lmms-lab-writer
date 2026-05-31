@@ -25,16 +25,8 @@ export interface EditorSettings {
   // Editing
   tabSize: number;
   insertSpaces: boolean;
-  autoClosingBrackets:
-    | "always"
-    | "languageDefined"
-    | "beforeWhitespace"
-    | "never";
-  autoClosingQuotes:
-    | "always"
-    | "languageDefined"
-    | "beforeWhitespace"
-    | "never";
+  autoClosingBrackets: "always" | "languageDefined" | "beforeWhitespace" | "never";
+  autoClosingQuotes: "always" | "languageDefined" | "beforeWhitespace" | "never";
 
   // Features
   minimap: MinimapSettings;
@@ -42,13 +34,7 @@ export interface EditorSettings {
   renderWhitespace: "none" | "boundary" | "selection" | "trailing" | "all";
   smoothScrolling: boolean;
   cursorBlinking: "blink" | "smooth" | "phase" | "expand" | "solid";
-  cursorStyle:
-    | "line"
-    | "block"
-    | "underline"
-    | "line-thin"
-    | "block-outline"
-    | "underline-thin";
+  cursorStyle: "line" | "block" | "underline" | "line-thin" | "block-outline" | "underline-thin";
 
   // Formatting
   formatOnSave: boolean;

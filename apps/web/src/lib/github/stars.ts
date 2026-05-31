@@ -1,11 +1,11 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
-  GITHUB_CONFIG,
   calculateMembership,
-  getTopRepos,
+  GITHUB_CONFIG,
   getAllPopularRepos,
+  getTopRepos,
   type StarredRepo,
 } from "./config";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 const GITHUB_API_BASE = "https://api.github.com";
 
@@ -24,9 +24,7 @@ export async function getGitHubUser(accessToken: string): Promise<GitHubUser> {
   });
 
   if (!response.ok) {
-    throw new Error(
-      `GitHub API error: ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
   }
 
   return response.json();
@@ -37,15 +35,12 @@ async function checkRepoStarred(
   owner: string,
   repo: string,
 ): Promise<boolean> {
-  const response = await fetch(
-    `${GITHUB_API_BASE}/user/starred/${owner}/${repo}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/vnd.github.v3+json",
-      },
+  const response = await fetch(`${GITHUB_API_BASE}/user/starred/${owner}/${repo}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/vnd.github.v3+json",
     },
-  );
+  });
 
   return response.status === 204;
 }
@@ -55,15 +50,12 @@ async function getRepoStarredAt(
   owner: string,
   repo: string,
 ): Promise<string | null> {
-  const response = await fetch(
-    `${GITHUB_API_BASE}/user/starred/${owner}/${repo}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/vnd.github.star+json",
-      },
+  const response = await fetch(`${GITHUB_API_BASE}/user/starred/${owner}/${repo}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/vnd.github.star+json",
     },
-  );
+  });
 
   if (response.status === 404) {
     return null;
@@ -94,20 +86,13 @@ async function getRepoStarredAt(
 export async function checkStarredRepos(
   accessToken: string,
 ): Promise<{ allStarred: StarredRepo[]; eligibleCount: number }> {
-  const [allRepos, topRepos] = await Promise.all([
-    getAllPopularRepos(),
-    getTopRepos(),
-  ]);
+  const [allRepos, topRepos] = await Promise.all([getAllPopularRepos(), getTopRepos()]);
 
   const topRepoNames = new Set(topRepos.map((r) => r.name));
   const starredRepos: StarredRepo[] = [];
 
   const checks = allRepos.map(async (repo) => {
-    const starredAt = await getRepoStarredAt(
-      accessToken,
-      GITHUB_CONFIG.ORG,
-      repo.name,
-    );
+    const starredAt = await getRepoStarredAt(accessToken, GITHUB_CONFIG.ORG, repo.name);
 
     if (starredAt) {
       return {
@@ -126,9 +111,7 @@ export async function checkStarredRepos(
     }
   }
 
-  const eligibleCount = starredRepos.filter((r) =>
-    topRepoNames.has(r.repo),
-  ).length;
+  const eligibleCount = starredRepos.filter((r) => topRepoNames.has(r.repo)).length;
 
   return { allStarred: starredRepos, eligibleCount };
 }
@@ -210,9 +193,7 @@ export async function getMembershipInfo(
 } | null> {
   const { data, error } = await supabase
     .from("user_memberships")
-    .select(
-      "tier, expires_at, starred_repos, total_star_count, last_star_check",
-    )
+    .select("tier, expires_at, starred_repos, total_star_count, last_star_check")
     .eq("user_id", userId)
     .single();
 

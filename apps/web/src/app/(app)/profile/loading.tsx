@@ -24,10 +24,7 @@ export default function Loading() {
               <div className="h-5 w-24 bg-neutral-100 animate-pulse mb-4" />
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-12 w-full bg-neutral-50 animate-pulse"
-                  />
+                  <div key={i} className="h-12 w-full bg-neutral-50 animate-pulse" />
                 ))}
               </div>
             </div>

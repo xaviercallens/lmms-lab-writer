@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { normalize, basename } from "@/lib/path";
+import { useCallback, useEffect, useState } from "react";
+import { basename, normalize } from "@/lib/path";
 
 const STORAGE_KEY = "recent-projects";
 const MAX_PROJECTS = 10;
@@ -47,7 +47,7 @@ export function useRecentProjects() {
       const updated = [newProject, ...existing].slice(0, MAX_PROJECTS);
       saveProjects(updated);
     },
-    [projects, saveProjects]
+    [projects, saveProjects],
   );
 
   const removeProject = useCallback(
@@ -55,7 +55,7 @@ export function useRecentProjects() {
       const updated = projects.filter((p) => p.path !== path);
       saveProjects(updated);
     },
-    [projects, saveProjects]
+    [projects, saveProjects],
   );
 
   const clearAll = useCallback(() => {

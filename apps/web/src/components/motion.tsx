@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  m,
-  useReducedMotion,
-  type Variants,
-  type HTMLMotionProps,
-} from "framer-motion";
+import { type HTMLMotionProps, m, useReducedMotion, type Variants } from "framer-motion";
 import Link from "next/link";
-import { forwardRef, type ComponentProps } from "react";
+import { type ComponentProps, forwardRef } from "react";
 
 const GPU_TRANSITION = {
   type: "spring",
@@ -50,28 +45,26 @@ export const staggerContainer: Variants = {
   },
 };
 
-type MotionLinkProps = ComponentProps<typeof Link> &
-  Omit<HTMLMotionProps<"a">, "href">;
+type MotionLinkProps = ComponentProps<typeof Link> & Omit<HTMLMotionProps<"a">, "href">;
+
+const AnimatedLink = m.create(Link);
 
 export const MotionLink = forwardRef<HTMLAnchorElement, MotionLinkProps>(
   ({ children, className, ...props }, ref) => {
     const prefersReducedMotion = useReducedMotion();
 
     return (
-      <Link {...props} passHref legacyBehavior>
-        <m.a
-          ref={ref}
-          className={className}
-          whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
-          whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
-          transition={
-            prefersReducedMotion ? INSTANT_TRANSITION : GPU_TRANSITION
-          }
-          style={prefersReducedMotion ? undefined : { willChange: "transform" }}
-        >
-          {children}
-        </m.a>
-      </Link>
+      <AnimatedLink
+        ref={ref}
+        className={className}
+        whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+        transition={prefersReducedMotion ? INSTANT_TRANSITION : GPU_TRANSITION}
+        style={prefersReducedMotion ? undefined : { willChange: "transform" }}
+        {...props}
+      >
+        {children}
+      </AnimatedLink>
     );
   },
 );
@@ -102,17 +95,43 @@ MotionButton.displayName = "MotionButton";
 
 type MotionDivProps = HTMLMotionProps<"div">;
 
-export const FadeIn = forwardRef<HTMLDivElement, MotionDivProps>(
-  ({ children, ...props }, ref) => {
+export const FadeIn = forwardRef<HTMLDivElement, MotionDivProps>(({ children, ...props }, ref) => {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <m.div
+      ref={ref}
+      initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={prefersReducedMotion ? INSTANT_TRANSITION : FADE_TRANSITION}
+      {...props}
+    >
+      {children}
+    </m.div>
+  );
+});
+FadeIn.displayName = "FadeIn";
+
+export const FadeInStagger = forwardRef<HTMLDivElement, MotionDivProps & { staggerDelay?: number }>(
+  ({ children, staggerDelay = 0.1, ...props }, ref) => {
     const prefersReducedMotion = useReducedMotion();
 
     return (
       <m.div
         ref={ref}
-        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={prefersReducedMotion ? "visible" : "hidden"}
+        whileInView="visible"
         viewport={{ once: true, margin: "-50px" }}
-        transition={prefersReducedMotion ? INSTANT_TRANSITION : FADE_TRANSITION}
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: prefersReducedMotion
+              ? INSTANT_TRANSITION
+              : { staggerChildren: staggerDelay },
+          },
+        }}
         {...props}
       >
         {children}
@@ -120,35 +139,6 @@ export const FadeIn = forwardRef<HTMLDivElement, MotionDivProps>(
     );
   },
 );
-FadeIn.displayName = "FadeIn";
-
-export const FadeInStagger = forwardRef<
-  HTMLDivElement,
-  MotionDivProps & { staggerDelay?: number }
->(({ children, staggerDelay = 0.1, ...props }, ref) => {
-  const prefersReducedMotion = useReducedMotion();
-
-  return (
-    <m.div
-      ref={ref}
-      initial={prefersReducedMotion ? "visible" : "hidden"}
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      variants={{
-        hidden: { opacity: 0 },
-        visible: {
-          opacity: 1,
-          transition: prefersReducedMotion
-            ? INSTANT_TRANSITION
-            : { staggerChildren: staggerDelay },
-        },
-      }}
-      {...props}
-    >
-      {children}
-    </m.div>
-  );
-});
 FadeInStagger.displayName = "FadeInStagger";
 
 export const FadeInStaggerItem = forwardRef<HTMLDivElement, MotionDivProps>(
@@ -163,9 +153,7 @@ export const FadeInStaggerItem = forwardRef<HTMLDivElement, MotionDivProps>(
           visible: {
             opacity: 1,
             y: 0,
-            transition: prefersReducedMotion
-              ? INSTANT_TRANSITION
-              : FADE_TRANSITION,
+            transition: prefersReducedMotion ? INSTANT_TRANSITION : FADE_TRANSITION,
           },
         }}
         {...props}
@@ -185,11 +173,7 @@ export const MotionCard = forwardRef<HTMLDivElement, MotionDivProps>(
       <m.div
         ref={ref}
         className={className}
-        whileHover={
-          prefersReducedMotion
-            ? undefined
-            : { y: -2, transition: GPU_TRANSITION }
-        }
+        whileHover={prefersReducedMotion ? undefined : { y: -2, transition: GPU_TRANSITION }}
         style={prefersReducedMotion ? undefined : { willChange: "transform" }}
         {...props}
       >
@@ -200,4 +184,4 @@ export const MotionCard = forwardRef<HTMLDivElement, MotionDivProps>(
 );
 MotionCard.displayName = "MotionCard";
 
-export { m as motion, AnimatePresence } from "framer-motion";
+export { AnimatePresence, m as motion } from "framer-motion";

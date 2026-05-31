@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 function highlightLatex(text: string): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
@@ -128,11 +128,22 @@ export function PaperDemo() {
   const [currentLine, setCurrentLine] = useState(0);
   const [currentText, setCurrentText] = useState("");
 
-  const currentPaper = PAPERS[paperIndex] ?? PAPERS[0]!;
+  const currentPaper = PAPERS[paperIndex] ?? PAPERS[0];
+  if (!currentPaper) {
+    throw new Error("Paper demo requires at least one paper");
+  }
   const content = currentPaper.content;
   const prompt = currentPaper.prompt;
+  const renderedLines = useMemo(
+    () =>
+      lines.map((line, lineIndex) => ({
+        id: `${currentPaper.filename}:${lineIndex + 1}:${line}`,
+        line,
+        lineNumber: lineIndex + 1,
+      })),
+    [currentPaper.filename, lines],
+  );
 
-   
   useEffect(() => {
     if (phase === "user-typing") {
       if (userTypedText.length >= prompt.length) {
@@ -143,10 +154,7 @@ export function PaperDemo() {
       }
 
       const chunkSize = Math.floor(Math.random() * 3) + 1;
-      const nextChunk = prompt.slice(
-        userTypedText.length,
-        userTypedText.length + chunkSize,
-      );
+      const nextChunk = prompt.slice(userTypedText.length, userTypedText.length + chunkSize);
       const delay = Math.floor(Math.random() * 50) + 30;
 
       const timeout = setTimeout(() => {
@@ -175,10 +183,7 @@ export function PaperDemo() {
       }
 
       const chunkSize = Math.floor(Math.random() * 4) + 2;
-      const nextChunk = fullLine.slice(
-        currentText.length,
-        currentText.length + chunkSize,
-      );
+      const nextChunk = fullLine.slice(currentText.length, currentText.length + chunkSize);
       const delay = Math.floor(Math.random() * 30) + 15;
 
       const timeout = setTimeout(() => {
@@ -210,24 +215,16 @@ export function PaperDemo() {
 
       return () => clearTimeout(timeout);
     }
-  }, [
-    phase,
-    userTypedText,
-    currentLine,
-    currentText,
-    content,
-    prompt,
-    commandText,
-  ]);
+  }, [phase, userTypedText, currentLine, currentText, content, prompt, commandText]);
 
   return (
     <div className="border-2 border-foreground bg-white relative">
       <div className="flex items-center justify-between px-4 py-2 border-b-2 border-foreground bg-neutral-100">
         <span className="text-xs">{currentPaper.filename}</span>
         <div className="flex gap-1.5">
-          {PAPERS.map((_, i) => (
+          {PAPERS.map((paper, i) => (
             <span
-              key={i}
+              key={paper.filename}
               className={`w-2.5 h-2.5 border border-foreground transition-colors ${
                 i === paperIndex ? "bg-foreground" : ""
               }`}
@@ -238,10 +235,10 @@ export function PaperDemo() {
 
       <div className="p-6 h-80 overflow-hidden">
         <div className="space-y-1 text-sm">
-          {lines.map((line, i) => (
-            <div key={i} className={`flex ${line === "" ? "h-4" : ""}`}>
+          {renderedLines.map(({ id, line, lineNumber }) => (
+            <div key={id} className={`flex ${line === "" ? "h-4" : ""}`}>
               <span className="text-muted select-none mr-3 w-6 text-right shrink-0">
-                {i + 1}
+                {lineNumber}
               </span>
               <span className="flex-1 break-words">{highlightLatex(line)}</span>
             </div>
@@ -264,9 +261,7 @@ export function PaperDemo() {
         <div className="flex items-center min-w-0">
           {(phase === "user-typing" || phase === "user-command") && (
             <>
-              <span className="text-muted mr-3 w-6 text-right shrink-0">
-                User
-              </span>
+              <span className="text-muted mr-3 w-6 text-right shrink-0">User</span>
               <span className="truncate">
                 {phase === "user-typing" ? userTypedText : commandText}
                 <span className="animate-pulse">|</span>

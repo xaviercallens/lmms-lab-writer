@@ -1,11 +1,11 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
-import { Terminal as XTerm } from "@xterm/xterm";
-import { FitAddon } from "@xterm/addon-fit";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { FitAddon } from "@xterm/addon-fit";
+import { Terminal as XTerm } from "@xterm/xterm";
 import { useTheme } from "next-themes";
+import { memo, useEffect, useRef, useState } from "react";
 import { EDITOR_MONO_FONT_FAMILY } from "@/lib/editor/font-stacks";
 
 // GitHub Light terminal colors
@@ -78,7 +78,6 @@ export const Terminal = memo(function Terminal({
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
 
-
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -95,9 +94,7 @@ export const Terminal = memo(function Terminal({
     if (!mounted || !containerRef.current || !projectPath) return;
 
     const preferredShell =
-      shellMode === "custom" && customShell.trim().length > 0
-        ? customShell.trim()
-        : null;
+      shellMode === "custom" && customShell.trim().length > 0 ? customShell.trim() : null;
 
     // Track cleanup state to prevent zombie processes
     let isCleanedUp = false;
@@ -145,14 +142,11 @@ export const Terminal = memo(function Terminal({
 
         ptyId = spawnedPtyId;
 
-        unlistenOutput = await listen<{ id: string; data: string }>(
-          "pty-output",
-          (event) => {
-            if (event.payload.id === ptyId && !isCleanedUp) {
-              term.write(event.payload.data);
-            }
-          },
-        );
+        unlistenOutput = await listen<{ id: string; data: string }>("pty-output", (event) => {
+          if (event.payload.id === ptyId && !isCleanedUp) {
+            term.write(event.payload.data);
+          }
+        });
 
         // Check again after async operation
         if (isCleanedUp) {
@@ -161,17 +155,12 @@ export const Terminal = memo(function Terminal({
           return;
         }
 
-        unlistenExit = await listen<{ id: string; code: number }>(
-          "pty-exit",
-          (event) => {
-            if (event.payload.id === ptyId && !isCleanedUp) {
-              term.write(
-                `\r\n[Process exited with code ${event.payload.code}]\r\n`,
-              );
-              ptyId = null;
-            }
-          },
-        );
+        unlistenExit = await listen<{ id: string; code: number }>("pty-exit", (event) => {
+          if (event.payload.id === ptyId && !isCleanedUp) {
+            term.write(`\r\n[Process exited with code ${event.payload.code}]\r\n`);
+            ptyId = null;
+          }
+        });
 
         // Check again after async operation
         if (isCleanedUp) {
@@ -189,9 +178,7 @@ export const Terminal = memo(function Terminal({
 
         term.onResize(({ cols, rows }) => {
           if (ptyId && !isCleanedUp) {
-            invoke("resize_pty", { id: ptyId, cols, rows }).catch(
-              console.error,
-            );
+            invoke("resize_pty", { id: ptyId, cols, rows }).catch(console.error);
           }
         });
       } catch (err) {
@@ -236,8 +223,8 @@ export const Terminal = memo(function Terminal({
       termRef.current = null;
       fitAddonRef.current = null;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- resolvedTheme intentionally excluded to avoid recreating PTY on theme change
-  }, [mounted, projectPath, shellMode, customShell]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resolvedTheme intentionally excluded to avoid recreating PTY on theme change
+  }, [mounted, projectPath, shellMode, customShell, resolvedTheme]);
 
   if (!mounted) {
     return (
@@ -250,9 +237,7 @@ export const Terminal = memo(function Terminal({
   if (!projectPath) {
     return (
       <div className={`bg-background flex items-center justify-center ${className}`}>
-        <span className="text-sm text-muted">
-          Open a project to use terminal
-        </span>
+        <span className="text-sm text-muted">Open a project to use terminal</span>
       </div>
     );
   }

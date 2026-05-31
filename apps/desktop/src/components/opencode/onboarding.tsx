@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckIcon, FolderIcon, TerminalIcon } from "./icons";
 import { Spinner } from "@/components/ui/spinner";
+import { CheckIcon, FolderIcon, TerminalIcon } from "./icons";
 import type { OpenCodeDaemonStatus } from "./types";
 
 export function OnboardingState({
@@ -47,9 +47,7 @@ export function OnboardingState({
               <FolderIcon className="size-6 text-muted" />
             </div>
             <h3 className="text-sm mb-1">Open a Project</h3>
-            <p className="text-xs text-muted">
-              Open a LaTeX project folder to use AI features
-            </p>
+            <p className="text-xs text-muted">Open a LaTeX project folder to use AI features</p>
           </div>
         </div>
       </div>
@@ -60,12 +58,7 @@ export function OnboardingState({
     {
       id: "install",
       label: "Install OpenCode",
-      status:
-        daemonStatus === "unavailable"
-          ? "current"
-          : daemonStatus
-            ? "complete"
-            : "pending",
+      status: daemonStatus === "unavailable" ? "current" : daemonStatus ? "complete" : "pending",
     },
     {
       id: "start",
@@ -84,12 +77,7 @@ export function OnboardingState({
     {
       id: "connect",
       label: "Connect",
-      status:
-        daemonStatus === "running"
-          ? connecting
-            ? "loading"
-            : "current"
-          : "pending",
+      status: daemonStatus === "running" ? (connecting ? "loading" : "current") : "pending",
     },
   ];
 
@@ -101,9 +89,7 @@ export function OnboardingState({
             <TerminalIcon className="size-6 text-muted" />
           </div>
           <h3 className="text-sm mb-1">Setup Agent Mode</h3>
-          <p className="text-xs text-muted">
-            Connect to OpenCode to use AI features
-          </p>
+          <p className="text-xs text-muted">Connect to OpenCode to use AI features</p>
         </div>
 
         <div className="space-y-2">
@@ -130,9 +116,7 @@ export function OnboardingState({
         </div>
 
         {error && (
-          <div className="p-2 border border-red-200 bg-red-50 text-xs text-red-600">
-            {error}
-          </div>
+          <div className="p-2 border border-red-200 bg-red-50 text-xs text-red-600">{error}</div>
         )}
 
         {daemonStatus === "unavailable" && (
@@ -143,40 +127,31 @@ export function OnboardingState({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-muted">npm</span>
                   <button
-                    onClick={() =>
-                      copyToClipboard("npm i -g opencode-ai@latest", "npm")
-                    }
+                    type="button"
+                    onClick={() => copyToClipboard("npm i -g opencode-ai@latest", "npm")}
                     className="text-xs text-muted hover:text-foreground"
                   >
                     {copiedNpm ? "Copied!" : "Copy"}
                   </button>
                 </div>
-                <code className="text-xs block font-mono">
-                  npm i -g opencode-ai@latest
-                </code>
+                <code className="text-xs block font-mono">npm i -g opencode-ai@latest</code>
               </div>
               <div className="border border-border p-2">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-muted">Homebrew</span>
                   <button
-                    onClick={() =>
-                      copyToClipboard("brew install sst/tap/opencode", "brew")
-                    }
+                    type="button"
+                    onClick={() => copyToClipboard("brew install sst/tap/opencode", "brew")}
                     className="text-xs text-muted hover:text-foreground"
                   >
                     {copiedBrew ? "Copied!" : "Copy"}
                   </button>
                 </div>
-                <code className="text-xs block font-mono">
-                  brew install sst/tap/opencode
-                </code>
+                <code className="text-xs block font-mono">brew install sst/tap/opencode</code>
               </div>
             </div>
             {onRestartOpenCode && (
-              <button
-                onClick={onRestartOpenCode}
-                className="btn-brutalist w-full"
-              >
+              <button type="button" onClick={onRestartOpenCode} className="btn-brutalist w-full">
                 I've installed OpenCode
               </button>
             )}
@@ -184,7 +159,7 @@ export function OnboardingState({
         )}
 
         {daemonStatus === "stopped" && onRestartOpenCode && (
-          <button onClick={onRestartOpenCode} className="btn-brutalist w-full">
+          <button type="button" onClick={onRestartOpenCode} className="btn-brutalist w-full">
             Start OpenCode
           </button>
         )}
@@ -198,6 +173,7 @@ export function OnboardingState({
 
         {daemonStatus === "running" && (
           <button
+            type="button"
             onClick={onConnect}
             disabled={connecting}
             className="btn-brutalist w-full disabled:opacity-50"

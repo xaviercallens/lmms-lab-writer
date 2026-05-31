@@ -1,12 +1,9 @@
 "use client";
 
+import { ArrowRightIcon, CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowRightIcon,
-  CaretDownIcon,
-  CaretRightIcon,
-} from "@phosphor-icons/react";
-import { useAuth, type UserProfile } from "@/lib/auth";
+import { type UserProfile, useAuth } from "@/lib/auth";
 
 type Props = {
   profile: UserProfile;
@@ -31,10 +28,7 @@ export function UserDropdown({ profile }: Props) {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -71,22 +65,24 @@ export function UserDropdown({ profile }: Props) {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >
         {avatarUrl ? (
-          <img
+          <Image
+            unoptimized
             src={avatarUrl}
             alt={displayName}
+            width={32}
+            height={32}
             className="size-8 border border-border"
           />
         ) : (
           <div className="size-8 border border-border flex items-center justify-center">
-            <span className="text-sm font-medium text-muted">
-              {initial}
-            </span>
+            <span className="text-sm font-medium text-muted">{initial}</span>
           </div>
         )}
         <CaretDownIcon
@@ -100,21 +96,23 @@ export function UserDropdown({ profile }: Props) {
           role="menu"
         >
           <button
+            type="button"
             onClick={handleOpenProfile}
             className="w-full p-5 border-b border-border flex items-center gap-4 hover:bg-accent-hover transition-colors group text-left"
             role="menuitem"
           >
             {avatarUrl ? (
-              <img
+              <Image
+                unoptimized
                 src={avatarUrl}
                 alt={displayName}
+                width={48}
+                height={48}
                 className="size-12 border border-border"
               />
             ) : (
               <div className="size-12 border border-border flex items-center justify-center">
-                <span className="text-lg font-medium text-muted">
-                  {initial}
-                </span>
+                <span className="text-lg font-medium text-muted">{initial}</span>
               </div>
             )}
             <div className="min-w-0 flex-1">
@@ -128,14 +126,11 @@ export function UserDropdown({ profile }: Props) {
             {tier === "supporter" && expiresAt ? (
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-muted uppercase tracking-wider">
-                    Membership
-                  </span>
-                  <p className="text-sm mt-1">
-                    Expires {formatExpiryDate(expiresAt)}
-                  </p>
+                  <span className="text-xs text-muted uppercase tracking-wider">Membership</span>
+                  <p className="text-sm mt-1">Expires {formatExpiryDate(expiresAt)}</p>
                 </div>
                 <button
+                  type="button"
                   onClick={handleOpenProfile}
                   className="text-xs text-muted hover:text-foreground transition-colors"
                   role="menuitem"
@@ -145,13 +140,12 @@ export function UserDropdown({ profile }: Props) {
               </div>
             ) : (
               <button
+                type="button"
                 onClick={handleOpenProfile}
                 className="flex items-center justify-between w-full group"
                 role="menuitem"
               >
-                <span className="text-sm font-medium">
-                  Star repos to unlock
-                </span>
+                <span className="text-sm font-medium">Star repos to unlock</span>
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-muted group-hover:text-foreground transition-colors">
                   Unlock
                   <ArrowRightIcon className="size-3" weight="bold" />
@@ -162,6 +156,7 @@ export function UserDropdown({ profile }: Props) {
 
           <div className="px-5 py-3">
             <button
+              type="button"
               onClick={handleSignOut}
               disabled={isSigningOut}
               className="text-sm text-muted hover:text-foreground transition-colors disabled:opacity-50"

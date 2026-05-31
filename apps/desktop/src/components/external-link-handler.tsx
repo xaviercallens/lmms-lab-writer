@@ -17,12 +17,10 @@ export function ExternalLinkHandler() {
       const href = anchor.getAttribute("href");
       if (!href) return;
 
-      const isExternal =
-        href.startsWith("http://") || href.startsWith("https://");
+      const isExternal = href.startsWith("http://") || href.startsWith("https://");
       let isSameOrigin = false;
       try {
-        isSameOrigin =
-          isExternal && new URL(href).origin === window.location.origin;
+        isSameOrigin = isExternal && new URL(href).origin === window.location.origin;
       } catch {
         isSameOrigin = false;
       }
@@ -42,26 +40,18 @@ export function ExternalLinkHandler() {
     };
 
     const originalWindowOpen = window.open;
-    window.open = function (
-      url?: string | URL,
-      target?: string,
-      features?: string,
-    ) {
+    window.open = (url?: string | URL, target?: string, features?: string) => {
       const urlString = url?.toString() ?? "";
-      const isExternal =
-        urlString.startsWith("http://") || urlString.startsWith("https://");
+      const isExternal = urlString.startsWith("http://") || urlString.startsWith("https://");
       let isSameOrigin = false;
       try {
-        isSameOrigin =
-          isExternal && new URL(urlString).origin === window.location.origin;
+        isSameOrigin = isExternal && new URL(urlString).origin === window.location.origin;
       } catch {
         isSameOrigin = false;
       }
 
       if (isExternal && !isSameOrigin) {
-        import("@tauri-apps/plugin-shell")
-          .then(({ open }) => open(urlString))
-          .catch(console.error);
+        import("@tauri-apps/plugin-shell").then(({ open }) => open(urlString)).catch(console.error);
         return null;
       }
 

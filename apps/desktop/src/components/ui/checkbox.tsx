@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { CheckIcon } from "@phosphor-icons/react";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import * as React from "react";
 
 export const Checkbox = React.forwardRef<
   React.ComponentRef<typeof CheckboxPrimitive.Root>,

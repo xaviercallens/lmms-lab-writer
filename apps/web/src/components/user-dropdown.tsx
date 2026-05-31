@@ -1,13 +1,13 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
-import { clearUserCacheCookie } from "@/lib/user-cache";
-import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
-import { getMessages } from "@/lib/messages";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
+import { getMessages } from "@/lib/messages";
+import { createClient } from "@/lib/supabase/client";
+import { clearUserCacheCookie } from "@/lib/user-cache";
 
 type Props = {
   email: string;
@@ -34,10 +34,7 @@ export function UserDropdown({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -63,6 +60,7 @@ export function UserDropdown({
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
@@ -76,23 +74,17 @@ export function UserDropdown({
           />
         ) : (
           <div className="size-8 border border-neutral-300 flex items-center justify-center">
-            <span className="text-sm font-medium text-neutral-600">
-              {initial}
-            </span>
+            <span className="text-sm font-medium text-neutral-600">{initial}</span>
           </div>
         )}
         <svg
+          aria-hidden="true"
           className={`size-4 text-muted transition-transform ${isOpen ? "rotate-180" : ""}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
@@ -113,9 +105,7 @@ export function UserDropdown({
               />
             ) : (
               <div className="size-12 border border-neutral-300 flex items-center justify-center">
-                <span className="text-lg font-medium text-neutral-600">
-                  {initial}
-                </span>
+                <span className="text-lg font-medium text-neutral-600">{initial}</span>
               </div>
             )}
             <div className="min-w-0 flex-1">
@@ -123,6 +113,7 @@ export function UserDropdown({
               <p className="text-sm text-muted truncate">{email}</p>
             </div>
             <svg
+              aria-hidden="true"
               className="size-4 text-muted group-hover:text-black transition-colors flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
@@ -161,6 +152,7 @@ export function UserDropdown({
 
           <div className="px-5 py-3">
             <button
+              type="button"
               onClick={handleSignOut}
               disabled={isSigningOut}
               className="text-sm text-muted hover:text-black transition-colors disabled:opacity-50"

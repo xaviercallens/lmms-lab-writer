@@ -232,8 +232,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       downloadCta: "Download",
       documentationCta: "Documentation",
       featuresTitle: "Everything you need. Nothing you don't.",
-      featuresSubtitle:
-        "Built for researchers who'd rather focus on ideas than LaTeX boilerplate.",
+      featuresSubtitle: "Built for researchers who'd rather focus on ideas than LaTeX boilerplate.",
       tapToZoom: "Tap to zoom",
       features: [
         {
@@ -270,8 +269,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       videoTitle: "Demo Video",
       videoSubtitle: "Watch LMMs-Lab Writer in action.",
       demoTitle: "See it in action.",
-      demoSubtitle:
-        "Every legendary paper started somewhere. Yours starts here.",
+      demoSubtitle: "Every legendary paper started somewhere. Yours starts here.",
       comparisonTitle: "There's a reason you're still frustrated.",
       comparisonColumns: {
         feature: "Feature",
@@ -337,14 +335,12 @@ const MESSAGES: Record<Locale, WebMessages> = {
             {
               title: "Installation",
               href: "/docs/installation",
-              description:
-                "How to install LMMs-Lab Writer on macOS and Windows.",
+              description: "How to install LMMs-Lab Writer on macOS and Windows.",
             },
             {
               title: "Quick Start",
               href: "/docs/quick-start",
-              description:
-                "Get up and running with LMMs-Lab Writer in 5 minutes.",
+              description: "Get up and running with LMMs-Lab Writer in 5 minutes.",
             },
           ],
         },
@@ -354,14 +350,12 @@ const MESSAGES: Record<Locale, WebMessages> = {
             {
               title: "OpenCode",
               href: "/docs/opencode",
-              description:
-                "Using the built-in OpenCode AI panel for AI-assisted LaTeX writing.",
+              description: "Using the built-in OpenCode AI panel for AI-assisted LaTeX writing.",
             },
             {
               title: "AI Agents",
               href: "/docs/ai-agents",
-              description:
-                "Using Claude Code, Cursor, Codex CLI, and other AI tools.",
+              description: "Using Claude Code, Cursor, Codex CLI, and other AI tools.",
             },
           ],
         },
@@ -371,20 +365,17 @@ const MESSAGES: Record<Locale, WebMessages> = {
             {
               title: "LaTeX Compilation",
               href: "/docs/compilation",
-              description:
-                "Compiling documents with pdfLaTeX, XeLaTeX, LuaLaTeX, and Latexmk.",
+              description: "Compiling documents with pdfLaTeX, XeLaTeX, LuaLaTeX, and Latexmk.",
             },
             {
               title: "Terminal",
               href: "/docs/terminal",
-              description:
-                "Using the built-in terminal for shell access and CLI tools.",
+              description: "Using the built-in terminal for shell access and CLI tools.",
             },
             {
               title: "Git Integration",
               href: "/docs/git",
-              description:
-                "Version control, diffing, and GitHub publishing built into the editor.",
+              description: "Version control, diffing, and GitHub publishing built into the editor.",
             },
           ],
         },
@@ -396,8 +387,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       pageTitle: "Download",
       versionLabel: "Version",
       installNoticeBadge: "Install & Distribution Notes",
-      installNoticeTitle:
-        "Homebrew is recommended. DMG/PKG are fallback options.",
+      installNoticeTitle: "Homebrew is recommended. DMG/PKG are fallback options.",
       installNoticeIntro:
         "Some macOS install paths require administrator permission. We request sudo only when needed for system-level install steps.",
       installNoticeSudoTitle: "Why sudo appears",
@@ -414,21 +404,18 @@ const MESSAGES: Record<Locale, WebMessages> = {
       installOrderSecondary: "2) DMG",
       installOrderTertiary: "3) PKG / manual",
       readyBannerTitle: "You have {inks} inks - ready to download",
-      readyBannerNote:
-        "Beta period: No inks deducted when you download or use the app",
+      readyBannerNote: "Beta period: No inks deducted when you download or use the app",
       recommendedForSystem: "Recommended for your system",
       genericDownload: "Download",
       platformDetected: "{platform} detected",
       otherPlatforms: "Other platforms",
       installViaHomebrew: "Install via Homebrew",
       recommendedTag: "Recommended",
-      homebrewNote:
-        "No security warnings. Auto-updates with brew upgrade.",
+      homebrewNote: "No security warnings. Auto-updates with brew upgrade.",
       homebrewArchFallback:
         "If Homebrew shows an architecture mismatch (for example Intel Mac), use the Intel (x64) DMG/PKG downloads below.",
       npmPackage: "NPM package",
-      latestTarball:
-        "Latest tarball of @lmms-lab/writer-shared:",
+      latestTarball: "Latest tarball of @lmms-lab/writer-shared:",
       installation: "Installation",
       manualInstallation: "Manual Installation",
       windowsInstallIntro: "To install:",
@@ -436,15 +423,14 @@ const MESSAGES: Record<Locale, WebMessages> = {
       windowsStep2: "Double-click to run the installer",
       windowsStep3: "Follow the installation wizard",
       windowsWarning:
-        "Windows may show a SmartScreen warning. Click \"More info\" then \"Run anyway\" to proceed.",
+        'Windows may show a SmartScreen warning. Click "More info" then "Run anyway" to proceed.',
       notNotarized:
         "This build is not notarized yet. If macOS blocks the installer, use the terminal commands below.",
       installFromDmg: "Install from DMG (recommended):",
       dmgStep1: "Download the .dmg file",
       dmgStep2: "Run in Terminal:",
       installFromPkg: "Install from PKG (CLI):",
-      pkgUntrustedNote:
-        "-allowUntrusted is required because PKG is not Developer ID signed yet.",
+      pkgUntrustedNote: "-allowUntrusted is required because PKG is not Developer ID signed yet.",
       alternativeMethod: "Alternative: Right-click method",
       altStep1Prefix: "Right-click",
       altStep1Action: "the downloaded file and select",
@@ -456,30 +442,26 @@ const MESSAGES: Record<Locale, WebMessages> = {
       gitOptional: "Git (optional, for version control)",
       buildFromSource: "Build from source",
       inksGateTitle: "{requiredInks} inks required to download",
-      inksGateDescription:
-        "Star top {maxRepos} repos to earn inks. 1 repo = {inksPerStar} inks.",
+      inksGateDescription: "Star top {maxRepos} repos to earn inks. 1 repo = {inksPerStar} inks.",
       yourInks: "Your inks",
       betaUsersTitle: "Beta users: Permanent inks",
       betaUsersDescription:
         "Inks earned during beta never expire. After public launch, the app will be free to download, but premium AI features will consume inks daily. Lock in your inks now.",
       goToProfile: "Go to Profile to Earn Inks",
       signInToGetStarted: "Sign in to Get Started",
-      starEnoughInks:
-        "Star {repoCount} repos to earn enough inks",
+      starEnoughInks: "Star {repoCount} repos to earn enough inks",
     },
     auth: {
       backToHome: "Back to home",
       signIn: "Sign in",
       signInDescription: "Sign in with GitHub to access your account.",
       createAccount: "Create an account",
-      createAccountDescription:
-        "Create an account with GitHub to get started.",
+      createAccountDescription: "Create an account with GitHub to get started.",
       checkingLoginStatus: "Checking login status...",
       connecting: "Connecting...",
       continueWithGitHub: "Continue with GitHub",
       connectGitHub: "Connect GitHub",
-      githubAccountRequired:
-        "GitHub account required to track starred repositories and earn inks.",
+      githubAccountRequired: "GitHub account required to track starred repositories and earn inks.",
       alreadyHaveAccount: "Already have an account?",
       signInLink: "Sign in",
     },
@@ -509,20 +491,17 @@ const MESSAGES: Record<Locale, WebMessages> = {
       moreInksToUnlock: "{count} more inks to unlock download",
       earnInks: "Earn inks",
       earnInksArrow: "Earn inks \u2192",
-      starTopRepos:
-        "Star top {maxRepos} repos to earn inks. Need {requiredInks} inks to download.",
+      starTopRepos: "Star top {maxRepos} repos to earn inks. Need {requiredInks} inks to download.",
       earnInksTitle: "Earn Inks",
       refresh: "Refresh",
       refreshing: "Refreshing...",
       refreshStarStatus: "Refresh star status",
       connectGitHubTitle: "Connect GitHub",
-      connectGitHubDescription:
-        "Link your GitHub account to track starred repos and earn inks.",
+      connectGitHubDescription: "Link your GitHub account to track starred repos and earn inks.",
       recommended: "Recommended",
       starred: "Starred",
       star: "Star",
-      starTopReposFooter:
-        "Star top {maxRepos} repos to earn inks | 1 repo = {inksPerStar} inks",
+      starTopReposFooter: "Star top {maxRepos} repos to earn inks | 1 repo = {inksPerStar} inks",
     },
     desktopSuccess: {
       loginFailed: "Login Failed",
@@ -530,18 +509,14 @@ const MESSAGES: Record<Locale, WebMessages> = {
       loginSuccessful: "Login Successful!",
       loggedIn: "Logged In!",
       sendingCode: "Sending login code to desktop app...",
-      codeSent:
-        "Login code sent to desktop app. You can close this window.",
-      copyCodePrompt:
-        "Copy the login code below and paste it in the desktop app.",
+      codeSent: "Login code sent to desktop app. You can close this window.",
+      copyCodePrompt: "Copy the login code below and paste it in the desktop app.",
       copyCode: "Copy Code",
       copied: "Copied!",
       codeManualCopy: "You can also copy the code manually if needed.",
-      codeExpires:
-        "This code expires when your session expires. Get a new code if login fails.",
+      codeExpires: "This code expires when your session expires. Get a new code if login fails.",
       returnToDesktop: "Return to the desktop app to continue.",
-      closeWindow:
-        "You can close this window after pasting the code in the app.",
+      closeWindow: "You can close this window after pasting the code in the app.",
     },
   },
   zh: {
@@ -555,14 +530,12 @@ const MESSAGES: Record<Locale, WebMessages> = {
       language: "语言",
     },
     home: {
-      heroDescription:
-        "AI 原生 LaTeX 编辑器。一键环境配置，全语言支持，内置 Git，完全开源。",
+      heroDescription: "AI 原生 LaTeX 编辑器。一键环境配置，全语言支持，内置 Git，完全开源。",
       heroImageAlt: "LMMs-Lab Writer - AI 原生 LaTeX 编辑器",
       downloadCta: "下载客户端",
       documentationCta: "查看文档",
       featuresTitle: "你需要的一切，都在这里。",
-      featuresSubtitle:
-        "专为研究者打造，让你专注于创意，而非繁琐的 LaTeX 配置。",
+      featuresSubtitle: "专为研究者打造，让你专注于创意，而非繁琐的 LaTeX 配置。",
       tapToZoom: "点击放大",
       features: [
         {
@@ -572,8 +545,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
         },
         {
           title: "一键 LaTeX 配置",
-          description:
-            "自动检测并安装最小化 LaTeX 发行版。编译时自动补全缺失宏包，零手动配置。",
+          description: "自动检测并安装最小化 LaTeX 发行版。编译时自动补全缺失宏包，零手动配置。",
         },
         {
           title: "全语言支持",
@@ -587,8 +559,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
         },
         {
           title: "完全开源",
-          description:
-            "MIT 协议。数据完全本地化，无遥测、无厂商锁定。你可以自由 Fork 与修改。",
+          description: "MIT 协议。数据完全本地化，无遥测、无厂商锁定。你可以自由 Fork 与修改。",
         },
         {
           title: "跨平台",
@@ -599,8 +570,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       videoTitle: "演示视频",
       videoSubtitle: "观看 LMMs-Lab Writer 实机演示。",
       demoTitle: "实机演示",
-      demoSubtitle:
-        "每一篇传奇论文都始于笔下，你的旅程也从这里开始。",
+      demoSubtitle: "每一篇传奇论文都始于笔下，你的旅程也从这里开始。",
       comparisonTitle: "为何现有的工具仍让你感到受挫？",
       comparisonColumns: {
         feature: "功能特性",
@@ -696,8 +666,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
             {
               title: "LaTeX 编译",
               href: "/docs/compilation",
-              description:
-                "使用 pdfLaTeX、XeLaTeX、LuaLaTeX 及 Latexmk 编译文档。",
+              description: "使用 pdfLaTeX、XeLaTeX、LuaLaTeX 及 Latexmk 编译文档。",
             },
             {
               title: "终端",
@@ -726,8 +695,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       installNoticeSudoBody:
         "sudo 用于将应用写入受保护目录（如 /Applications），并设置正确的文件所有权与权限。",
       installNoticeOpenSourceTitle: "开源透明",
-      installNoticeOpenSourceBody:
-        "应用及安装脚本完全开源，您可以在授权前审查所有执行逻辑。",
+      installNoticeOpenSourceBody: "应用及安装脚本完全开源，您可以在授权前审查所有执行逻辑。",
       installNoticeIndependenceTitle: "独立分发",
       installNoticeIndependenceBody:
         "我们选择不依赖 Apple 的封闭分发渠道，旨在保持安装策略的透明性，并将控制权交还给用户。",
@@ -754,16 +722,13 @@ const MESSAGES: Record<Locale, WebMessages> = {
       windowsStep1: "下载 .msi 文件",
       windowsStep2: "双击运行安装程序",
       windowsStep3: "按照向导完成安装",
-      windowsWarning:
-        "Windows 可能显示 SmartScreen 警告。点击“更多信息”，然后选择“仍要运行”即可。",
-      notNotarized:
-        "当前构建尚未进行公证（Notarization）。若 macOS 拦截安装，请执行下方终端命令。",
+      windowsWarning: "Windows 可能显示 SmartScreen 警告。点击“更多信息”，然后选择“仍要运行”即可。",
+      notNotarized: "当前构建尚未进行公证（Notarization）。若 macOS 拦截安装，请执行下方终端命令。",
       installFromDmg: "通过 DMG 安装（推荐）：",
       dmgStep1: "下载 .dmg 文件",
       dmgStep2: "在终端执行：",
       installFromPkg: "通过 PKG 安装（CLI）：",
-      pkgUntrustedNote:
-        "由于 PKG 尚未进行 Developer ID 签名，需添加 -allowUntrusted 参数。",
+      pkgUntrustedNote: "由于 PKG 尚未进行 Developer ID 签名，需添加 -allowUntrusted 参数。",
       alternativeMethod: "备选方案：右键打开",
       altStep1Prefix: "右键点击",
       altStep1Action: "下载的文件并选择",
@@ -795,8 +760,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       connecting: "连接中...",
       continueWithGitHub: "使用 GitHub 继续",
       connectGitHub: "关联 GitHub",
-      githubAccountRequired:
-        "需要 GitHub 账户以追踪 Star 仓库并获取 inks。",
+      githubAccountRequired: "需要 GitHub 账户以追踪 Star 仓库并获取 inks。",
       alreadyHaveAccount: "已有账户？",
       signInLink: "登录",
     },
@@ -826,20 +790,17 @@ const MESSAGES: Record<Locale, WebMessages> = {
       moreInksToUnlock: "距下载解锁还差 {count} inks",
       earnInks: "赚取 inks",
       earnInksArrow: "赚取 inks \u2192",
-      starTopRepos:
-        "Star 前 {maxRepos} 个仓库可获 inks。需 {requiredInks} inks 解锁下载。",
+      starTopRepos: "Star 前 {maxRepos} 个仓库可获 inks。需 {requiredInks} inks 解锁下载。",
       earnInksTitle: "赚取 Inks",
       refresh: "刷新",
       refreshing: "刷新中...",
       refreshStarStatus: "刷新 Star 状态",
       connectGitHubTitle: "关联 GitHub",
-      connectGitHubDescription:
-        "关联 GitHub 账户以追踪 Star 仓库并赚取 inks。",
+      connectGitHubDescription: "关联 GitHub 账户以追踪 Star 仓库并赚取 inks。",
       recommended: "推荐仓库",
       starred: "已 Star",
       star: "Star",
-      starTopReposFooter:
-        "Star 前 {maxRepos} 个仓库获取 inks | 1 Star = {inksPerStar} inks",
+      starTopReposFooter: "Star 前 {maxRepos} 个仓库获取 inks | 1 Star = {inksPerStar} inks",
     },
     desktopSuccess: {
       loginFailed: "登录失败",
@@ -852,8 +813,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       copyCode: "复制代码",
       copied: "已复制！",
       codeManualCopy: "您也可以手动复制代码。",
-      codeExpires:
-        "此代码将在会话结束时失效。若登录失败，请重新获取。",
+      codeExpires: "此代码将在会话结束时失效。若登录失败，请重新获取。",
       returnToDesktop: "请返回桌面应用继续。",
       closeWindow: "代码粘贴完成后，即可关闭此窗口。",
     },
@@ -979,8 +939,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
             {
               title: "インストール",
               href: "/docs/installation",
-              description:
-                "macOS および Windows への LMMs-Lab Writer インストール手順。",
+              description: "macOS および Windows への LMMs-Lab Writer インストール手順。",
             },
             {
               title: "クイックスタート",
@@ -995,14 +954,12 @@ const MESSAGES: Record<Locale, WebMessages> = {
             {
               title: "OpenCode",
               href: "/docs/opencode",
-              description:
-                "内蔵 OpenCode AI パネルを使った LaTeX 執筆支援。",
+              description: "内蔵 OpenCode AI パネルを使った LaTeX 執筆支援。",
             },
             {
               title: "AI Agents",
               href: "/docs/ai-agents",
-              description:
-                "Claude Code、Cursor、Codex CLI などの AI ツールとの連携。",
+              description: "Claude Code、Cursor、Codex CLI などの AI ツールとの連携。",
             },
           ],
         },
@@ -1012,20 +969,17 @@ const MESSAGES: Record<Locale, WebMessages> = {
             {
               title: "LaTeX コンパイル",
               href: "/docs/compilation",
-              description:
-                "pdfLaTeX、XeLaTeX、LuaLaTeX、Latexmk を用いたコンパイル。",
+              description: "pdfLaTeX、XeLaTeX、LuaLaTeX、Latexmk を用いたコンパイル。",
             },
             {
               title: "ターミナル",
               href: "/docs/terminal",
-              description:
-                "内蔵ターミナルでのシェル操作と CLI ツールの利用。",
+              description: "内蔵ターミナルでのシェル操作と CLI ツールの利用。",
             },
             {
               title: "Git 連携",
               href: "/docs/git",
-              description:
-                "エディタ内でのバージョン管理、差分確認、GitHub 公開。",
+              description: "エディタ内でのバージョン管理、差分確認、GitHub 公開。",
             },
           ],
         },
@@ -1037,8 +991,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       pageTitle: "ダウンロード",
       versionLabel: "バージョン",
       installNoticeBadge: "インストールと配布について",
-      installNoticeTitle:
-        "Homebrew でのインストールを推奨します。DMG/PKG は代替手段です。",
+      installNoticeTitle: "Homebrew でのインストールを推奨します。DMG/PKG は代替手段です。",
       installNoticeIntro:
         "macOS の一部のインストール先では管理者権限が必要です。sudo はシステムレベルのインストール手順においてのみ要求されます。",
       installNoticeSudoTitle: "sudo が必要な理由",
@@ -1055,21 +1008,18 @@ const MESSAGES: Record<Locale, WebMessages> = {
       installOrderSecondary: "2) DMG",
       installOrderTertiary: "3) PKG / 手動",
       readyBannerTitle: "{inks} inks 保有 - ダウンロード可能です",
-      readyBannerNote:
-        "ベータ期間中: ダウンロードや利用で inks は消費されません",
+      readyBannerNote: "ベータ期間中: ダウンロードや利用で inks は消費されません",
       recommendedForSystem: "お使いのシステムへの推奨",
       genericDownload: "ダウンロード",
       platformDetected: "{platform} を検出",
       otherPlatforms: "その他のプラットフォーム",
       installViaHomebrew: "Homebrew でインストール",
       recommendedTag: "推奨",
-      homebrewNote:
-        "セキュリティ警告は出ません。brew upgrade で自動更新可能です。",
+      homebrewNote: "セキュリティ警告は出ません。brew upgrade で自動更新可能です。",
       homebrewArchFallback:
         "Homebrew でアーキテクチャの不一致（Intel Mac など）が生じる場合は、下の Intel (x64) DMG/PKG をご利用ください。",
       npmPackage: "NPM パッケージ",
-      latestTarball:
-        "@lmms-lab/writer-shared の最新 tarball:",
+      latestTarball: "@lmms-lab/writer-shared の最新 tarball:",
       installation: "インストール",
       manualInstallation: "手動インストール",
       windowsInstallIntro: "インストール手順:",
@@ -1105,17 +1055,14 @@ const MESSAGES: Record<Locale, WebMessages> = {
         "ベータ期間中に獲得した inks は失効しません。正式リリース後、アプリ本体は無料ですが、高度な AI 機能は日次で inks を消費します。今のうちに確保しておきましょう。",
       goToProfile: "プロフィールで inks を獲得",
       signInToGetStarted: "サインインして開始",
-      starEnoughInks:
-        "{repoCount} つのリポジトリにスターを付けると必要な inks が貯まります",
+      starEnoughInks: "{repoCount} つのリポジトリにスターを付けると必要な inks が貯まります",
     },
     auth: {
       backToHome: "ホームに戻る",
       signIn: "サインイン",
-      signInDescription:
-        "GitHub でサインインしてアカウントにアクセス。",
+      signInDescription: "GitHub でサインインしてアカウントにアクセス。",
       createAccount: "アカウント作成",
-      createAccountDescription:
-        "GitHub でアカウントを作成して利用開始。",
+      createAccountDescription: "GitHub でアカウントを作成して利用開始。",
       checkingLoginStatus: "ログイン状態を確認中...",
       connecting: "接続中...",
       continueWithGitHub: "GitHub で続ける",
@@ -1148,8 +1095,7 @@ const MESSAGES: Record<Locale, WebMessages> = {
       inksTitle: "Inks",
       betaInksNeverExpire: "ベータ特典 - Inks は失効しません",
       readyToDownload: "ダウンロード可能",
-      moreInksToUnlock:
-        "ダウンロード解禁まであと {count} inks",
+      moreInksToUnlock: "ダウンロード解禁まであと {count} inks",
       earnInks: "Inks を獲得",
       earnInksArrow: "Inks を獲得 \u2192",
       starTopRepos:
@@ -1173,18 +1119,15 @@ const MESSAGES: Record<Locale, WebMessages> = {
       loginSuccessful: "ログイン成功！",
       loggedIn: "ログインしました！",
       sendingCode: "デスクトップアプリにログインコードを送信中...",
-      codeSent:
-        "ログインコードを送信しました。このウィンドウは閉じて構いません。",
-      copyCodePrompt:
-        "以下のコードをコピーして、デスクトップアプリに貼り付けてください。",
+      codeSent: "ログインコードを送信しました。このウィンドウは閉じて構いません。",
+      copyCodePrompt: "以下のコードをコピーして、デスクトップアプリに貼り付けてください。",
       copyCode: "コードをコピー",
       copied: "コピーしました！",
       codeManualCopy: "コードは手動でコピーすることも可能です。",
       codeExpires:
         "このコードはセッション終了時に無効化されます。ログインに失敗した場合は再取得してください。",
       returnToDesktop: "デスクトップアプリに戻って操作を続けてください。",
-      closeWindow:
-        "アプリにコードを入力したら、このウィンドウを閉じてください。",
+      closeWindow: "アプリにコードを入力したら、このウィンドウを閉じてください。",
     },
   },
 };

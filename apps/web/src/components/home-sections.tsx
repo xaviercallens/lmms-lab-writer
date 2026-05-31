@@ -1,30 +1,31 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import {
+  CheckCircle2,
   Download,
   FileText,
-  CheckCircle2,
-  Zap,
-  Globe,
   GitBranch,
-  Sparkles,
+  Globe,
   Lock,
   Monitor,
+  Sparkles,
+  Zap,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LightboxImage } from "@/components/lightbox";
 import {
-  motion,
   AnimatePresence,
   FadeIn,
   FadeInStagger,
   FadeInStaggerItem,
   MotionCard,
+  motion,
 } from "@/components/motion";
 import { PaperDemo } from "@/components/paper-demo";
-import { LightboxImage } from "@/components/lightbox";
-import { DEFAULT_LOCALE, withLocalePrefix, type Locale } from "@/lib/i18n";
+import { DEFAULT_LOCALE, type Locale, withLocalePrefix } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
 
 const GPU_SPRING = {
@@ -172,20 +173,21 @@ const AUTO_PLAY_MS = 5000; // cycle every 5s
 
 export function FeaturesSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
   const messages = getMessages(locale);
-  const features = useMemo(
-    () =>
-      messages.home.features.map((feature, index) => {
-        const visual = FEATURE_VISUALS[index] ?? FEATURE_VISUALS[0]!;
-        return {
-          ...feature,
-          icon: visual.icon,
-          image: visual.image,
-        };
-      }),
-    [messages.home.features],
-  );
+  const features = useMemo(() => {
+    const fallbackVisual = FEATURE_VISUALS[0];
+    if (!fallbackVisual) return [];
+
+    return messages.home.features.map((feature, index) => {
+      const visual = FEATURE_VISUALS[index] ?? fallbackVisual;
+      return {
+        ...feature,
+        icon: visual.icon,
+        image: visual.image,
+      };
+    });
+  }, [messages.home.features]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const activeFeature = features[activeIndex] ?? features[0]!;
+  const activeFeature = features[activeIndex] ?? features[0];
   const pausedUntil = useRef(0);
 
   // Auto-cycle through features when not paused
@@ -194,9 +196,7 @@ export function FeaturesSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
 
     const id = setInterval(() => {
       if (Date.now() < pausedUntil.current) return;
-      setActiveIndex((prev: number) =>
-        prev < 0 ? prev : (prev + 1) % features.length,
-      );
+      setActiveIndex((prev: number) => (prev < 0 ? prev : (prev + 1) % features.length));
     }, AUTO_PLAY_MS);
     return () => clearInterval(id);
   }, [features.length]);
@@ -207,13 +207,13 @@ export function FeaturesSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
     setActiveIndex(i);
   }, []);
 
+  if (!activeFeature) return null;
+
   return (
     <section className="py-12 md:py-20 px-6 border-t border-border">
       <div className="max-w-5xl mx-auto">
         <FadeIn>
-          <h2 className="text-2xl font-medium mb-2 text-center">
-            {messages.home.featuresTitle}
-          </h2>
+          <h2 className="text-2xl font-medium mb-2 text-center">{messages.home.featuresTitle}</h2>
           <p className="text-sm text-muted mb-8 md:mb-12 text-center max-w-xl mx-auto">
             {messages.home.featuresSubtitle}
           </p>
@@ -227,18 +227,15 @@ export function FeaturesSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
               className={i !== features.length - 1 ? "border-b border-foreground" : ""}
             >
               <button
+                type="button"
                 onClick={() => handleSelect(activeIndex === i ? -1 : i)}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 text-left text-sm transition-colors ${
-                  i === activeIndex
-                    ? "bg-neutral-50 font-medium"
-                    : "text-muted"
+                  i === activeIndex ? "bg-neutral-50 font-medium" : "text-muted"
                 }`}
               >
                 <div
                   className={`w-7 h-7 border flex items-center justify-center shrink-0 ${
-                    i === activeIndex
-                      ? "border-foreground bg-white"
-                      : "border-border"
+                    i === activeIndex ? "border-foreground bg-white" : "border-border"
                   }`}
                 >
                   <feature.icon className="w-3.5 h-3.5" />
@@ -292,9 +289,7 @@ export function FeaturesSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
                 <div
                   key={feature.title}
                   className={`relative ${
-                    i !== features.length - 1
-                      ? "border-b border-foreground"
-                      : ""
+                    i !== features.length - 1 ? "border-b border-foreground" : ""
                   }`}
                 >
                   {/* Progress bar on the left edge */}
@@ -306,6 +301,7 @@ export function FeaturesSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
                     />
                   )}
                   <button
+                    type="button"
                     onClick={() => handleSelect(i)}
                     className={`w-full flex items-center gap-3 px-5 py-4 text-left text-sm transition-colors ${
                       i === activeIndex
@@ -315,9 +311,7 @@ export function FeaturesSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
                   >
                     <div
                       className={`w-8 h-8 border flex items-center justify-center shrink-0 ${
-                        i === activeIndex
-                          ? "border-foreground bg-white"
-                          : "border-border"
+                        i === activeIndex ? "border-foreground bg-white" : "border-border"
                       }`}
                     >
                       <feature.icon className="w-4 h-4" />
@@ -388,7 +382,10 @@ export function VideoSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
         <p className="text-base md:text-lg text-muted mb-8 md:mb-10 text-center">
           {messages.home.videoSubtitle}
         </p>
-        <div className="relative w-full overflow-hidden rounded-sm border border-border shadow-lg" style={{ paddingBottom: "56.25%" }}>
+        <div
+          className="relative w-full overflow-hidden rounded-sm border border-border shadow-lg"
+          style={{ paddingBottom: "56.25%" }}
+        >
           {locale === "zh" ? (
             <iframe
               className="absolute inset-0 w-full h-full"
@@ -469,17 +466,13 @@ export function ComparisonSection({ locale = DEFAULT_LOCALE }: { locale?: Locale
                 ease: [0.25, 0.46, 0.45, 0.94],
               }}
               className={`grid grid-cols-3 text-sm ${
-                i !== messages.home.comparisons.length - 1
-                  ? "border-b border-foreground"
-                  : ""
+                i !== messages.home.comparisons.length - 1 ? "border-b border-foreground" : ""
               }`}
             >
               <div className="p-4 border-r border-foreground font-medium text-muted">
                 {row.feature}
               </div>
-              <div className="p-4 border-r border-foreground text-muted">
-                {row.overleaf}
-              </div>
+              <div className="p-4 border-r border-foreground text-muted">{row.overleaf}</div>
               <div className="p-4 flex items-start gap-2 bg-neutral-50 font-medium">
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-foreground mt-0.5" />
                 {row.writer}

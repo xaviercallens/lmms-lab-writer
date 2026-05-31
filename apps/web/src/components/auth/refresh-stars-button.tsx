@@ -1,9 +1,9 @@
 "use client";
 
-import { startTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "@/lib/useLocale";
+import { startTransition, useState } from "react";
 import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/lib/useLocale";
 
 export function RefreshStarsButton() {
   const [loading, setLoading] = useState(false);
@@ -42,12 +42,14 @@ export function RefreshStarsButton() {
   return (
     <div className="flex items-center gap-2">
       <button
+        type="button"
         onClick={handleRefresh}
         disabled={loading}
         className="text-xs text-muted hover:text-black transition-colors disabled:opacity-50 flex items-center gap-1"
         title={error || t.profile.refreshStarStatus}
       >
         <svg
+          aria-hidden="true"
           className={`size-3.5 ${loading ? "animate-spin" : ""}`}
           fill="none"
           stroke="currentColor"

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useId } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface InputDialogProps {
   title: string;
@@ -92,7 +92,9 @@ export function InputDialog({
         >
           {/* Header */}
           <div className="px-5 py-4 border-b border-border">
-            <h3 id={titleId} className="text-sm font-medium">{title}</h3>
+            <h3 id={titleId} className="text-sm font-medium">
+              {title}
+            </h3>
           </div>
 
           {/* Content */}
@@ -133,6 +135,6 @@ export function InputDialog({
         </motion.div>
       </div>
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

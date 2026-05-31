@@ -64,10 +64,7 @@ export function withLocalePrefix(pathname: string, locale: Locale): string {
   return `/${locale}${basePath}`;
 }
 
-export function interpolate(
-  template: string,
-  values: Record<string, string | number>,
-): string {
+export function interpolate(template: string, values: Record<string, string | number>): string {
   let output = template;
 
   for (const [key, value] of Object.entries(values)) {
@@ -81,15 +78,14 @@ export const LOCALE_COOKIE = "locale";
 
 export function getLocaleCookie(): Locale {
   if (typeof document === "undefined") return DEFAULT_LOCALE;
-  const match = document.cookie.match(
-    new RegExp(`(?:^|;\\s*)${LOCALE_COOKIE}=([^;]*)`),
-  );
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${LOCALE_COOKIE}=([^;]*)`));
   const value = match?.[1];
   return value && isLocale(value) ? value : DEFAULT_LOCALE;
 }
 
 export function setLocaleCookie(locale: Locale): void {
   if (typeof document === "undefined") return;
+  // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API is not available in every supported browser.
   document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
 }
 

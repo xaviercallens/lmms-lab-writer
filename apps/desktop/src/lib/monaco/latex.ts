@@ -180,14 +180,8 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
         [/\\\(/, { token: "string.math", next: "@mathInline" }],
 
         // Commands with arguments
-        [
-          /\\(begin|end)\s*\{/,
-          { token: "keyword.control", next: "@environment" },
-        ],
-        [
-          /\\(documentclass|usepackage)\s*(\[)?/,
-          { token: "keyword.control", next: "@options" },
-        ],
+        [/\\(begin|end)\s*\{/, { token: "keyword.control", next: "@environment" }],
+        [/\\(documentclass|usepackage)\s*(\[)?/, { token: "keyword.control", next: "@options" }],
 
         // Section commands
         [
@@ -196,16 +190,10 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
         ],
 
         // Reference commands
-        [
-          /\\(ref|cite|label|pageref|eqref)\s*\{/,
-          { token: "keyword", next: "@braceArg" },
-        ],
+        [/\\(ref|cite|label|pageref|eqref)\s*\{/, { token: "keyword", next: "@braceArg" }],
 
         // Text formatting
-        [
-          /\\(textbf|textit|texttt|emph|underline)\s*\{/,
-          { token: "keyword", next: "@braceArg" },
-        ],
+        [/\\(textbf|textit|texttt|emph|underline)\s*\{/, { token: "keyword", next: "@braceArg" }],
 
         // Other commands
         [/\\[a-zA-Z@]+\*?/, "keyword"],
@@ -296,51 +284,50 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
           // Document structure
           {
             label: "documentclass",
-            insertText: "documentclass{${1:article}}",
+            insertText: `documentclass{\${1:article}}`,
             detail: "Document class",
           },
           {
             label: "usepackage",
-            insertText: "usepackage{${1:package}}",
+            insertText: `usepackage{\${1:package}}`,
             detail: "Import package",
           },
           {
             label: "begin",
-            insertText:
-              "begin{${1:environment}}\n\t$0\n\\end{${1:environment}}",
+            insertText: `begin{\${1:environment}}\n\t$0\n\\end{\${1:environment}}`,
             detail: "Begin environment",
           },
           {
             label: "section",
-            insertText: "section{${1:title}}",
+            insertText: `section{\${1:title}}`,
             detail: "Section",
           },
           {
             label: "subsection",
-            insertText: "subsection{${1:title}}",
+            insertText: `subsection{\${1:title}}`,
             detail: "Subsection",
           },
           {
             label: "subsubsection",
-            insertText: "subsubsection{${1:title}}",
+            insertText: `subsubsection{\${1:title}}`,
             detail: "Subsubsection",
           },
           {
             label: "chapter",
-            insertText: "chapter{${1:title}}",
+            insertText: `chapter{\${1:title}}`,
             detail: "Chapter",
           },
           {
             label: "title",
-            insertText: "title{${1:title}}",
+            insertText: `title{\${1:title}}`,
             detail: "Document title",
           },
           {
             label: "author",
-            insertText: "author{${1:name}}",
+            insertText: `author{\${1:name}}`,
             detail: "Author",
           },
-          { label: "date", insertText: "date{${1:\\today}}", detail: "Date" },
+          { label: "date", insertText: `date{\${1:\\today}}`, detail: "Date" },
           { label: "maketitle", insertText: "maketitle", detail: "Make title" },
           {
             label: "tableofcontents",
@@ -351,65 +338,65 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
           // Text formatting
           {
             label: "textbf",
-            insertText: "textbf{${1:text}}",
+            insertText: `textbf{\${1:text}}`,
             detail: "Bold text",
           },
           {
             label: "textit",
-            insertText: "textit{${1:text}}",
+            insertText: `textit{\${1:text}}`,
             detail: "Italic text",
           },
           {
             label: "texttt",
-            insertText: "texttt{${1:text}}",
+            insertText: `texttt{\${1:text}}`,
             detail: "Monospace text",
           },
           {
             label: "emph",
-            insertText: "emph{${1:text}}",
+            insertText: `emph{\${1:text}}`,
             detail: "Emphasized text",
           },
           {
             label: "underline",
-            insertText: "underline{${1:text}}",
+            insertText: `underline{\${1:text}}`,
             detail: "Underlined text",
           },
 
           // References
-          { label: "label", insertText: "label{${1:key}}", detail: "Label" },
-          { label: "ref", insertText: "ref{${1:key}}", detail: "Reference" },
-          { label: "cite", insertText: "cite{${1:key}}", detail: "Citation" },
+          { label: "label", insertText: `label{\${1:key}}`, detail: "Label" },
+          { label: "ref", insertText: `ref{\${1:key}}`, detail: "Reference" },
+          { label: "cite", insertText: `cite{\${1:key}}`, detail: "Citation" },
           {
             label: "footnote",
-            insertText: "footnote{${1:text}}",
+            insertText: `footnote{\${1:text}}`,
             detail: "Footnote",
           },
           {
             label: "caption",
-            insertText: "caption{${1:text}}",
+            insertText: `caption{\${1:text}}`,
             detail: "Caption",
           },
 
           // Math
           {
             label: "frac",
-            insertText: "frac{${1:num}}{${2:den}}",
+            insertText: `frac{\${1:num}}{\${2:den}}`,
             detail: "Fraction",
           },
-          { label: "sqrt", insertText: "sqrt{${1:x}}", detail: "Square root" },
+          { label: "sqrt", insertText: `sqrt{\${1:x}}`, detail: "Square root" },
           {
             label: "sum",
-            insertText: "sum_{${1:i=1}}^{${2:n}}",
+            insertText: `sum_{\${1:i=1}}^{\${2:n}}`,
             detail: "Summation",
           },
           {
             label: "int",
-            insertText: "int_{${1:a}}^{${2:b}}",
+            insertText: `int_{\${1:a}}^{\${2:b}}`,
             detail: "Integral",
           },
           {
             label: "lim",
-            insertText: "lim_{${1:x \\to \\infty}}",
+            insertText: `lim_{\${1:x \\to \\infty}}`,
             detail: "Limit",
           },
 
@@ -430,12 +417,12 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
           // Spacing
           {
             label: "hspace",
-            insertText: "hspace{${1:1cm}}",
+            insertText: `hspace{\${1:1cm}}`,
             detail: "Horizontal space",
           },
           {
             label: "vspace",
-            insertText: "vspace{${1:1cm}}",
+            insertText: `vspace{\${1:1cm}}`,
             detail: "Vertical space",
           },
           { label: "newline", insertText: "newline", detail: "New line" },
@@ -447,12 +434,12 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
           // Includes
           {
             label: "input",
-            insertText: "input{${1:file}}",
+            insertText: `input{\${1:file}}`,
             detail: "Input file",
           },
           {
             label: "include",
-            insertText: "include{${1:file}}",
+            insertText: `include{\${1:file}}`,
             detail: "Include file",
           },
         ];
@@ -462,8 +449,7 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
             label: cmd.label,
             kind: monaco.languages.CompletionItemKind.Function,
             insertText: cmd.insertText,
-            insertTextRules:
-              monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
             detail: cmd.detail,
             range,
           });
@@ -505,8 +491,7 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
             label: env.label,
             kind: monaco.languages.CompletionItemKind.Snippet,
             insertText: `${env.label}}\n\t$0\n\\\\end{${env.label}}`,
-            insertTextRules:
-              monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
             detail: env.detail,
             range,
           });
@@ -517,4 +502,3 @@ export const registerLaTeXLanguage = (monaco: Monaco) => {
     },
   });
 };
-

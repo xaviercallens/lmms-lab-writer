@@ -1,11 +1,11 @@
 "use client";
 
+import { m } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { m } from "framer-motion";
-import { useLocale } from "@/lib/useLocale";
 import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/lib/useLocale";
 
 const SignupForm = dynamic(
   () => import("@/components/auth/signup-form").then((m) => m.SignupForm),
@@ -61,12 +61,7 @@ export default function SignupPage() {
           {t.auth.createAccountDescription}
         </m.p>
 
-        <m.div
-          initial="hidden"
-          animate="visible"
-          custom={0.2}
-          variants={fadeIn}
-        >
+        <m.div initial="hidden" animate="visible" custom={0.2} variants={fadeIn}>
           <SignupForm />
         </m.div>
       </div>

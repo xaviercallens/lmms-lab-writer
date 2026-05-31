@@ -1,7 +1,7 @@
 "use client";
 
-import { Component, ErrorInfo, ReactNode } from "react";
 import { WarningIcon } from "@phosphor-icons/react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
 type Props = {
   children: ReactNode;
@@ -39,13 +39,12 @@ export class OpenCodeErrorBoundary extends Component<Props, State> {
           <div className="size-12 border border-border flex items-center justify-center mb-4">
             <WarningIcon className="size-6 text-muted-foreground" />
           </div>
-          <h3 className="text-sm font-medium text-foreground mb-1">
-            OpenCode Panel Error
-          </h3>
+          <h3 className="text-sm font-medium text-foreground mb-1">OpenCode Panel Error</h3>
           <p className="text-xs text-muted mb-4 max-w-[200px]">
             {this.state.error?.message || "An unexpected error occurred"}
           </p>
           <button
+            type="button"
             onClick={this.handleReset}
             className="px-3 py-1.5 text-xs border border-foreground bg-background hover:bg-accent-hover transition-colors"
             style={{ boxShadow: "2px 2px 0 0 var(--foreground)" }}

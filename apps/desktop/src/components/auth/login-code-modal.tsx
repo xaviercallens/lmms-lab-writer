@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowSquareOutIcon,
   CheckIcon,
@@ -8,9 +7,10 @@ import {
   CopyIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { getSupabaseClient } from "@/lib/supabase";
 import { invoke } from "@tauri-apps/api/core";
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getSupabaseClient } from "@/lib/supabase";
 
 interface LoginCodeModalProps {
   isOpen: boolean;
@@ -23,7 +23,12 @@ type LoginState = "idle" | "loading" | "success" | "error";
 
 const DEFAULT_LOGIN_URL = "https://writer.lmms-lab.com/login?source=desktop";
 
-export function LoginCodeModal({ isOpen, onClose, onSuccess, loginUrl: baseLoginUrl = DEFAULT_LOGIN_URL }: LoginCodeModalProps) {
+export function LoginCodeModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  loginUrl: baseLoginUrl = DEFAULT_LOGIN_URL,
+}: LoginCodeModalProps) {
   const [loginCode, setLoginCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<LoginState>("idle");
@@ -36,98 +41,99 @@ export function LoginCodeModal({ isOpen, onClose, onSuccess, loginUrl: baseLogin
   const processLoginCodeRef = useRef<((code: string) => Promise<void>) | null>(null);
 
   // Compute login URL with callback port
-  const loginUrl = callbackPort
-    ? `${baseLoginUrl}&callback_port=${callbackPort}`
-    : baseLoginUrl;
+  const loginUrl = callbackPort ? `${baseLoginUrl}&callback_port=${callbackPort}` : baseLoginUrl;
 
   // Handle code login (extracted to be reusable)
-  const processLoginCode = useCallback(async (code: string) => {
-    if (!code.trim() || state === "loading" || state === "success") return;
+  const processLoginCode = useCallback(
+    async (code: string) => {
+      if (!code.trim() || state === "loading" || state === "success") return;
 
-    // Prevent double processing
-    if (hasProcessedCodeRef.current) return;
-    hasProcessedCodeRef.current = true;
+      // Prevent double processing
+      if (hasProcessedCodeRef.current) return;
+      hasProcessedCodeRef.current = true;
 
-    setLoginCode(code);
-    setError(null);
-    setState("loading");
+      setLoginCode(code);
+      setError(null);
+      setState("loading");
 
-    // Step 1: Decode and validate
-    let accessToken: string;
-    let refreshToken: string;
+      // Step 1: Decode and validate
+      let accessToken: string;
+      let refreshToken: string;
 
-    try {
-      const decoded = atob(code.trim());
-      const tokens = JSON.parse(decoded);
-      accessToken = tokens.accessToken;
-      refreshToken = tokens.refreshToken;
+      try {
+        const decoded = atob(code.trim());
+        const tokens = JSON.parse(decoded);
+        accessToken = tokens.accessToken;
+        refreshToken = tokens.refreshToken;
 
-      if (!accessToken || !refreshToken) {
-        throw new Error("missing tokens");
-      }
-    } catch (err) {
-      console.error("[LoginCode] Decode error:", err);
-      setError("Invalid login code format. Please copy the code again.");
-      setState("error");
-      hasProcessedCodeRef.current = false;
-      return;
-    }
-
-    // Step 2: Set session
-    try {
-      const supabase = getSupabaseClient();
-      const { data: setSessionData, error: setSessionError } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
-
-      if (setSessionError || !setSessionData?.session) {
-
-        const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
-
-        if (userError || !userData?.user) {
-          throw new Error("invalid_token");
+        if (!accessToken || !refreshToken) {
+          throw new Error("missing tokens");
         }
+      } catch (err) {
+        console.error("[LoginCode] Decode error:", err);
+        setError("Invalid login code format. Please copy the code again.");
+        setState("error");
+        hasProcessedCodeRef.current = false;
+        return;
+      }
 
-        // Success - access token is valid
+      // Step 2: Set session
+      try {
+        const supabase = getSupabaseClient();
+        const { data: setSessionData, error: setSessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (setSessionError || !setSessionData?.session) {
+          const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
+
+          if (userError || !userData?.user) {
+            throw new Error("invalid_token");
+          }
+
+          // Success - access token is valid
+          setState("success");
+
+          setTimeout(() => {
+            onClose();
+            onSuccess?.(accessToken);
+          }, 500);
+          return;
+        }
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          throw new Error("no session");
+        }
         setState("success");
 
         setTimeout(() => {
           onClose();
-          onSuccess?.(accessToken);
+          onSuccess?.();
         }, 500);
-        return;
+      } catch (err) {
+        console.error("[LoginCode] Error:", err);
+        const message = err instanceof Error ? err.message : "unknown";
+
+        if (message === "invalid_token") {
+          setError("Invalid or expired login code. Please get a new code.");
+        } else if (message === "expired" || message.includes("Refresh Token")) {
+          setError("Login code expired. Please get a new code from the web page.");
+        } else if (message === "no session") {
+          setError("Failed to establish session. Please try again.");
+        } else {
+          setError("Login failed. Please try again with a new code.");
+        }
+
+        setState("error");
+        hasProcessedCodeRef.current = false;
       }
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        throw new Error("no session");
-      }
-      setState("success");
-
-      setTimeout(() => {
-        onClose();
-        onSuccess?.();
-      }, 500);
-
-    } catch (err) {
-      console.error("[LoginCode] Error:", err);
-      const message = err instanceof Error ? err.message : "unknown";
-
-      if (message === "invalid_token") {
-        setError("Invalid or expired login code. Please get a new code.");
-      } else if (message === "expired" || message.includes("Refresh Token")) {
-        setError("Login code expired. Please get a new code from the web page.");
-      } else if (message === "no session") {
-        setError("Failed to establish session. Please try again.");
-      } else {
-        setError("Login failed. Please try again with a new code.");
-      }
-
-      setState("error");
-      hasProcessedCodeRef.current = false;
-    }
-  }, [state, onClose, onSuccess]);
+    },
+    [state, onClose, onSuccess],
+  );
 
   // Keep ref updated with latest processLoginCode
   useEffect(() => {
@@ -266,19 +272,20 @@ export function LoginCodeModal({ isOpen, onClose, onSuccess, loginUrl: baseLogin
   const isSuccess = state === "success";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !isLoading) {
-          onClose();
-        }
-      }}
-    >
-      <div className="bg-background border border-foreground w-full max-w-md mx-4 p-6 shadow-[3px_3px_0_var(--foreground)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50">
+      <button
+        type="button"
+        aria-label="Close login dialog"
+        className="absolute inset-0 cursor-default"
+        disabled={isLoading}
+        onClick={onClose}
+      />
+      <div className="relative bg-background border border-foreground w-full max-w-md mx-4 p-6 shadow-[3px_3px_0_var(--foreground)]">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium">Login with Code</h2>
           <button
+            type="button"
             onClick={onClose}
             disabled={isLoading}
             className="p-1 hover:bg-surface-secondary transition-colors disabled:opacity-50"
@@ -299,6 +306,7 @@ export function LoginCodeModal({ isOpen, onClose, onSuccess, loginUrl: baseLogin
               <span className="text-xs text-muted">Login URL</span>
               <div className="flex items-center gap-1">
                 <button
+                  type="button"
                   onClick={handleCopyLink}
                   className="p-1 text-muted hover:text-foreground hover:bg-surface-tertiary transition-colors"
                   title="Copy link"
@@ -310,6 +318,7 @@ export function LoginCodeModal({ isOpen, onClose, onSuccess, loginUrl: baseLogin
                   )}
                 </button>
                 <button
+                  type="button"
                   onClick={handleOpenLink}
                   className="p-1 text-muted hover:text-foreground hover:bg-surface-tertiary transition-colors"
                   title="Open in browser"
@@ -318,9 +327,7 @@ export function LoginCodeModal({ isOpen, onClose, onSuccess, loginUrl: baseLogin
                 </button>
               </div>
             </div>
-            <p className="text-xs font-mono text-muted break-all select-all">
-              {loginUrl}
-            </p>
+            <p className="text-xs font-mono text-muted break-all select-all">{loginUrl}</p>
           </div>
 
           <input
@@ -348,6 +355,7 @@ export function LoginCodeModal({ isOpen, onClose, onSuccess, loginUrl: baseLogin
           {/* Actions */}
           <div className="flex gap-3 pt-2">
             <button
+              type="button"
               onClick={onClose}
               disabled={isLoading}
               className="flex-1 px-4 py-2 text-sm border border-border hover:bg-accent-hover transition-colors disabled:opacity-50"
@@ -355,6 +363,7 @@ export function LoginCodeModal({ isOpen, onClose, onSuccess, loginUrl: baseLogin
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleCodeLogin}
               disabled={isLoading || isSuccess || !loginCode.trim()}
               className={`flex-1 px-4 py-2 text-sm border transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2 ${

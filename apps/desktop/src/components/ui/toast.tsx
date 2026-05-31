@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { CheckIcon, InfoIcon, XIcon } from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "framer-motion";
+import type React from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 type ToastType = "success" | "error" | "info";
 
@@ -52,13 +53,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ToastItem({
-  toast,
-  onDismiss,
-}: {
-  toast: Toast;
-  onDismiss: (id: string) => void;
-}) {
+function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
   const Icon = getIcon(toast.type);
 
   return (
@@ -74,10 +69,9 @@ function ToastItem({
         style={{ boxShadow: "4px 4px 0 0 var(--foreground)" }}
       >
         <div className="flex-shrink-0 mt-0.5">{Icon}</div>
-        <p className="text-sm text-foreground flex-1 leading-tight">
-          {toast.message}
-        </p>
+        <p className="text-sm text-foreground flex-1 leading-tight">{toast.message}</p>
         <button
+          type="button"
           onClick={() => onDismiss(toast.id)}
           className="flex-shrink-0 text-foreground hover:opacity-60 transition-opacity"
           aria-label="Dismiss"

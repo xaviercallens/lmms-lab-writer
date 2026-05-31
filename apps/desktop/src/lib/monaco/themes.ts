@@ -2,9 +2,9 @@
 
 import type { Monaco } from "@monaco-editor/react";
 import type { MonacoTheme } from "monaco-themes";
+import githubDarkTheme from "./github-dark.json";
 // Source: monaco-themes/themes/ (v0.4.8)
 import githubLightTheme from "./github-light.json";
-import githubDarkTheme from "./github-dark.json";
 
 // Supplementary editor chrome colors not included in the base GitHub Light theme
 const githubLightEditorColors: Record<string, string> = {

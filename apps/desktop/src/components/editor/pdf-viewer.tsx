@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -26,7 +26,7 @@ export function PdfViewer({ src, onSynctexClick, refreshKey = 0 }: Props) {
   }
 
   const handlePageClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>, pageNumber: number) => {
+    (e: React.MouseEvent<HTMLButtonElement>, pageNumber: number) => {
       if (!onSynctexClick) return;
 
       const target = e.currentTarget;
@@ -49,6 +49,7 @@ export function PdfViewer({ src, onSynctexClick, refreshKey = 0 }: Props) {
   const zoomIn = useCallback(() => setScale((s) => Math.min(s + 0.25, 4.0)), []);
   const zoomOut = useCallback(() => setScale((s) => Math.max(s - 0.25, 0.25)), []);
   const zoomReset = useCallback(() => setScale(1.0), []);
+  const pageNumbers = Array.from({ length: numPages }, (_, pageIndex) => pageIndex + 1);
 
   // Fit width on mount
   useEffect(() => {
@@ -60,7 +61,7 @@ export function PdfViewer({ src, onSynctexClick, refreshKey = 0 }: Props) {
         setScale(fitScale);
       }
     }
-  }, [src, refreshKey]);
+  }, []);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -70,6 +71,7 @@ export function PdfViewer({ src, onSynctexClick, refreshKey = 0 }: Props) {
         </span>
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={zoomOut}
             className="px-1.5 py-0.5 text-xs text-muted hover:text-foreground hover:bg-surface-tertiary rounded transition-colors"
             title="Zoom out"
@@ -77,6 +79,7 @@ export function PdfViewer({ src, onSynctexClick, refreshKey = 0 }: Props) {
             -
           </button>
           <button
+            type="button"
             onClick={zoomReset}
             className="px-1.5 py-0.5 text-xs text-muted hover:text-foreground hover:bg-surface-tertiary rounded transition-colors min-w-[3.5rem] text-center"
             title="Reset zoom"
@@ -84,6 +87,7 @@ export function PdfViewer({ src, onSynctexClick, refreshKey = 0 }: Props) {
             {Math.round(scale * 100)}%
           </button>
           <button
+            type="button"
             onClick={zoomIn}
             className="px-1.5 py-0.5 text-xs text-muted hover:text-foreground hover:bg-surface-tertiary rounded transition-colors"
             title="Zoom in"
@@ -108,19 +112,21 @@ export function PdfViewer({ src, onSynctexClick, refreshKey = 0 }: Props) {
             </div>
           }
         >
-          {Array.from({ length: numPages }, (_, i) => (
-            <div
-              key={`page_${i + 1}`}
-              className="mb-4 cursor-crosshair"
-              onClick={(e) => handlePageClick(e, i + 1)}
+          {pageNumbers.map((pageNumber) => (
+            <button
+              type="button"
+              key={`pdf-page-${pageNumber}`}
+              className="mb-4 block cursor-crosshair border-0 bg-transparent p-0 text-left"
+              onClick={(e) => handlePageClick(e, pageNumber)}
+              aria-label={`Sync PDF page ${pageNumber}`}
             >
               <Page
-                pageNumber={i + 1}
+                pageNumber={pageNumber}
                 scale={scale}
                 renderTextLayer={true}
                 renderAnnotationLayer={true}
               />
-            </div>
+            </button>
           ))}
         </Document>
       </div>

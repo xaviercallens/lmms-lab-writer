@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
-import { InstallProgress, InstallResult, LaTeXDistribution } from "./types";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { InstallProgress, InstallResult, LaTeXDistribution } from "./types";
 
 export type InstallStatus = "idle" | "loading" | "installing" | "success" | "error";
 
@@ -39,13 +39,10 @@ export function useLatexInstaller() {
         unlistenRef.current();
       }
 
-      unlistenRef.current = await listen<InstallProgress>(
-        "latex-install-progress",
-        (event) => {
-          if (!mounted) return;
-          setProgress(event.payload);
-        }
-      );
+      unlistenRef.current = await listen<InstallProgress>("latex-install-progress", (event) => {
+        if (!mounted) return;
+        setProgress(event.payload);
+      });
     };
 
     setupListener();

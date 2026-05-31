@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { LaTeXCompilersStatus, LaTeXSettings } from "./types";
+import { useCallback, useEffect, useState } from "react";
+import type { LaTeXCompilersStatus, LaTeXSettings } from "./types";
 
 export interface UseLatexCompilerOptions {
   settings: LaTeXSettings;
@@ -11,8 +11,7 @@ export function useLatexCompiler({
   settings: _settings,
   projectPath: _projectPath,
 }: UseLatexCompilerOptions) {
-  const [compilersStatus, setCompilersStatus] =
-    useState<LaTeXCompilersStatus | null>(null);
+  const [compilersStatus, setCompilersStatus] = useState<LaTeXCompilersStatus | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
 
   // Detect installed compilers

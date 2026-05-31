@@ -126,9 +126,9 @@ cd apps/desktop/src-tauri && cargo check    # Rust
 cd apps/web && pnpm tsc --noEmit            # Website TypeScript
 
 # Lint & Format
-pnpm lint                                   # ESLint
-pnpm lint:fix                               # ESLint auto-fix
-pnpm format                                 # Prettier
+pnpm lint                                   # Biome check
+pnpm lint:fix                               # Biome safe fixes
+pnpm format                                 # Biome formatter
 ```
 
 ### Build Output Locations

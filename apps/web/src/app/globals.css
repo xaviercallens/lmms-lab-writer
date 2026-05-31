@@ -378,8 +378,8 @@ body {
   .logo-bar-sm span,
   .paper-line,
   .feature-progress {
-    animation: none !important;
-    opacity: 1 !important;
+    animation: none;
+    opacity: 1;
   }
   .typing-cursor::after {
     animation: none;

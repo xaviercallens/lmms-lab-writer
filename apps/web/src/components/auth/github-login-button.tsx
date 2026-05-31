@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { GithubIcon } from "@/components/icons/github-icon";
+import { getMessages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/client";
 import { useLocale } from "@/lib/useLocale";
-import { getMessages } from "@/lib/messages";
 
 export function GitHubLoginButton() {
   const [loading, setLoading] = useState(false);
@@ -24,6 +24,7 @@ export function GitHubLoginButton() {
 
   return (
     <button
+      type="button"
       onClick={handleGitHubLogin}
       disabled={loading}
       className="btn btn-secondary inline-flex items-center gap-2"

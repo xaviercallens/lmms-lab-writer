@@ -1,18 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import {
-  Download,
   Apple,
-  Monitor,
   ChevronDown,
-  ShieldCheck,
+  Download,
   Eye,
+  Monitor,
   Scaling,
+  ShieldCheck,
   TerminalSquare,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion, FadeIn } from "@/components/motion";
+import { FadeIn, motion } from "@/components/motion";
 import { GITHUB_CONFIG } from "@/lib/github/config";
 import { DEFAULT_LOCALE, interpolate, type Locale } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
@@ -108,9 +108,8 @@ function detectPlatform(): Platform {
 function detectMacArch(): MacArch {
   if (typeof window === "undefined") return "unknown";
 
-  const uaData = (
-    navigator as Navigator & { userAgentData?: { architecture?: string } }
-  ).userAgentData;
+  const uaData = (navigator as Navigator & { userAgentData?: { architecture?: string } })
+    .userAgentData;
   const architecture = uaData?.architecture?.toLowerCase();
 
   if (architecture?.includes("arm")) return "arm64";
@@ -123,11 +122,7 @@ function detectMacArch(): MacArch {
   return "unknown";
 }
 
-export function InstallationPolicySection({
-  locale = DEFAULT_LOCALE,
-}: {
-  locale?: Locale;
-}) {
+export function InstallationPolicySection({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
   const messages = getMessages(locale).download;
   const [detectedPlatform, setDetectedPlatform] = useState<Platform>("unknown");
 
@@ -151,9 +146,7 @@ export function InstallationPolicySection({
           <h2 className="text-base sm:text-lg font-medium leading-tight">
             {messages.installNoticeTitle}
           </h2>
-          <p className="text-sm text-muted leading-relaxed">
-            {messages.installNoticeIntro}
-          </p>
+          <p className="text-sm text-muted leading-relaxed">{messages.installNoticeIntro}</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="border border-black bg-neutral-50 p-3">
@@ -163,9 +156,7 @@ export function InstallationPolicySection({
                   {messages.installNoticeSudoTitle}
                 </h3>
               </div>
-              <p className="text-xs text-muted leading-relaxed">
-                {messages.installNoticeSudoBody}
-              </p>
+              <p className="text-xs text-muted leading-relaxed">{messages.installNoticeSudoBody}</p>
             </div>
 
             <div className="border border-black bg-neutral-50 p-3">
@@ -226,18 +217,17 @@ export function DownloadSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
   }, []);
 
   const recommendedPlatform =
-    detectedPlatform === "macOS" || detectedPlatform === "Windows"
-      ? detectedPlatform
-      : "macOS";
+    detectedPlatform === "macOS" || detectedPlatform === "Windows" ? detectedPlatform : "macOS";
 
   const recommended = platforms[recommendedPlatform];
   const otherPlatformKey = recommendedPlatform === "macOS" ? "Windows" : "macOS";
   const other = platforms[otherPlatformKey];
-  const recommendedVariants: DownloadVariant[] = recommendedPlatform === "macOS"
-    ? detectedMacArch === "unknown"
-      ? recommended.variants
-      : recommended.variants.filter((variant) => variant.arch === detectedMacArch)
-    : recommended.variants;
+  const recommendedVariants: DownloadVariant[] =
+    recommendedPlatform === "macOS"
+      ? detectedMacArch === "unknown"
+        ? recommended.variants
+        : recommended.variants.filter((variant) => variant.arch === detectedMacArch)
+      : recommended.variants;
 
   return (
     <FadeIn className="max-w-2xl">
@@ -257,7 +247,12 @@ export function DownloadSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
         </div>
         <p className="text-xs text-muted mb-4">
           Downloads are now served via{" "}
-          <Link href={RELEASE_PAGE_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+          <Link
+            href={RELEASE_PAGE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-foreground"
+          >
             GitHub Releases
           </Link>
           .
@@ -296,6 +291,7 @@ export function DownloadSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
       {/* Other Platforms */}
       <div>
         <button
+          type="button"
           onClick={() => setShowAllPlatforms(!showAllPlatforms)}
           className="flex items-center gap-2 text-sm text-muted hover:text-black transition-colors mb-4"
         >
@@ -362,12 +358,8 @@ export function HomebrewSection({ locale = DEFAULT_LOCALE }: { locale?: Locale }
         {`brew tap EvolvingLMMs-Lab/tap
 brew install --cask lmms-lab-writer`}
       </pre>
-      <p className="text-xs text-muted mt-2">
-        {messages.homebrewNote}
-      </p>
-      <p className="text-xs text-muted mt-2">
-        {messages.homebrewArchFallback}
-      </p>
+      <p className="text-xs text-muted mt-2">{messages.homebrewNote}</p>
+      <p className="text-xs text-muted mt-2">{messages.homebrewArchFallback}</p>
     </FadeIn>
   );
 }
@@ -381,7 +373,8 @@ export function NpmPackageSection({ locale = DEFAULT_LOCALE }: { locale?: Locale
       <h2 className="text-sm font-medium mb-3">{messages.npmPackage}</h2>
       <div className="text-sm text-muted space-y-4">
         <p>
-          {messages.latestTarball} <code className="bg-neutral-100 px-1">@lmms-lab/writer-shared</code>:
+          {messages.latestTarball}{" "}
+          <code className="bg-neutral-100 px-1">@lmms-lab/writer-shared</code>:
         </p>
         <Link
           href={packageUrl}

@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { DEFAULT_MINIMAP_SETTINGS, DEFAULT_EDITOR_SETTINGS } from "./types";
+import { describe, expect, it } from "vitest";
+import { DEFAULT_EDITOR_SETTINGS, DEFAULT_MINIMAP_SETTINGS } from "./types";
 
 describe("DEFAULT_MINIMAP_SETTINGS", () => {
   it("is disabled by default", () => {

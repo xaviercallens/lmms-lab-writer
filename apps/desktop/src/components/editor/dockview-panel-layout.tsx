@@ -1,21 +1,21 @@
 "use client";
 
 import {
+  type AddPanelPositionOptions,
+  type DockviewApi,
+  DockviewReact,
+  type DockviewReadyEvent,
+  type IDockviewPanelProps,
+} from "dockview-react";
+import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
-  type ReactNode,
 } from "react";
-import {
-  DockviewReact,
-  type AddPanelPositionOptions,
-  type DockviewApi,
-  type DockviewReadyEvent,
-  type IDockviewPanelProps,
-} from "dockview-react";
 
 const PANEL_COMPONENT_ID = "workspace-panel-content";
 
@@ -44,9 +44,7 @@ type DockviewPanelLayoutProps = {
 function PanelContentRenderer({ params }: IDockviewPanelProps<PanelParams>) {
   const contentMap = useContext(PanelContentContext);
   return (
-    <div className="h-full min-h-0 overflow-hidden">
-      {contentMap.get(params.panelId) ?? null}
-    </div>
+    <div className="h-full min-h-0 overflow-hidden">{contentMap.get(params.panelId) ?? null}</div>
   );
 }
 
@@ -139,11 +137,10 @@ export function DockviewPanelLayout({
           panelId: panel.id,
         },
         inactive: panel.inactive ?? true,
-        position:
-          panel.position ?? {
-            referencePanel: fallbackReferencePanel,
-            direction: "right",
-          },
+        position: panel.position ?? {
+          referencePanel: fallbackReferencePanel,
+          direction: "right",
+        },
       });
     }
   }, [api, panels]);

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Header } from "@/components/header";
 import { DocsContent } from "@/components/docs-sections";
+import { Header } from "@/components/header";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
 

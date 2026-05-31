@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { pathSync, pathsEqual, lineEndings } from "./path";
+import { describe, expect, it } from "vitest";
+import { lineEndings, pathSync, pathsEqual } from "./path";
 
 describe("pathSync.basename", () => {
   it("extracts filename from Unix path", () => {
@@ -25,9 +25,7 @@ describe("pathSync.dirname", () => {
   });
 
   it("returns parent directory for Windows path", () => {
-    expect(pathSync.dirname("C:\\Users\\user\\file.tex")).toBe(
-      "C:\\Users\\user",
-    );
+    expect(pathSync.dirname("C:\\Users\\user\\file.tex")).toBe("C:\\Users\\user");
   });
 
   it("returns root for file in root", () => {
@@ -51,15 +49,11 @@ describe("pathSync.extname", () => {
 
 describe("pathSync.join", () => {
   it("joins Unix paths", () => {
-    expect(pathSync.join("/home/user", "docs", "file.tex")).toBe(
-      "/home/user/docs/file.tex",
-    );
+    expect(pathSync.join("/home/user", "docs", "file.tex")).toBe("/home/user/docs/file.tex");
   });
 
   it("preserves Windows backslash separator", () => {
-    expect(pathSync.join("C:\\Users", "docs", "file.tex")).toBe(
-      "C:\\Users\\docs\\file.tex",
-    );
+    expect(pathSync.join("C:\\Users", "docs", "file.tex")).toBe("C:\\Users\\docs\\file.tex");
   });
 });
 
@@ -73,15 +67,11 @@ describe("pathsEqual", () => {
   });
 
   it("compares Windows paths case-insensitively", () => {
-    expect(
-      pathsEqual("C:\\Users\\User\\file.tex", "c:\\users\\user\\file.tex"),
-    ).toBe(true);
+    expect(pathsEqual("C:\\Users\\User\\file.tex", "c:\\users\\user\\file.tex")).toBe(true);
   });
 
   it("normalizes mixed separators", () => {
-    expect(
-      pathsEqual("C:\\Users\\user\\file.tex", "C:/Users/user/file.tex"),
-    ).toBe(true);
+    expect(pathsEqual("C:\\Users\\user\\file.tex", "C:/Users/user/file.tex")).toBe(true);
   });
 });
 

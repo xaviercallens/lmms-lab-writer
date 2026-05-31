@@ -1,21 +1,18 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, memo } from "react";
-import dynamic from "next/dynamic";
-import type { PendingEdit } from "@/lib/opencode/types";
 import {
   CaretLeftIcon,
   CaretRightIcon,
-  CheckIcon,
   CheckCircleIcon,
+  CheckIcon,
   XIcon,
 } from "@phosphor-icons/react";
+import dynamic from "next/dynamic";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import type { PendingEdit } from "@/lib/opencode/types";
 
 const MonacoDiffEditor = dynamic(
-  () =>
-    import("@/components/editor/monaco-diff-editor").then(
-      (m) => m.MonacoDiffEditor
-    ),
+  () => import("@/components/editor/monaco-diff-editor").then((m) => m.MonacoDiffEditor),
   {
     ssr: false,
     loading: () => (
@@ -23,7 +20,7 @@ const MonacoDiffEditor = dynamic(
         <div className="text-sm text-muted-foreground">Loading diff editor...</div>
       </div>
     ),
-  }
+  },
 );
 
 interface ChangesReviewPanelProps {
@@ -77,7 +74,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
       await onAccept(currentEdit.id);
       // Auto-advance to next pending edit if available
       const nextPendingIndex = edits.findIndex(
-        (e, i) => i > currentIndex && e.status === "pending"
+        (e, i) => i > currentIndex && e.status === "pending",
       );
       if (nextPendingIndex !== -1) {
         setCurrentIndex(nextPendingIndex);
@@ -95,7 +92,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
       await onReject(currentEdit.id);
       // Auto-advance to next pending edit if available
       const nextPendingIndex = edits.findIndex(
-        (e, i) => i > currentIndex && e.status === "pending"
+        (e, i) => i > currentIndex && e.status === "pending",
       );
       if (nextPendingIndex !== -1) {
         setCurrentIndex(nextPendingIndex);
@@ -153,14 +150,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    isProcessing,
-    onDismiss,
-    goToPrevious,
-    goToNext,
-    handleAcceptCurrent,
-    handleAcceptAll,
-  ]);
+  }, [isProcessing, onDismiss, goToPrevious, goToNext, handleAcceptCurrent, handleAcceptAll]);
 
   // Calculate total additions/deletions
   const totalStats = useMemo(() => {
@@ -169,7 +159,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
         additions: acc.additions + edit.additions,
         deletions: acc.deletions + edit.deletions,
       }),
-      { additions: 0, deletions: 0 }
+      { additions: 0, deletions: 0 },
     );
   }, [edits]);
 
@@ -188,23 +178,17 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <CheckCircleIcon className="w-4 h-4 text-amber-600" />
-            <span className="text-sm font-medium text-amber-800">
-              Review Changes
-            </span>
+            <span className="text-sm font-medium text-amber-800">Review Changes</span>
           </div>
           <span className="text-xs text-amber-700 font-mono">
             {pendingCount} pending of {totalCount} files
           </span>
           <div className="flex items-center gap-1.5 text-xs font-mono">
             {totalStats.additions > 0 && (
-              <span className="text-green-600 font-medium">
-                +{totalStats.additions}
-              </span>
+              <span className="text-green-600 font-medium">+{totalStats.additions}</span>
             )}
             {totalStats.deletions > 0 && (
-              <span className="text-red-500 font-medium">
-                -{totalStats.deletions}
-              </span>
+              <span className="text-red-500 font-medium">-{totalStats.deletions}</span>
             )}
           </div>
         </div>
@@ -221,6 +205,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
             navigate
           </span>
           <button
+            type="button"
             onClick={onDismiss}
             disabled={isProcessing}
             className="px-3 py-1 text-xs font-medium text-muted hover:text-foreground hover:bg-surface-secondary rounded transition-colors disabled:opacity-50"
@@ -240,6 +225,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
           <div className="flex-1 overflow-y-auto">
             {edits.map((edit, index) => (
               <button
+                type="button"
                 key={edit.id}
                 onClick={() => setCurrentIndex(index)}
                 className={`w-full text-left px-3 py-2 text-xs font-mono border-b border-surface-secondary transition-colors ${
@@ -267,12 +253,8 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
                   <span className="truncate">{getFileName(edit.filePath)}</span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5 text-[10px]">
-                  {edit.additions > 0 && (
-                    <span className="text-green-600">+{edit.additions}</span>
-                  )}
-                  {edit.deletions > 0 && (
-                    <span className="text-red-500">-{edit.deletions}</span>
-                  )}
+                  {edit.additions > 0 && <span className="text-green-600">+{edit.additions}</span>}
+                  {edit.deletions > 0 && <span className="text-red-500">-{edit.deletions}</span>}
                 </div>
               </button>
             ))}
@@ -281,6 +263,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
           {/* Batch actions */}
           <div className="p-2 border-t border-border space-y-1.5">
             <button
+              type="button"
               onClick={handleAcceptAll}
               disabled={isProcessing || pendingCount === 0}
               className="w-full px-2 py-1.5 text-xs font-medium bg-green-600 text-white hover:bg-green-700 rounded transition-colors disabled:opacity-50"
@@ -288,6 +271,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
               Accept All ({pendingCount})
             </button>
             <button
+              type="button"
               onClick={handleRejectAll}
               disabled={isProcessing || pendingCount === 0}
               className="w-full px-2 py-1.5 text-xs font-medium border border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 rounded transition-colors disabled:opacity-50"
@@ -304,6 +288,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={goToPrevious}
                   disabled={currentIndex === 0 || isProcessing}
                   className="p-1 text-muted hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
@@ -314,6 +299,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
                   {currentIndex + 1} / {totalCount}
                 </span>
                 <button
+                  type="button"
                   onClick={goToNext}
                   disabled={currentIndex === edits.length - 1 || isProcessing}
                   className="p-1 text-muted hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
@@ -326,9 +312,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
               </span>
               <div className="flex items-center gap-1.5 text-xs font-mono flex-shrink-0">
                 {currentEdit.additions > 0 && (
-                  <span className="text-green-600">
-                    +{currentEdit.additions}
-                  </span>
+                  <span className="text-green-600">+{currentEdit.additions}</span>
                 )}
                 {currentEdit.deletions > 0 && (
                   <span className="text-red-500">-{currentEdit.deletions}</span>
@@ -341,6 +325,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
               {currentEdit.status === "pending" ? (
                 <>
                   <button
+                    type="button"
                     onClick={handleRejectCurrent}
                     disabled={isProcessing}
                     className="px-3 py-1 text-xs font-medium border border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 rounded transition-colors disabled:opacity-50"
@@ -348,6 +333,7 @@ export const ChangesReviewPanel = memo(function ChangesReviewPanel({
                     Reject
                   </button>
                   <button
+                    type="button"
                     onClick={handleAcceptCurrent}
                     disabled={isProcessing}
                     className="px-3 py-1 text-xs font-medium bg-green-600 text-white hover:bg-green-700 rounded transition-colors disabled:opacity-50"

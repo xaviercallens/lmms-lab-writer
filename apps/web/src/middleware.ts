@@ -1,12 +1,12 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import { type NextRequest, NextResponse } from "next/server";
 import {
-  LOCALE_COOKIE,
   DEFAULT_LOCALE,
   isLocale,
+  LOCALE_COOKIE,
   localeFromAcceptLanguage,
   withLocalePrefix,
 } from "@/lib/i18n";
+import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
   // Auto-detect locale on first visit (no cookie yet, no locale in URL)
@@ -16,9 +16,7 @@ export async function middleware(request: NextRequest) {
   const urlHasLocale = firstSegment ? isLocale(firstSegment) : false;
 
   if (!hasLocaleCookie && !urlHasLocale) {
-    const detected = localeFromAcceptLanguage(
-      request.headers.get("accept-language"),
-    );
+    const detected = localeFromAcceptLanguage(request.headers.get("accept-language"));
 
     if (detected !== DEFAULT_LOCALE) {
       const url = request.nextUrl.clone();
@@ -37,7 +35,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

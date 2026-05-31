@@ -34,13 +34,15 @@ export function setUserCacheCookie(user: CachedUser): void {
   if (typeof document === "undefined") return;
 
   const encoded = encodeURIComponent(encodeUserCache(user));
+  // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API is not available in every supported browser.
   document.cookie = `${COOKIE_NAME}=${encoded}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
 }
 
 export function clearUserCacheCookie(): void {
   if (typeof document === "undefined") return;
 
+  // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API is not available in every supported browser.
   document.cookie = `${COOKIE_NAME}=; path=/; max-age=0`;
 }
 
-export { COOKIE_NAME, COOKIE_MAX_AGE };
+export { COOKIE_MAX_AGE, COOKIE_NAME };

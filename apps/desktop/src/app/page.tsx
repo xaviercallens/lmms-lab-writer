@@ -1,63 +1,62 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
-import { useTauriDaemon } from "@/lib/tauri";
-import { useAuth } from "@/lib/auth";
-import { useToast } from "@/components/ui/toast";
-import { InputDialog } from "@/components/ui/input-dialog";
-import {
-  TabBar,
-  type TabItem,
-  type TabReorderPosition,
-  type TabDragMovePayload,
-  type TabDragEndPayload,
-} from "@/components/ui/tab-bar";
-import { EditorSkeleton } from "@/components/editor/editor-skeleton";
-import { EditorErrorBoundary } from "@/components/editor/editor-error-boundary";
-import {
-  DockviewPanelLayout,
-  type DockviewPanelItem,
-} from "@/components/editor/dockview-panel-layout";
-import { FileSidebarPanel } from "@/components/editor/sidebar-file-panel";
-import { GitSidebarPanel } from "@/components/editor/sidebar-git-panel";
-import { GitHubPublishDialog } from "@/components/editor/github-publish-dialog";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-import { motion, AnimatePresence, useReducedMotion, type PanInfo } from "framer-motion";
+import { AnimatePresence, motion, type PanInfo, useReducedMotion } from "framer-motion";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LoginCodeModal } from "@/components/auth";
 import {
-  useLatexSettings,
-  useLatexCompiler,
-  findTexFiles,
-  findMainTexFile,
-} from "@/lib/latex";
-import { useEditorSettings } from "@/lib/editor";
+  type DockviewPanelItem,
+  DockviewPanelLayout,
+} from "@/components/editor/dockview-panel-layout";
+import { EditorErrorBoundary } from "@/components/editor/editor-error-boundary";
+import { EditorSkeleton } from "@/components/editor/editor-skeleton";
+import { GitHubPublishDialog } from "@/components/editor/github-publish-dialog";
+import { FileSidebarPanel } from "@/components/editor/sidebar-file-panel";
+import { GitSidebarPanel } from "@/components/editor/sidebar-git-panel";
 import {
-  LaTeXSettingsDialog,
   LaTeXInstallPrompt,
+  LaTeXSettingsDialog,
   MainFileSelectionDialog,
   SynctexInstallDialog,
 } from "@/components/latex";
 import { RecentProjects } from "@/components/recent-projects";
-import { useRecentProjects } from "@/lib/recent-projects";
+import { InputDialog } from "@/components/ui/input-dialog";
+import {
+  TabBar,
+  type TabDragEndPayload,
+  type TabDragMovePayload,
+  type TabItem,
+  type TabReorderPosition,
+} from "@/components/ui/tab-bar";
+import { useToast } from "@/components/ui/toast";
+import { useAuth } from "@/lib/auth";
+import { useEditorSettings } from "@/lib/editor";
+import { findMainTexFile, findTexFiles, useLatexCompiler, useLatexSettings } from "@/lib/latex";
+import {
+  COMPILE_PROMPT,
+  type MainFileDetectionResult,
+  type SynctexResult,
+} from "@/lib/latex/types";
 import { pathSync } from "@/lib/path";
-import { COMPILE_PROMPT, type MainFileDetectionResult, type SynctexResult } from "@/lib/latex/types";
+import { useRecentProjects } from "@/lib/recent-projects";
+import { useTauriDaemon } from "@/lib/tauri";
+
 const PdfViewer = dynamic(
   () => import("@/components/editor/pdf-viewer").then((mod) => mod.PdfViewer),
   { ssr: false },
 );
+
 import {
   GearIcon,
   PlayCircleIcon,
+  RobotIcon,
   SidebarSimpleIcon,
   TerminalIcon,
-  RobotIcon,
 } from "@phosphor-icons/react";
 
-function throttle<T extends (...args: Parameters<T>) => void>(
-  fn: T,
-  limit: number,
-): T {
+function throttle<T extends (...args: Parameters<T>) => void>(fn: T, limit: number): T {
   let lastCall = 0;
   return ((...args: Parameters<T>) => {
     const now = Date.now();
@@ -118,10 +117,7 @@ function parseUnifiedDiffContent(content: string): ParsedUnifiedDiff {
   let isBinary = false;
 
   for (const line of lines) {
-    if (
-      line.startsWith("Binary files ") ||
-      line.startsWith("GIT binary patch")
-    ) {
+    if (line.startsWith("Binary files ") || line.startsWith("GIT binary patch")) {
       isBinary = true;
     }
 
@@ -274,10 +270,7 @@ function getPreferredOpenCodeConfig(): PreferredOpenCodeConfig {
         providerId?: unknown;
         modelId?: unknown;
       };
-      if (
-        typeof savedModel.providerId === "string" &&
-        typeof savedModel.modelId === "string"
-      ) {
+      if (typeof savedModel.providerId === "string" && typeof savedModel.modelId === "string") {
         model = {
           providerID: savedModel.providerId,
           modelID: savedModel.modelId,
@@ -323,16 +316,12 @@ function buildAiCommitPrompt(diff: string, scope: "staged" | "unstaged"): string
 }
 
 const MonacoEditor = dynamic(
-  () =>
-    import("@/components/editor/monaco-editor").then((mod) => mod.MonacoEditor),
+  () => import("@/components/editor/monaco-editor").then((mod) => mod.MonacoEditor),
   { ssr: false },
 );
 
 const GitMonacoDiffEditor = dynamic(
-  () =>
-    import("@/components/editor/monaco-diff-editor").then(
-      (mod) => mod.MonacoDiffEditor,
-    ),
+  () => import("@/components/editor/monaco-diff-editor").then((mod) => mod.MonacoDiffEditor),
   {
     ssr: false,
     loading: () => <EditorSkeleton className="h-full" />,
@@ -344,18 +333,13 @@ const EditorTerminal = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-full flex items-center px-4 text-sm text-muted">
-        Loading terminal...
-      </div>
+      <div className="h-full flex items-center px-4 text-sm text-muted">Loading terminal...</div>
     ),
   },
 );
 
 const OpenCodePanel = dynamic(
-  () =>
-    import("@/components/opencode/opencode-panel").then(
-      (mod) => mod.OpenCodePanel,
-    ),
+  () => import("@/components/opencode/opencode-panel").then((mod) => mod.OpenCodePanel),
   {
     ssr: false,
     loading: () => <OpenCodePanelSkeleton />,
@@ -380,9 +364,7 @@ const OpenCodeErrorBoundary = dynamic(
 
 const OpenCodeErrorDialog = dynamic(
   () =>
-    import("@/components/opencode/opencode-error-dialog").then(
-      (mod) => mod.OpenCodeErrorDialog,
-    ),
+    import("@/components/opencode/opencode-error-dialog").then((mod) => mod.OpenCodeErrorDialog),
   { ssr: false },
 );
 
@@ -395,8 +377,7 @@ const PANEL_SPRING = {
 
 const INSTANT_TRANSITION = { duration: 0 } as const;
 
-const _WEB_URL =
-  process.env.NEXT_PUBLIC_WEB_URL || "https://writer.lmms-lab.com";
+const _WEB_URL = process.env.NEXT_PUBLIC_WEB_URL || "https://writer.lmms-lab.com";
 
 const MIN_PANEL_WIDTH = 200;
 const MAX_SIDEBAR_WIDTH = 480;
@@ -407,8 +388,7 @@ export default function EditorPage() {
   const editorSettings = useEditorSettings();
   const daemon = useTauriDaemon({
     gitAutoFetchEnabled: editorSettings.settings.gitAutoFetchEnabled,
-    gitAutoFetchIntervalMs:
-      editorSettings.settings.gitAutoFetchIntervalSeconds * 1000,
+    gitAutoFetchIntervalMs: editorSettings.settings.gitAutoFetchIntervalSeconds * 1000,
   });
   const prefersReducedMotion = useReducedMotion();
   const auth = useAuth();
@@ -455,32 +435,32 @@ export default function EditorPage() {
 
   const [commitMessage, setCommitMessage] = useState("");
   const [showCommitInput, setShowCommitInput] = useState(false);
-  const [isGeneratingCommitMessageAI, setIsGeneratingCommitMessageAI] =
-    useState(false);
+  const [isGeneratingCommitMessageAI, setIsGeneratingCommitMessageAI] = useState(false);
   const [showRemoteInput, setShowRemoteInput] = useState(false);
   const [remoteUrl, setRemoteUrl] = useState("");
   const [createDialog, setCreateDialog] = useState<{
     type: "file" | "directory";
   } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [opencodeDaemonStatus, setOpencodeDaemonStatus] =
-    useState<OpenCodeDaemonStatus>("stopped");
+  const [opencodeDaemonStatus, setOpencodeDaemonStatus] = useState<OpenCodeDaemonStatus>("stopped");
   const [opencodePort, setOpencodePort] = useState(4096);
   const [showDisconnectedDialog, setShowDisconnectedDialog] = useState(false);
   const [showLatexSettings, setShowLatexSettings] = useState(false);
   const [showLoginCodeModal, setShowLoginCodeModal] = useState(false);
-  const [pendingOpenCodeMessage, setPendingOpenCodeMessage] = useState<
-    string | null
-  >(null);
+  const [pendingOpenCodeMessage, setPendingOpenCodeMessage] = useState<string | null>(null);
   const [opencodeError, setOpencodeError] = useState<string | null>(null);
 
   const [showMainFileDialog, setShowMainFileDialog] = useState(false);
-  const [mainFileDetectionResult, setMainFileDetectionResult] = useState<MainFileDetectionResult | null>(null);
+  const [mainFileDetectionResult, setMainFileDetectionResult] =
+    useState<MainFileDetectionResult | null>(null);
   const [showGitHubPublishDialog, setShowGitHubPublishDialog] = useState(false);
   const [ghPublishError, setGhPublishError] = useState<string | null>(null);
   const [showSynctexInstallDialog, setShowSynctexInstallDialog] = useState(false);
   const pendingSynctexRetryRef = useRef<{
-    page: number; x: number; y: number; context: "main" | "split";
+    page: number;
+    x: number;
+    y: number;
+    context: "main" | "split";
   } | null>(null);
 
   const contentSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -588,9 +568,7 @@ The AI assistant will read and update this file during compilation.
     // If detection found a main file and doesn't need user input, proceed
     if (result.main_file && !result.needs_user_input) {
       setShowRightPanel(true);
-      setPendingOpenCodeMessage(
-        COMPILE_PROMPT.replace("{mainFile}", result.main_file)
-      );
+      setPendingOpenCodeMessage(COMPILE_PROMPT.replace("{mainFile}", result.main_file));
       return;
     }
 
@@ -606,17 +584,18 @@ The AI assistant will read and update this file during compilation.
   }, [daemon.projectPath, latexSettings, toast, ensureCompileNotesFile]);
 
   // Handle main file selection from dialog
-  const handleMainFileSelect = useCallback((mainFile: string) => {
-    latexSettings.setMainFile(mainFile);
-    setShowMainFileDialog(false);
-    setMainFileDetectionResult(null);
+  const handleMainFileSelect = useCallback(
+    (mainFile: string) => {
+      latexSettings.setMainFile(mainFile);
+      setShowMainFileDialog(false);
+      setMainFileDetectionResult(null);
 
-    // Proceed with compilation
-    setShowRightPanel(true);
-    setPendingOpenCodeMessage(
-      COMPILE_PROMPT.replace("{mainFile}", mainFile)
-    );
-  }, [latexSettings]);
+      // Proceed with compilation
+      setShowRightPanel(true);
+      setPendingOpenCodeMessage(COMPILE_PROMPT.replace("{mainFile}", mainFile));
+    },
+    [latexSettings],
+  );
 
   const handleMainFileDialogCancel = useCallback(() => {
     setShowMainFileDialog(false);
@@ -716,13 +695,7 @@ The AI assistant will read and update this file during compilation.
       const errorMessage = err instanceof Error ? err.message : String(err);
       setOpencodeError(errorMessage);
     }
-  }, [
-    daemon.projectPath,
-    opencodeDaemonStatus,
-    toast,
-    checkOpencodeStatus,
-    startOpencode,
-  ]);
+  }, [daemon.projectPath, opencodeDaemonStatus, toast, checkOpencodeStatus, startOpencode]);
 
   const handleMaxReconnectFailed = useCallback(() => {
     setShowDisconnectedDialog(true);
@@ -781,7 +754,6 @@ The AI assistant will read and update this file during compilation.
   useEffect(() => {
     localStorage.setItem("terminalHeight", String(terminalHeight));
   }, [terminalHeight]);
-
 
   useEffect(() => {
     checkOpencodeStatus();
@@ -845,18 +817,9 @@ The AI assistant will read and update this file during compilation.
       sidebarWidthRef.current = sidebarWidth;
       rightPanelWidthRef.current = rightPanelWidth;
       terminalHeightRef.current = terminalHeight;
-      document.documentElement.style.setProperty(
-        "--sidebar-width",
-        `${sidebarWidth}px`,
-      );
-      document.documentElement.style.setProperty(
-        "--right-panel-width",
-        `${rightPanelWidth}px`,
-      );
-      document.documentElement.style.setProperty(
-        "--terminal-height",
-        `${terminalHeight}px`,
-      );
+      document.documentElement.style.setProperty("--sidebar-width", `${sidebarWidth}px`);
+      document.documentElement.style.setProperty("--right-panel-width", `${rightPanelWidth}px`);
+      document.documentElement.style.setProperty("--terminal-height", `${terminalHeight}px`);
     },
     [sidebarWidth, rightPanelWidth, terminalHeight],
   );
@@ -866,15 +829,9 @@ The AI assistant will read and update this file during compilation.
 
     rafIdRef.current = requestAnimationFrame(() => {
       if (panel === "sidebar") {
-        const newWidth = Math.min(
-          Math.max(info.point.x, MIN_PANEL_WIDTH),
-          MAX_SIDEBAR_WIDTH,
-        );
+        const newWidth = Math.min(Math.max(info.point.x, MIN_PANEL_WIDTH), MAX_SIDEBAR_WIDTH);
         sidebarWidthRef.current = newWidth;
-        document.documentElement.style.setProperty(
-          "--sidebar-width",
-          `${newWidth}px`,
-        );
+        document.documentElement.style.setProperty("--sidebar-width", `${newWidth}px`);
       } else if (panel === "right") {
         const maxRightWidth = Math.floor(window.innerWidth / 2);
         const newWidth = Math.min(
@@ -882,10 +839,7 @@ The AI assistant will read and update this file during compilation.
           maxRightWidth,
         );
         rightPanelWidthRef.current = newWidth;
-        document.documentElement.style.setProperty(
-          "--right-panel-width",
-          `${newWidth}px`,
-        );
+        document.documentElement.style.setProperty("--right-panel-width", `${newWidth}px`);
       } else if (panel === "bottom") {
         const maxHeight = Math.floor(window.innerHeight * MAX_TERMINAL_HEIGHT_RATIO);
         const newHeight = Math.min(
@@ -893,10 +847,7 @@ The AI assistant will read and update this file during compilation.
           maxHeight,
         );
         terminalHeightRef.current = newHeight;
-        document.documentElement.style.setProperty(
-          "--terminal-height",
-          `${newHeight}px`,
-        );
+        document.documentElement.style.setProperty("--terminal-height", `${newHeight}px`);
       }
       rafIdRef.current = null;
     });
@@ -932,9 +883,7 @@ The AI assistant will read and update this file during compilation.
 
   const getFileType = useCallback((path: string): "text" | "image" | "pdf" => {
     const ext = path.split(".").pop()?.toLowerCase() || "";
-    if (
-      ["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp", "ico"].includes(ext)
-    ) {
+    if (["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp", "ico"].includes(ext)) {
       return "image";
     }
     if (ext === "pdf") {
@@ -1012,10 +961,7 @@ The AI assistant will read and update this file during compilation.
       if (matches.length > 1) {
         const preferred = matches[0];
         if (preferred) {
-          toast(
-            `Multiple files named "${normalized}" found. Opening "${preferred}".`,
-            "error",
-          );
+          toast(`Multiple files named "${normalized}" found. Opening "${preferred}".`, "error");
           return preferred;
         }
       }
@@ -1050,10 +996,7 @@ The AI assistant will read and update this file during compilation.
           // Handle file not found - remove from tabs and notify user
           if (errorStr.includes("FILE_NOT_FOUND")) {
             const fileName = pathSync.basename(resolvedPath);
-            toast(
-              `File "${fileName}" no longer exists and has been removed from tabs`,
-              "error",
-            );
+            toast(`File "${fileName}" no longer exists and has been removed from tabs`, "error");
 
             // Remove the file from open tabs
             setOpenTabs((prev) => {
@@ -1110,7 +1053,10 @@ The AI assistant will read and update this file during compilation.
 
         // Normalize slashes and resolve "." segments for comparison
         const normalize = (p: string) =>
-          p.replace(/\\/g, "/").replace(/\/\.\//g, "/").replace(/\/+/g, "/");
+          p
+            .replace(/\\/g, "/")
+            .replace(/\/\.\//g, "/")
+            .replace(/\/+/g, "/");
 
         const normalFile = normalize(result.file);
         const normalProject = normalize(daemon.projectPath);
@@ -1154,7 +1100,10 @@ The AI assistant will read and update this file during compilation.
         });
 
         const normalize = (p: string) =>
-          p.replace(/\\/g, "/").replace(/\/\.\//g, "/").replace(/\/+/g, "/");
+          p
+            .replace(/\\/g, "/")
+            .replace(/\/\.\//g, "/")
+            .replace(/\/+/g, "/");
 
         const normalFile = normalize(result.file);
         const normalProject = normalize(daemon.projectPath);
@@ -1292,18 +1241,19 @@ The AI assistant will read and update this file during compilation.
       // Reload file content if the currently selected file was modified externally
       // Skip if this was our own save (within 2 seconds)
       const lastSave = lastSaveTimeRef.current;
-      const isOurSave = lastSave &&
-        lastSave.path === path &&
-        Date.now() - lastSave.time < 2000;
+      const isOurSave = lastSave && lastSave.path === path && Date.now() - lastSave.time < 2000;
 
       if (path === selectedFile && !isOurSave) {
-        daemon.readFile(path).then((content) => {
-          if (content !== null) {
-            setFileContent(content);
-          }
-        }).catch((err) => {
-          console.error("Failed to reload modified file:", err);
-        });
+        daemon
+          .readFile(path)
+          .then((content) => {
+            if (content !== null) {
+              setFileContent(content);
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to reload modified file:", err);
+          });
       }
 
       if (
@@ -1312,20 +1262,23 @@ The AI assistant will read and update this file during compilation.
         !splitPane.binaryPreviewUrl &&
         !isOurSave
       ) {
-        daemon.readFile(path).then((content) => {
-          if (content !== null) {
-            setSplitPane((prev) => {
-              if (!prev || prev.selectedFile !== path) return prev;
-              return {
-                ...prev,
-                content,
-                error: null,
-              };
-            });
-          }
-        }).catch((err) => {
-          console.error("Failed to reload modified split file:", err);
-        });
+        daemon
+          .readFile(path)
+          .then((content) => {
+            if (content !== null) {
+              setSplitPane((prev) => {
+                if (!prev || prev.selectedFile !== path) return prev;
+                return {
+                  ...prev,
+                  content,
+                  error: null,
+                };
+              });
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to reload modified split file:", err);
+          });
       }
     }
   }, [daemon.lastFileChange, selectedFile, handleFileSelect, daemon, splitPane]);
@@ -1404,11 +1357,7 @@ The AI assistant will read and update this file during compilation.
   }, []);
 
   const handleReorderTabs = useCallback(
-    (
-      draggedPath: string,
-      targetPath: string,
-      position: TabReorderPosition,
-    ) => {
+    (draggedPath: string, targetPath: string, position: TabReorderPosition) => {
       if (draggedPath === targetPath) return;
 
       setOpenTabs((prev) => {
@@ -1423,8 +1372,7 @@ The AI assistant will read and update this file during compilation.
         const targetAfterRemoval = reordered.indexOf(targetPath);
         if (targetAfterRemoval < 0) return prev;
 
-        const insertIndex =
-          position === "before" ? targetAfterRemoval : targetAfterRemoval + 1;
+        const insertIndex = position === "before" ? targetAfterRemoval : targetAfterRemoval + 1;
         reordered.splice(insertIndex, 0, movedTab);
         return reordered;
       });
@@ -1441,11 +1389,7 @@ The AI assistant will read and update this file during compilation.
   }, []);
 
   const openFileInSplitPane = useCallback(
-    async (
-      path: string,
-      side: SplitPaneSide,
-      options?: { moveFromPrimary?: boolean },
-    ) => {
+    async (path: string, side: SplitPaneSide, options?: { moveFromPrimary?: boolean }) => {
       const resolvedPath = resolveSelectablePath(path);
       const fileType = getFileType(resolvedPath);
       const requestId = splitLoadRequestIdRef.current + 1;
@@ -1522,10 +1466,7 @@ The AI assistant will read and update this file during compilation.
           if (splitLoadRequestIdRef.current !== requestId) return;
           const errorStr = String(err);
           if (errorStr.includes("FILE_NOT_FOUND")) {
-            toast(
-              `File "${pathSync.basename(resolvedPath)}" no longer exists`,
-              "error",
-            );
+            toast(`File "${pathSync.basename(resolvedPath)}" no longer exists`, "error");
             setSplitPane(null);
             return;
           }
@@ -1570,14 +1511,7 @@ The AI assistant will read and update this file during compilation.
         };
       });
     },
-    [
-      daemon,
-      getFileType,
-      resolveSelectablePath,
-      toast,
-      selectedFile,
-      handleFileSelect,
-    ],
+    [daemon, getFileType, resolveSelectablePath, toast, selectedFile, handleFileSelect],
   );
 
   const handleSplitContentChange = useCallback(
@@ -1632,7 +1566,7 @@ The AI assistant will read and update this file during compilation.
       const nextSelected =
         splitPane.selectedFile === path
           ? newTabs[Math.min(idx, newTabs.length - 1)]
-          : splitPane.selectedFile ?? newTabs[0];
+          : (splitPane.selectedFile ?? newTabs[0]);
 
       setSplitPane((prev) => {
         if (!prev) return prev;
@@ -1680,9 +1614,7 @@ The AI assistant will read and update this file during compilation.
           ...prev,
           openTabs: newTabs,
           selectedFile:
-            prev.selectedFile && newTabs.includes(prev.selectedFile)
-              ? prev.selectedFile
-              : path,
+            prev.selectedFile && newTabs.includes(prev.selectedFile) ? prev.selectedFile : path,
         };
       });
       if (splitPane.selectedFile && !newTabs.includes(splitPane.selectedFile)) {
@@ -1704,9 +1636,7 @@ The AI assistant will read and update this file during compilation.
           ...prev,
           openTabs: newTabs,
           selectedFile:
-            prev.selectedFile && newTabs.includes(prev.selectedFile)
-              ? prev.selectedFile
-              : path,
+            prev.selectedFile && newTabs.includes(prev.selectedFile) ? prev.selectedFile : path,
         };
       });
       if (splitPane.selectedFile && !newTabs.includes(splitPane.selectedFile)) {
@@ -1717,11 +1647,7 @@ The AI assistant will read and update this file during compilation.
   );
 
   const handleSplitReorderTabs = useCallback(
-    (
-      draggedPath: string,
-      targetPath: string,
-      position: TabReorderPosition,
-    ) => {
+    (draggedPath: string, targetPath: string, position: TabReorderPosition) => {
       if (draggedPath === targetPath) return;
       setSplitPane((prev) => {
         if (!prev) return prev;
@@ -1736,8 +1662,7 @@ The AI assistant will read and update this file during compilation.
         const targetAfterRemoval = reordered.indexOf(targetPath);
         if (targetAfterRemoval < 0) return prev;
 
-        const insertIndex =
-          position === "before" ? targetAfterRemoval : targetAfterRemoval + 1;
+        const insertIndex = position === "before" ? targetAfterRemoval : targetAfterRemoval + 1;
         reordered.splice(insertIndex, 0, movedTab);
         return {
           ...prev,
@@ -1749,11 +1674,7 @@ The AI assistant will read and update this file during compilation.
   );
 
   const resolveSplitDropSide = useCallback(
-    (
-      clientX: number,
-      clientY: number,
-      source: DragSourcePane,
-    ): SplitPaneSide | null => {
+    (clientX: number, clientY: number, source: DragSourcePane): SplitPaneSide | null => {
       const container = editorWorkspaceRef.current;
       if (!container) return null;
 
@@ -1766,14 +1687,12 @@ The AI assistant will read and update this file during compilation.
 
       if (!isInsideEditorWorkspace) return null;
 
-      const hoveredSide: SplitPaneSide =
-        clientX < rect.left + rect.width / 2 ? "left" : "right";
+      const hoveredSide: SplitPaneSide = clientX < rect.left + rect.width / 2 ? "left" : "right";
 
       if (!splitPane) return source === "primary" ? hoveredSide : null;
 
       const splitSide: SplitPaneSide = splitPane.side;
-      const primarySide: SplitPaneSide =
-        splitSide === "left" ? "right" : "left";
+      const primarySide: SplitPaneSide = splitSide === "left" ? "right" : "left";
 
       if (source === "primary") {
         return hoveredSide === splitSide ? splitSide : null;
@@ -1791,9 +1710,7 @@ The AI assistant will read and update this file during compilation.
         return;
       }
 
-      setSplitDropHint(
-        resolveSplitDropSide(payload.clientX, payload.clientY, "primary"),
-      );
+      setSplitDropHint(resolveSplitDropSide(payload.clientX, payload.clientY, "primary"));
     },
     [resolveSplitDropSide],
   );
@@ -1812,7 +1729,7 @@ The AI assistant will read and update this file during compilation.
         const nextSelected =
           splitPane.selectedFile === resolvedPath
             ? nextTabs[Math.min(currentIndex, nextTabs.length - 1)]
-            : splitPane.selectedFile ?? nextTabs[0];
+            : (splitPane.selectedFile ?? nextTabs[0]);
 
         setSplitPane((prev) => {
           if (!prev) return prev;
@@ -1830,13 +1747,7 @@ The AI assistant will read and update this file during compilation.
 
       void handleFileSelect(resolvedPath);
     },
-    [
-      splitPane,
-      resolveSelectablePath,
-      closeSplitPane,
-      openFileInSplitPane,
-      handleFileSelect,
-    ],
+    [splitPane, resolveSelectablePath, closeSplitPane, openFileInSplitPane, handleFileSelect],
   );
 
   const handleSplitTabDragMove = useCallback(
@@ -1846,9 +1757,7 @@ The AI assistant will read and update this file during compilation.
         return;
       }
 
-      setSplitDropHint(
-        resolveSplitDropSide(payload.clientX, payload.clientY, "split"),
-      );
+      setSplitDropHint(resolveSplitDropSide(payload.clientX, payload.clientY, "split"));
     },
     [resolveSplitDropSide],
   );
@@ -1858,11 +1767,7 @@ The AI assistant will read and update this file during compilation.
       setSplitDropHint(null);
       if (payload.dropTarget.type !== "outside") return;
 
-      const side = resolveSplitDropSide(
-        payload.clientX,
-        payload.clientY,
-        "primary",
-      );
+      const side = resolveSplitDropSide(payload.clientX, payload.clientY, "primary");
       if (!side) return;
 
       void openFileInSplitPane(payload.tabId, side, { moveFromPrimary: true });
@@ -1875,15 +1780,10 @@ The AI assistant will read and update this file during compilation.
       setSplitDropHint(null);
       if (payload.dropTarget.type !== "outside") return;
 
-      const side = resolveSplitDropSide(
-        payload.clientX,
-        payload.clientY,
-        "split",
-      );
+      const side = resolveSplitDropSide(payload.clientX, payload.clientY, "split");
       if (!side || !splitPane) return;
 
-      const primarySide: SplitPaneSide =
-        splitPane.side === "left" ? "right" : "left";
+      const primarySide: SplitPaneSide = splitPane.side === "left" ? "right" : "left";
       if (side !== primarySide) return;
 
       moveTabFromSplitToPrimary(payload.tabId);
@@ -1942,9 +1842,12 @@ The AI assistant will read and update this file during compilation.
             ) : splitPane.binaryPreviewUrl ? (
               <div className="h-full flex items-center justify-center overflow-auto p-4 bg-accent-hover">
                 {splitFileType === "image" ? (
-                  <img
+                  <Image
+                    unoptimized
                     src={splitPane.binaryPreviewUrl}
                     alt={splitSelectedFile}
+                    width={1200}
+                    height={900}
                     className="max-w-full max-h-full object-contain"
                   />
                 ) : splitFileType === "pdf" ? (
@@ -2018,10 +1921,7 @@ The AI assistant will read and update this file during compilation.
       {
         id: "git",
         label: "Git",
-        badge:
-          gitStatus && gitStatus.changes.length > 0
-            ? gitStatus.changes.length
-            : undefined,
+        badge: gitStatus && gitStatus.changes.length > 0 ? gitStatus.changes.length : undefined,
       },
     ],
     [gitStatus],
@@ -2099,7 +1999,7 @@ The AI assistant will read and update this file during compilation.
         recentProjects.removeProject(path);
       }
     },
-    [daemon, recentProjects, toast]
+    [daemon, recentProjects, toast],
   );
 
   const handleStageAll = useCallback(() => {
@@ -2174,33 +2074,30 @@ The AI assistant will read and update this file during compilation.
     }
   }, [daemon, toast]);
 
-  const handleDiscardFile = useCallback(async (path: string) => {
-    const result = await daemon.gitDiscardFile(path);
-    if (result.success) {
-      toast(`Discarded changes: ${path}`, "success");
-    } else {
-      toast(result.error || "Failed to discard file", "error");
-    }
-  }, [daemon, toast]);
+  const handleDiscardFile = useCallback(
+    async (path: string) => {
+      const result = await daemon.gitDiscardFile(path);
+      if (result.success) {
+        toast(`Discarded changes: ${path}`, "success");
+      } else {
+        toast(result.error || "Failed to discard file", "error");
+      }
+    },
+    [daemon, toast],
+  );
 
   const handlePublishToGitHub = useCallback(async () => {
     setGhPublishError(null);
 
     const status = await daemon.ghCheck();
     if (!status.installed) {
-      toast(
-        "GitHub CLI (gh) is not installed. Install it from https://cli.github.com",
-        "error",
-      );
+      toast("GitHub CLI (gh) is not installed. Install it from https://cli.github.com", "error");
       return;
     }
 
     if (!status.authenticated) {
       if (daemon.isAuthenticatingGh) {
-        toast(
-          "GitHub authentication is already in progress in the terminal window.",
-          "info",
-        );
+        toast("GitHub authentication is already in progress in the terminal window.", "info");
         return;
       }
 
@@ -2290,21 +2187,16 @@ The AI assistant will read and update this file during compilation.
           requestBody.model = preferred.model;
         }
 
-        const messageResponse = await fetch(
-          `${baseUrl}/session/${sessionId}/message${query}`,
-          {
-            method: "POST",
-            headers,
-            body: JSON.stringify(requestBody),
-            signal: controller.signal,
-          },
-        );
+        const messageResponse = await fetch(`${baseUrl}/session/${sessionId}/message${query}`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
 
         if (!messageResponse.ok) {
           const errorText = await messageResponse.text().catch(() => "");
-          throw new Error(
-            `OpenCode message failed: ${messageResponse.status} ${errorText}`,
-          );
+          throw new Error(`OpenCode message failed: ${messageResponse.status} ${errorText}`);
         }
 
         const messageDataRaw = (await messageResponse.json()) as unknown;
@@ -2318,14 +2210,11 @@ The AI assistant will read and update this file during compilation.
           messageData?.info?.role === "user" ? messageData.info.id : undefined;
         const startedAt = Date.now();
         while (Date.now() - startedAt < AI_COMMIT_TIMEOUT_MS) {
-          const messagesResponse = await fetch(
-            `${baseUrl}/session/${sessionId}/message${query}`,
-            {
-              method: "GET",
-              headers,
-              signal: controller.signal,
-            },
-          );
+          const messagesResponse = await fetch(`${baseUrl}/session/${sessionId}/message${query}`, {
+            method: "GET",
+            headers,
+            signal: controller.signal,
+          });
 
           if (!messagesResponse.ok) {
             const errorText = await messagesResponse.text().catch(() => "");
@@ -2339,17 +2228,15 @@ The AI assistant will read and update this file during compilation.
             ? (messagesData as OpenCodeMessageItem[])
             : messagesData &&
                 typeof messagesData === "object" &&
-                Array.isArray(
-                  (messagesData as { messages?: OpenCodeMessageItem[] })
-                    .messages,
-                )
+                Array.isArray((messagesData as { messages?: OpenCodeMessageItem[] }).messages)
               ? (messagesData as { messages: OpenCodeMessageItem[] }).messages
               : [];
 
           for (let i = items.length - 1; i >= 0; i--) {
             const item = items[i];
+            if (!item) continue;
             const info = item?.info;
-            if (!info || info.role !== "assistant") continue;
+            if (info?.role !== "assistant") continue;
             if (parentMessageId && info.parentID && info.parentID !== parentMessageId) {
               continue;
             }
@@ -2399,10 +2286,7 @@ The AI assistant will read and update this file during compilation.
     try {
       const status = await checkOpencodeStatus();
       if (!status?.installed) {
-        toast(
-          "OpenCode is not installed. Run: npm i -g opencode-ai@latest",
-          "error",
-        );
+        toast("OpenCode is not installed. Run: npm i -g opencode-ai@latest", "error");
         return;
       }
 
@@ -2441,20 +2325,12 @@ The AI assistant will read and update this file during compilation.
       toast("AI commit draft generated.", "success");
     } catch (error) {
       console.error("Failed to generate AI commit message:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       toast(`AI draft failed: ${errorMessage}`, "error");
     } finally {
       setIsGeneratingCommitMessageAI(false);
     }
-  }, [
-    daemon,
-    stagedChanges,
-    checkOpencodeStatus,
-    startOpencode,
-    runOpenCodePrompt,
-    toast,
-  ]);
+  }, [daemon, stagedChanges, checkOpencodeStatus, startOpencode, runOpenCodePrompt, toast]);
 
   const handleCommit = useCallback(async () => {
     if (!commitMessage.trim()) return;
@@ -2528,14 +2404,11 @@ The AI assistant will read and update this file during compilation.
     };
 
     window.addEventListener("keydown", handleKeyDown, { capture: true });
-    return () =>
-      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+    return () => window.removeEventListener("keydown", handleKeyDown, { capture: true });
   }, [daemon, handleOpenFolder, selectedFile, handleCloseTab, handleCompileWithDetection]);
 
   const isShowingGitDiff =
-    editorViewMode === "git-diff" &&
-    !!gitDiffPreview &&
-    selectedFile === gitDiffPreview.path;
+    editorViewMode === "git-diff" && !!gitDiffPreview && selectedFile === gitDiffPreview.path;
 
   const gitDiffContent = gitDiffPreview?.content;
   const parsedGitDiff = useMemo(() => {
@@ -2567,16 +2440,10 @@ The AI assistant will read and update this file during compilation.
           <div className="flex-1 min-h-0 flex flex-col">
             <div className="border-b border-border bg-accent-hover px-3 py-2 flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <div className="text-sm font-medium truncate">
-                  {gitDiffPreview.path}
-                </div>
+                <div className="text-sm font-medium truncate">{gitDiffPreview.path}</div>
                 <div className="text-xs text-muted flex items-center gap-2">
-                  <span>
-                    {gitDiffPreview.staged
-                      ? "Staged changes"
-                      : "Working tree changes"}
-                  </span>
-                  {parsedGitDiff && parsedGitDiff.hasRenderableHunks && (
+                  <span>{gitDiffPreview.staged ? "Staged changes" : "Working tree changes"}</span>
+                  {parsedGitDiff?.hasRenderableHunks && (
                     <span>
                       +{parsedGitDiff.added} / -{parsedGitDiff.removed}
                     </span>
@@ -2585,6 +2452,7 @@ The AI assistant will read and update this file during compilation.
               </div>
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() =>
                     void loadGitDiffPreview(gitDiffPreview.path, gitDiffPreview.staged)
                   }
@@ -2593,6 +2461,7 @@ The AI assistant will read and update this file during compilation.
                   Refresh Diff
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     void handleFileSelect(gitDiffPreview.path);
                   }}
@@ -2618,7 +2487,7 @@ The AI assistant will read and update this file during compilation.
                 <div className="h-full flex items-center justify-center px-6 text-sm text-muted">
                   No textual diff available for this file.
                 </div>
-              ) : parsedGitDiff && parsedGitDiff.hasRenderableHunks ? (
+              ) : parsedGitDiff?.hasRenderableHunks ? (
                 <GitMonacoDiffEditor
                   original={parsedGitDiff.original}
                   modified={parsedGitDiff.modified}
@@ -2642,9 +2511,12 @@ The AI assistant will read and update this file during compilation.
           <div className="flex-1 flex flex-col bg-accent-hover overflow-hidden">
             {getFileType(selectedFile) === "image" ? (
               <div className="flex-1 flex items-center justify-center overflow-auto p-4">
-                <img
+                <Image
+                  unoptimized
                   src={binaryPreviewUrl}
                   alt={selectedFile}
+                  width={1200}
+                  height={900}
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
@@ -2709,9 +2581,7 @@ The AI assistant will read and update this file during compilation.
   if (splitPane) {
     editorPanelItems.push({
       id: `editor-split-${splitPane.side}`,
-      title: splitPane.selectedFile
-        ? pathSync.basename(splitPane.selectedFile)
-        : "Split",
+      title: splitPane.selectedFile ? pathSync.basename(splitPane.selectedFile) : "Split",
       content: renderSplitPane(splitPane.side),
       inactive: false,
       position: {
@@ -2724,12 +2594,11 @@ The AI assistant will read and update this file during compilation.
   return (
     <div className="h-dvh flex flex-col">
       <div className="flex-shrink-0 flex flex-col">
-        <header
-          className="h-12 border-b border-border flex items-center"
-        >
+        <header className="h-12 border-b border-border flex items-center">
           <div className="w-full px-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <button
+                type="button"
                 onClick={() => {
                   import("@tauri-apps/plugin-shell").then(({ open }) => {
                     open("https://writer.lmms-lab.com");
@@ -2739,33 +2608,34 @@ The AI assistant will read and update this file during compilation.
                 title="Visit writer.lmms-lab.com"
                 aria-label="Open LMMs-Lab website"
               >
-                <img
+                <Image
                   src="/logo-small-light.svg"
                   alt="LMMs-Lab Writer"
+                  width={140}
+                  height={28}
                   className="h-7 w-auto dark:hidden"
                 />
-                <img
+                <Image
                   src="/logo-small-dark.svg"
                   alt="LMMs-Lab Writer"
+                  width={140}
+                  height={28}
                   className="h-7 w-auto hidden dark:block"
                 />
               </button>
               <span className="text-border">/</span>
               <div className="flex items-center gap-2 min-w-0">
                 <div className="text-sm font-medium px-2 py-1 -ml-2 truncate">
-                  {daemon.projectPath
-                    ? pathSync.basename(daemon.projectPath)
-                    : "LMMs-Lab Writer"}
+                  {daemon.projectPath ? pathSync.basename(daemon.projectPath) : "LMMs-Lab Writer"}
                 </div>
-                {isSaving && (
-                  <span className="text-xs text-muted shrink-0">Saving...</span>
-                )}
+                {isSaving && <span className="text-xs text-muted shrink-0">Saving...</span>}
               </div>
             </div>
 
             <div className="flex items-center gap-3 h-8">
               {daemon.projectPath && (
                 <button
+                  type="button"
                   onClick={() => setShowSidebar((prev) => !prev)}
                   className={`h-8 w-8 border border-border transition-colors flex items-center justify-center bg-background text-foreground ${
                     showSidebar
@@ -2780,6 +2650,7 @@ The AI assistant will read and update this file during compilation.
 
               {daemon.projectPath && (
                 <button
+                  type="button"
                   onClick={() => setShowTerminal((prev) => !prev)}
                   className={`h-8 w-8 border border-border transition-colors flex items-center justify-center bg-background text-foreground ${
                     showTerminal
@@ -2793,6 +2664,7 @@ The AI assistant will read and update this file during compilation.
               )}
 
               <button
+                type="button"
                 onClick={handleToggleRightPanel}
                 className={`h-8 w-8 border border-border transition-colors flex items-center justify-center bg-background text-foreground ${
                   showRightPanel
@@ -2809,6 +2681,7 @@ The AI assistant will read and update this file during compilation.
                   <span className="text-border text-lg select-none">/</span>
                   <div className="flex items-center gap-2 h-8">
                     <button
+                      type="button"
                       onClick={handleCompileWithDetection}
                       disabled={latexSettings.isDetecting}
                       className={`h-8 w-8 border border-border transition-colors flex items-center justify-center bg-background text-foreground ${
@@ -2822,6 +2695,7 @@ The AI assistant will read and update this file during compilation.
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => setShowLatexSettings(true)}
                       className="h-8 w-8 border border-border bg-background text-foreground hover:bg-accent-hover hover:border-border-dark transition-colors flex items-center justify-center"
                       title="Settings"
@@ -2832,7 +2706,6 @@ The AI assistant will read and update this file during compilation.
                   </div>
                 </>
               )}
-
             </div>
           </div>
         </header>
@@ -2843,29 +2716,18 @@ The AI assistant will read and update this file during compilation.
           {showSidebar && (
             <motion.div
               key="sidebar-container"
-              initial={
-                prefersReducedMotion ? { opacity: 1 } : { x: -280, opacity: 0 }
-              }
+              initial={prefersReducedMotion ? { opacity: 1 } : { x: -280, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={
-                prefersReducedMotion ? { opacity: 0 } : { x: -280, opacity: 0 }
-              }
-              transition={
-                prefersReducedMotion ? INSTANT_TRANSITION : PANEL_SPRING
-              }
+              exit={prefersReducedMotion ? { opacity: 0 } : { x: -280, opacity: 0 }}
+              transition={prefersReducedMotion ? INSTANT_TRANSITION : PANEL_SPRING}
               className="flex flex-shrink-0"
               style={{
-                willChange: prefersReducedMotion
-                  ? undefined
-                  : "transform, opacity",
+                willChange: prefersReducedMotion ? undefined : "transform, opacity",
               }}
             >
               <aside
                 style={{
-                  width:
-                    resizing === "sidebar"
-                      ? "var(--sidebar-width)"
-                      : sidebarWidth,
+                  width: resizing === "sidebar" ? "var(--sidebar-width)" : sidebarWidth,
                   willChange: resizing === "sidebar" ? "width" : undefined,
                 }}
                 className="border-r border-border flex flex-col flex-shrink-0 overflow-hidden"
@@ -2949,9 +2811,7 @@ The AI assistant will read and update this file during compilation.
                   dragElastic={0}
                   dragMomentum={false}
                   onDragStart={() => startResize("sidebar")}
-                  onDrag={(event, info) =>
-                    handleResizeDrag("sidebar", info)
-                  }
+                  onDrag={(_event, info) => handleResizeDrag("sidebar", info)}
                   onDragEnd={endResize}
                   className="absolute inset-y-0 -left-1 -right-1 cursor-col-resize z-10"
                   style={{ x: 0 }}
@@ -2966,10 +2826,7 @@ The AI assistant will read and update this file during compilation.
 
         <div className="flex-1 min-w-0 w-0 flex flex-col overflow-hidden">
           {daemon.projectPath && editorPanelItems.length > 0 ? (
-            <div
-              ref={editorWorkspaceRef}
-              className="relative flex-1 min-h-0"
-            >
+            <div ref={editorWorkspaceRef} className="relative flex-1 min-h-0">
               {splitDropHint && (
                 <div className="pointer-events-none absolute inset-0 z-10">
                   <div
@@ -2982,10 +2839,7 @@ The AI assistant will read and update this file during compilation.
                 </div>
               )}
 
-              <DockviewPanelLayout
-                panels={editorPanelItems}
-                className="dockview-editor-layout"
-              />
+              <DockviewPanelLayout panels={editorPanelItems} className="dockview-editor-layout" />
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
@@ -2993,20 +2847,21 @@ The AI assistant will read and update this file during compilation.
                 <div />
               ) : (
                 <div className="flex flex-col items-center justify-center text-center px-6">
-                  <img
+                  <Image
                     src="/logo-light.svg"
                     alt="LMMs-Lab Writer"
+                    width={320}
+                    height={96}
                     className="h-24 w-auto mb-10 dark:hidden"
                   />
-                  <img
+                  <Image
                     src="/logo-dark.svg"
                     alt="LMMs-Lab Writer"
+                    width={320}
+                    height={96}
                     className="h-24 w-auto mb-10 hidden dark:block"
                   />
-                  <button
-                    onClick={handleOpenFolder}
-                    className="btn btn-primary"
-                  >
+                  <button type="button" onClick={handleOpenFolder} className="btn btn-primary">
                     Open Folder
                   </button>
                   <RecentProjects
@@ -3026,9 +2881,7 @@ The AI assistant will read and update this file during compilation.
             !hasAnyCompiler &&
             !latexCompiler.isDetecting && (
               <div className="border-t border-border">
-                <LaTeXInstallPrompt
-                  onRefreshCompilers={latexCompiler.detectCompilers}
-                />
+                <LaTeXInstallPrompt onRefreshCompilers={latexCompiler.detectCompilers} />
               </div>
             )}
 
@@ -3037,25 +2890,14 @@ The AI assistant will read and update this file during compilation.
               <motion.div
                 key="terminal-container"
                 initial={
-                  prefersReducedMotion
-                    ? { opacity: 1, height: 0 }
-                    : { opacity: 0, height: 0 }
+                  prefersReducedMotion ? { opacity: 1, height: 0 } : { opacity: 0, height: 0 }
                 }
                 animate={{
                   opacity: 1,
-                  height:
-                    resizing === "bottom"
-                      ? "var(--terminal-height)"
-                      : terminalHeight,
+                  height: resizing === "bottom" ? "var(--terminal-height)" : terminalHeight,
                 }}
-                exit={
-                  prefersReducedMotion
-                    ? { opacity: 0, height: 0 }
-                    : { opacity: 0, height: 0 }
-                }
-                transition={
-                  prefersReducedMotion ? INSTANT_TRANSITION : PANEL_SPRING
-                }
+                exit={prefersReducedMotion ? { opacity: 0, height: 0 } : { opacity: 0, height: 0 }}
+                transition={prefersReducedMotion ? INSTANT_TRANSITION : PANEL_SPRING}
                 className="flex-shrink-0 border-t border-border flex flex-col overflow-hidden"
                 style={{
                   willChange: prefersReducedMotion ? undefined : "height, opacity",
@@ -3068,9 +2910,7 @@ The AI assistant will read and update this file during compilation.
                     dragElastic={0}
                     dragMomentum={false}
                     onDragStart={() => startResize("bottom")}
-                    onDrag={(event, info) =>
-                      handleResizeDrag("bottom", info)
-                    }
+                    onDrag={(_event, info) => handleResizeDrag("bottom", info)}
                     onDragEnd={endResize}
                     className="absolute inset-x-0 -top-1 -bottom-1 cursor-row-resize z-10"
                     style={{ y: 0 }}
@@ -3088,18 +2928,13 @@ The AI assistant will read and update this file during compilation.
               </motion.div>
             )}
           </AnimatePresence>
-
         </div>
 
         <AnimatePresence>
           {showRightPanel && (
             <motion.div
               key="right-panel-container"
-              initial={
-                prefersReducedMotion
-                  ? { opacity: 1, width: 0 }
-                  : { opacity: 0, width: 0 }
-              }
+              initial={prefersReducedMotion ? { opacity: 1, width: 0 } : { opacity: 0, width: 0 }}
               animate={{
                 opacity: 1,
                 width:
@@ -3107,14 +2942,8 @@ The AI assistant will read and update this file during compilation.
                     ? `calc(var(--right-panel-width) + 4px)`
                     : rightPanelWidth + 4,
               }}
-              exit={
-                prefersReducedMotion
-                  ? { opacity: 0, width: 0 }
-                  : { opacity: 0, width: 0 }
-              }
-              transition={
-                prefersReducedMotion ? INSTANT_TRANSITION : PANEL_SPRING
-              }
+              exit={prefersReducedMotion ? { opacity: 0, width: 0 } : { opacity: 0, width: 0 }}
+              transition={prefersReducedMotion ? INSTANT_TRANSITION : PANEL_SPRING}
               className="flex flex-shrink-0 bg-background overflow-hidden"
               style={{
                 willChange: prefersReducedMotion ? undefined : "width, opacity",
@@ -3127,7 +2956,7 @@ The AI assistant will read and update this file during compilation.
                   dragElastic={0}
                   dragMomentum={false}
                   onDragStart={() => startResize("right")}
-                  onDrag={(event, info) => handleResizeDrag("right", info)}
+                  onDrag={(_event, info) => handleResizeDrag("right", info)}
                   onDragEnd={endResize}
                   className="absolute inset-y-0 -left-1 -right-1 cursor-col-resize z-10"
                   style={{ x: 0 }}
@@ -3138,10 +2967,7 @@ The AI assistant will read and update this file during compilation.
               </div>
               <aside
                 style={{
-                  width:
-                    resizing === "right"
-                      ? "var(--right-panel-width)"
-                      : rightPanelWidth,
+                  width: resizing === "right" ? "var(--right-panel-width)" : rightPanelWidth,
                   willChange: resizing === "right" ? "width" : undefined,
                 }}
                 className="border-l border-border flex flex-col flex-shrink-0 overflow-hidden"
@@ -3151,9 +2977,7 @@ The AI assistant will read and update this file during compilation.
                     className="h-full"
                     baseUrl={`http://localhost:${opencodePort}`}
                     directory={daemon.projectPath ?? undefined}
-                    autoConnect={
-                      opencodeDaemonStatus === "running" && !!daemon.projectPath
-                    }
+                    autoConnect={opencodeDaemonStatus === "running" && !!daemon.projectPath}
                     daemonStatus={opencodeDaemonStatus}
                     onRestartOpenCode={restartOpencode}
                     onMaxReconnectFailed={handleMaxReconnectFailed}
@@ -3232,9 +3056,7 @@ The AI assistant will read and update this file during compilation.
       {showGitHubPublishDialog && (
         <GitHubPublishDialog
           defaultRepoName={
-            daemon.projectPath
-              ? pathSync.basename(daemon.projectPath)
-              : "my-project"
+            daemon.projectPath ? pathSync.basename(daemon.projectPath) : "my-project"
           }
           onPublish={handleGitHubPublish}
           onCancel={() => {
@@ -3259,7 +3081,6 @@ The AI assistant will read and update this file during compilation.
           }
         }}
       />
-
     </div>
   );
 }

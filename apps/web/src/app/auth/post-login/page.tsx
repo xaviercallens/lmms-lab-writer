@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function PostLoginPage() {
   const router = useRouter();
@@ -28,6 +28,7 @@ export default function PostLoginPage() {
         <div className="max-w-md w-full p-8 text-center">
           <div className="w-12 h-12 border-2 border-yellow-500 flex items-center justify-center mx-auto mb-4">
             <svg
+              aria-hidden="true"
               className="w-6 h-6 text-yellow-500"
               fill="none"
               stroke="currentColor"
@@ -43,8 +44,8 @@ export default function PostLoginPage() {
           </div>
           <h1 className="text-xl font-medium mb-2">Login Incomplete</h1>
           <p className="text-muted text-sm mb-6">
-            The login session couldn&apos;t be transferred to the desktop app.
-            Please try logging in again from the desktop app.
+            The login session couldn&apos;t be transferred to the desktop app. Please try logging in
+            again from the desktop app.
           </p>
           <a
             href="/login?source=desktop"

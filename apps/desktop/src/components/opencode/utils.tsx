@@ -14,13 +14,13 @@ export function formatRelativeTime(date: Date): string {
 
 export function formatValue(value: unknown): string {
   if (typeof value === "string") {
-    return value.length > 300 ? value.slice(0, 300) + "..." : value;
+    return value.length > 300 ? `${value.slice(0, 300)}...` : value;
   }
   if (value === null || value === undefined) {
     return String(value);
   }
   const json = JSON.stringify(value, null, 2);
-  return json.length > 300 ? json.slice(0, 300) + "..." : json;
+  return json.length > 300 ? `${json.slice(0, 300)}...` : json;
 }
 
 export function ErrorMessage({ message }: { message: string }) {
@@ -40,6 +40,7 @@ export function ErrorMessage({ message }: { message: string }) {
       <>
         {parts[0]}
         <button
+          type="button"
           onClick={handleClick}
           className="underline hover:text-red-900 font-medium"
         >

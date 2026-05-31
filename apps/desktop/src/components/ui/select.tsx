@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import * as SelectPrimitive from "@radix-ui/react-select";
 import { CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import * as React from "react";
 
 /* ── Root re-exports ── */
 export const Select = SelectPrimitive.Root;
@@ -57,9 +57,7 @@ export const SelectContent = React.forwardRef<
       `.trim()}
       {...props}
     >
-      <SelectPrimitive.Viewport
-        className={position === "popper" ? "p-1" : "p-1"}
-      >
+      <SelectPrimitive.Viewport className={position === "popper" ? "p-1" : "p-1"}>
         {children}
       </SelectPrimitive.Viewport>
     </SelectPrimitive.Content>

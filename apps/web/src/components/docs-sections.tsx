@@ -1,23 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import {
-  Download as DownloadIcon,
-  Zap as ZapIcon,
-  Sparkles as SparklesIcon,
   Bot as BotIcon,
+  Download as DownloadIcon,
   FileText as FileTextIcon,
-  Terminal as TerminalIcon,
   GitBranch as GitBranchIcon,
   type LucideIcon,
+  Sparkles as SparklesIcon,
+  Terminal as TerminalIcon,
+  Zap as ZapIcon,
 } from "lucide-react";
-import {
-  FadeIn,
-  FadeInStagger,
-  FadeInStaggerItem,
-  MotionCard,
-} from "@/components/motion";
-import { DEFAULT_LOCALE, withLocalePrefix, type Locale } from "@/lib/i18n";
+import Link from "next/link";
+import { FadeIn, FadeInStagger, FadeInStaggerItem, MotionCard } from "@/components/motion";
+import { DEFAULT_LOCALE, type Locale, withLocalePrefix } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
 
 function getDocIcon(href: string): LucideIcon {
@@ -48,12 +43,8 @@ export function DocsContent({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
     <main className="flex-1 py-16 px-6">
       <div className="max-w-5xl mx-auto">
         <FadeIn>
-          <h1 className="text-2xl font-medium tracking-tight mb-2">
-            {messages.docs.title}
-          </h1>
-          <p className="text-sm text-muted mb-12">
-            {messages.docs.subtitle}
-          </p>
+          <h1 className="text-2xl font-medium tracking-tight mb-2">{messages.docs.title}</h1>
+          <p className="text-sm text-muted mb-12">{messages.docs.subtitle}</p>
         </FadeIn>
 
         <div className="space-y-10">
@@ -73,10 +64,7 @@ export function DocsContent({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
 
                   return (
                     <FadeInStaggerItem key={item.href}>
-                      <Link
-                        href={withLocalePrefix(item.href, locale)}
-                        className="block h-full"
-                      >
+                      <Link href={withLocalePrefix(item.href, locale)} className="block h-full">
                         <MotionCard className="border border-border p-5 h-full">
                           <div className="flex items-center gap-3 mb-2.5">
                             <div className="w-8 h-8 border border-foreground flex items-center justify-center bg-neutral-50 shrink-0">
@@ -84,9 +72,7 @@ export function DocsContent({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
                             </div>
                             <h3 className="text-sm font-medium">{item.title}</h3>
                           </div>
-                          <p className="text-sm text-muted leading-relaxed">
-                            {item.description}
-                          </p>
+                          <p className="text-sm text-muted leading-relaxed">{item.description}</p>
                         </MotionCard>
                       </Link>
                     </FadeInStaggerItem>

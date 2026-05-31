@@ -1,20 +1,21 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import type {
-  Message,
   AssistantMessage,
-  Part,
-  ToolPart,
-  TextPart,
-  ReasoningPart,
   FilePart,
+  Message,
+  Part,
+  ReasoningPart,
+  TextPart,
+  ToolPart,
 } from "@/lib/opencode/types";
 import { ChevronRightIcon } from "./icons";
 import { MarkdownText } from "./markdown-text";
-import { ToolDisplay } from "./tool-display";
 import { AskUserQuestionDisplay } from "./question-wizard";
+import { ToolDisplay } from "./tool-display";
 
 export function MessageList({
   messages,
@@ -29,7 +30,11 @@ export function MessageList({
 }) {
   const turns = useMemo(() => {
     const result: { user: Message; assistantMessages: Message[]; assistantParts: Part[] }[] = [];
-    let currentTurn: { user: Message; assistantMessages: Message[]; assistantParts: Part[] } | null = null;
+    let currentTurn: {
+      user: Message;
+      assistantMessages: Message[];
+      assistantParts: Part[];
+    } | null = null;
 
     for (const msg of messages) {
       if (msg.role === "user") {
@@ -59,13 +64,21 @@ export function MessageList({
     <div ref={turnsParent} className="space-y-6">
       {turns.map((turn, index) => {
         const userParts = getPartsForMessage(turn.user.id);
-        const userText =
-          userParts.find((p): p is TextPart => p.type === "text")?.text || "";
-        const userImages = userParts.filter((p): p is FilePart => p.type === "file" && "mime" in p && typeof p.mime === "string" && p.mime.startsWith("image/"));
+        const userText = userParts.find((p): p is TextPart => p.type === "text")?.text || "";
+        const userImages = userParts.filter(
+          (p): p is FilePart =>
+            p.type === "file" &&
+            "mime" in p &&
+            typeof p.mime === "string" &&
+            p.mime.startsWith("image/"),
+        );
         const isLastTurn = index === turns.length - 1;
 
         const lastAssistant = turn.assistantMessages[turn.assistantMessages.length - 1];
-        const endTime = lastAssistant?.role === 'assistant' ? (lastAssistant as AssistantMessage).time?.completed : undefined;
+        const endTime =
+          lastAssistant?.role === "assistant"
+            ? (lastAssistant as AssistantMessage).time?.completed
+            : undefined;
 
         return (
           <MessageTurn
@@ -166,9 +179,12 @@ function MessageTurn({
                 rel="noopener noreferrer"
                 className="block"
               >
-                <img
+                <Image
+                  unoptimized
                   src={img.url}
                   alt="Attached"
+                  width={200}
+                  height={128}
                   className="max-h-32 max-w-[200px] object-contain rounded border border-border hover:border-border-dark transition-colors cursor-zoom-in"
                 />
               </a>
@@ -190,10 +206,16 @@ function MessageTurn({
       {/* All steps rendered chronologically */}
       {steps.length > 0 && (
         <div ref={stepsParent} className="space-y-1.5 pl-2 border-l border-surface-secondary ml-1">
-          {steps.map((step, idx) => {
+          {steps.map((step) => {
             // Reasoning Group
             if ("type" in step && step.type === "reasoning-group") {
-              return <ReasoningDisplay key={`reasoning-${idx}`} parts={(step as { parts: ReasoningPart[] }).parts} />;
+              const parts = (step as { parts: ReasoningPart[] }).parts;
+              return (
+                <ReasoningDisplay
+                  key={`reasoning-${parts.map((part) => part.id).join("-")}`}
+                  parts={parts}
+                />
+              );
             }
 
             const p = step as Part;
@@ -211,10 +233,7 @@ function MessageTurn({
             // Text Part — rendered as markdown
             if (p.type === "text") {
               return (
-                <div
-                  key={p.id}
-                  className="text-[13px] leading-relaxed text-foreground-secondary"
-                >
+                <div key={p.id} className="text-[13px] leading-relaxed text-foreground-secondary">
                   <MarkdownText text={(p as TextPart).text} onFileClick={onFileClick} />
                 </div>
               );
@@ -249,11 +268,7 @@ function ReasoningDisplay({ parts }: { parts: ReasoningPart[] }) {
           <span className="text-muted-foreground truncate flex-1">{preview}...</span>
         )}
       </button>
-      {expanded && (
-        <div className="mt-2 text-muted whitespace-pre-wrap">
-          {combinedText}
-        </div>
-      )}
+      {expanded && <div className="mt-2 text-muted whitespace-pre-wrap">{combinedText}</div>}
     </div>
   );
 }

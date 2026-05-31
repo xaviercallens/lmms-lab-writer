@@ -1,13 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState, useMemo, useRef } from "react";
+import type { FileNode, GitInfo, GitLogEntry, GitStatus } from "@lmms-lab/writer-shared";
 import { invoke } from "@tauri-apps/api/core";
-import type {
-  FileNode,
-  GitInfo,
-  GitStatus,
-  GitLogEntry,
-} from "@lmms-lab/writer-shared";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { pathSync } from "@/lib/path";
 
 function debounce<T extends (...args: Parameters<T>) => void>(
@@ -100,7 +95,7 @@ function stripWrappingQuotes(value: string): string {
   const first = trimmed[0];
   const last = trimmed[trimmed.length - 1];
   if (
-    (first === "\"" && last === "\"") ||
+    (first === '"' && last === '"') ||
     (first === "'" && last === "'") ||
     (first === "`" && last === "`")
   ) {
@@ -162,9 +157,7 @@ function convertFileNode(node: {
     name: node.name,
     path: node.path,
     type: node.type === "directory" ? "directory" : "file",
-    children: node.children?.map((child) =>
-      convertFileNode(child as typeof node),
-    ),
+    children: node.children?.map((child) => convertFileNode(child as typeof node)),
   };
 }
 
@@ -404,14 +397,8 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
       if (!projectState.projectPath) return;
 
       try {
-        const oldFullPath = resolvePathWithinProject(
-          projectState.projectPath,
-          oldRelativePath,
-        );
-        const newFullPath = resolvePathWithinProject(
-          projectState.projectPath,
-          newRelativePath,
-        );
+        const oldFullPath = resolvePathWithinProject(projectState.projectPath, oldRelativePath);
+        const newFullPath = resolvePathWithinProject(projectState.projectPath, newRelativePath);
         await invoke("rename_path", {
           oldPath: oldFullPath,
           newPath: newFullPath,
@@ -443,24 +430,26 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
     [projectState.projectPath, refreshFiles, setError],
   );
 
-  const refreshGitStatus = useCallback(async (syncRemote = false) => {
-    if (!projectState.projectPath) return;
-    if (syncRemote && gitState.gitStatus?.remote) {
-      try {
-        await invoke("git_fetch", { dir: projectState.projectPath });
-      } catch (error) {
-        console.error("Failed to fetch remote before refresh:", error);
+  const refreshGitStatus = useCallback(
+    async (syncRemote = false) => {
+      if (!projectState.projectPath) return;
+      if (syncRemote && gitState.gitStatus?.remote) {
+        try {
+          await invoke("git_fetch", { dir: projectState.projectPath });
+        } catch (error) {
+          console.error("Failed to fetch remote before refresh:", error);
+        }
       }
-    }
-    await refreshGitStatusInternal(projectState.projectPath);
-  }, [projectState.projectPath, gitState.gitStatus?.remote, refreshGitStatusInternal]);
+      await refreshGitStatusInternal(projectState.projectPath);
+    },
+    [projectState.projectPath, gitState.gitStatus?.remote, refreshGitStatusInternal],
+  );
 
   const gitDiscardAll = useCallback(async (): Promise<{
     success: boolean;
     error?: string;
   }> => {
-    if (!projectState.projectPath)
-      return { success: false, error: "No project" };
+    if (!projectState.projectPath) return { success: false, error: "No project" };
 
     try {
       await invoke("git_discard_all", { dir: projectState.projectPath });
@@ -472,22 +461,26 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
     }
   }, [projectState.projectPath, refreshGitStatus]);
 
-  const gitDiscardFile = useCallback(async (file: string): Promise<{
-    success: boolean;
-    error?: string;
-  }> => {
-    if (!projectState.projectPath)
-      return { success: false, error: "No project" };
+  const gitDiscardFile = useCallback(
+    async (
+      file: string,
+    ): Promise<{
+      success: boolean;
+      error?: string;
+    }> => {
+      if (!projectState.projectPath) return { success: false, error: "No project" };
 
-    try {
-      await invoke("git_discard_file", { dir: projectState.projectPath, file });
-      await refreshGitStatus();
-      return { success: true };
-    } catch (error) {
-      console.error("Failed to discard file:", error);
-      return { success: false, error: String(error) };
-    }
-  }, [projectState.projectPath, refreshGitStatus]);
+      try {
+        await invoke("git_discard_file", { dir: projectState.projectPath, file });
+        await refreshGitStatus();
+        return { success: true };
+      } catch (error) {
+        console.error("Failed to discard file:", error);
+        return { success: false, error: String(error) };
+      }
+    },
+    [projectState.projectPath, refreshGitStatus],
+  );
 
   const gitAdd = useCallback(
     async (files: string[]) => {
@@ -524,8 +517,7 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
 
   const gitCommit = useCallback(
     async (message: string): Promise<{ success: boolean; error?: string }> => {
-      if (!projectState.projectPath)
-        return { success: false, error: "No project" };
+      if (!projectState.projectPath) return { success: false, error: "No project" };
 
       try {
         await invoke("git_commit", { dir: projectState.projectPath, message });
@@ -543,8 +535,7 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
     success: boolean;
     error?: string;
   }> => {
-    if (!projectState.projectPath)
-      return { success: false, error: "No project" };
+    if (!projectState.projectPath) return { success: false, error: "No project" };
 
     setGitState((s) => ({ ...s, isPushing: true }));
     try {
@@ -563,8 +554,7 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
     success: boolean;
     error?: string;
   }> => {
-    if (!projectState.projectPath)
-      return { success: false, error: "No project" };
+    if (!projectState.projectPath) return { success: false, error: "No project" };
 
     setGitState((s) => ({ ...s, isPulling: true }));
     try {
@@ -670,7 +660,8 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
       return {
         success: false,
         authenticated: false,
-        error: "GitHub authentication timed out. Please finish login in the terminal and try again.",
+        error:
+          "GitHub authentication timed out. Please finish login in the terminal and try again.",
       };
     } catch (error) {
       console.error("Failed to start gh auth:", error);
@@ -729,9 +720,7 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
     setGitState((s) => ({ ...s, gitInitResult: null }));
   }, []);
 
-  const [lastFileChange, setLastFileChange] = useState<FileChangeEvent | null>(
-    null,
-  );
+  const [lastFileChange, setLastFileChange] = useState<FileChangeEvent | null>(null);
 
   const projectPathRef = useRef(projectState.projectPath);
   projectPathRef.current = projectState.projectPath;
@@ -791,30 +780,27 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
         return;
       }
 
-      unlistenFileChanged = await listen<FileChangeEvent>(
-        "file-changed",
-        (event) => {
-          if (isCleanedUp) return;
+      unlistenFileChanged = await listen<FileChangeEvent>("file-changed", (event) => {
+        if (isCleanedUp) return;
 
-          const { kind } = event.payload;
+        const { kind } = event.payload;
 
-          setLastFileChange(event.payload);
+        setLastFileChange(event.payload);
 
-          const currentPath = projectPathRef.current;
-          if (!currentPath) return;
+        const currentPath = projectPathRef.current;
+        if (!currentPath) return;
 
-          // Different OS/file managers emit slightly different watcher kinds
-          // for equivalent operations (e.g. external delete/rename). Refresh
-          // tree for every meaningful change event to avoid stale explorer state.
-          if (kind !== "access") {
-            debouncedRefreshFileTree(currentPath);
-          }
+        // Different OS/file managers emit slightly different watcher kinds
+        // for equivalent operations (e.g. external delete/rename). Refresh
+        // tree for every meaningful change event to avoid stale explorer state.
+        if (kind !== "access") {
+          debouncedRefreshFileTree(currentPath);
+        }
 
-          if (kind !== "access") {
-            debouncedRefreshGit(currentPath);
-          }
-        },
-      );
+        if (kind !== "access") {
+          debouncedRefreshGit(currentPath);
+        }
+      });
 
       if (isCleanedUp) {
         unlistenFiles?.();
@@ -847,9 +833,7 @@ export function useTauriDaemon(options?: TauriDaemonOptions) {
       unlistenFiles?.();
       unlistenFileChanged?.();
       if (watcherStarted) {
-        invoke("stop_watch").catch((error) =>
-          console.error("Failed to stop watch:", error),
-        );
+        invoke("stop_watch").catch((error) => console.error("Failed to stop watch:", error));
       }
     };
   }, [projectState.projectPath, refreshGitStatusInternal]);

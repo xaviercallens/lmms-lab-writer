@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ToolPart } from "@/lib/opencode/types";
 import { CheckIcon } from "./icons";
 import type { AskUserQuestion } from "./types";
@@ -19,10 +19,9 @@ export function parseAskUserQuestions(input: Record<string, unknown>): AskUserQu
 
   if (!Array.isArray(questions)) return null;
 
-  return questions.filter((q): q is AskUserQuestion =>
-    q && typeof q === "object" &&
-    typeof q.question === "string" &&
-    Array.isArray(q.options)
+  return questions.filter(
+    (q): q is AskUserQuestion =>
+      q && typeof q === "object" && typeof q.question === "string" && Array.isArray(q.options),
   );
 }
 
@@ -47,34 +46,34 @@ export function AskUserQuestionDisplay({
     return null;
   }
 
-  const totalSteps = questions.length + 1; // +1 for summary
   const isSummaryStep = currentStep === questions.length;
+  const stepIds = [...questions.map((q) => `question-${q.header}-${q.question}`), "summary"];
 
   const handleOptionClick = (qIndex: number, option: string, multiSelect: boolean) => {
-    setSelectedOptions(prev => {
+    setSelectedOptions((prev) => {
       const current = prev[qIndex] || [];
       if (multiSelect) {
         if (current.includes(option)) {
-          return { ...prev, [qIndex]: current.filter(o => o !== option) };
+          return { ...prev, [qIndex]: current.filter((o) => o !== option) };
         } else {
           return { ...prev, [qIndex]: [...current, option] };
         }
       } else {
-        setShowCustom(prevCustom => ({ ...prevCustom, [qIndex]: false }));
+        setShowCustom((prevCustom) => ({ ...prevCustom, [qIndex]: false }));
         return { ...prev, [qIndex]: [option] };
       }
     });
   };
 
   const toggleCustomInput = (qIndex: number, multiSelect: boolean) => {
-    setShowCustom(prev => {
+    setShowCustom((prev) => {
       const willShow = !prev[qIndex];
       if (willShow && !multiSelect) {
-        setSelectedOptions(opts => ({ ...opts, [qIndex]: [] }));
+        setSelectedOptions((opts) => ({ ...opts, [qIndex]: [] }));
       }
       return { ...prev, [qIndex]: willShow };
     });
-  }
+  };
 
   const handleSubmit = () => {
     if (!onAnswer || submitting) return;
@@ -82,14 +81,14 @@ export function AskUserQuestionDisplay({
     // Build positional string[][] — each inner array is selected labels for that question
     const answers: string[][] = questions.map((_, i) => {
       const selections = selectedOptions[i] || [];
-      const hasCustom = showCustom[i] && !!customInputs[i]?.trim();
+      const customAnswer = customInputs[i]?.trim();
       const result = [...selections];
-      if (hasCustom) result.push(customInputs[i]!.trim());
+      if (showCustom[i] && customAnswer) result.push(customAnswer);
       return result;
     });
 
     // Check at least one question has an answer
-    if (answers.some(a => a.length > 0)) {
+    if (answers.some((a) => a.length > 0)) {
       setSubmitting(true);
       onAnswer(part.id, answers);
     }
@@ -117,14 +116,14 @@ export function AskUserQuestionDisplay({
     const q = questions[qIndex];
     if (!q) return null;
     const selections = selectedOptions[qIndex] || [];
-    const hasCustom = showCustom[qIndex] && customInputs[qIndex];
+    const customAnswer = showCustom[qIndex] ? customInputs[qIndex]?.trim() : undefined;
 
     if (q.multiSelect) {
       const parts = [...selections];
-      if (hasCustom) parts.push(customInputs[qIndex]!);
+      if (customAnswer) parts.push(customAnswer);
       return parts.length > 0 ? parts.join(", ") : null;
     } else {
-      if (hasCustom) return customInputs[qIndex];
+      if (customAnswer) return customAnswer;
       if (selections.length && selections[0]) return selections[0];
       return null;
     }
@@ -138,7 +137,7 @@ export function AskUserQuestionDisplay({
         {questions.map((q, qIndex) => {
           const answer = getAnswerText(qIndex);
           return answer ? (
-            <div key={qIndex} className="text-xs">
+            <div key={`${q.header}-${q.question}`} className="text-xs">
               <span className="text-muted font-medium">{q.header}:</span> {answer}
             </div>
           ) : null;
@@ -152,17 +151,20 @@ export function AskUserQuestionDisplay({
       {/* Step indicator */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1">
-          {Array.from({ length: totalSteps }).map((_, i) => (
+          {stepIds.map((stepId, i) => (
             <button
-              key={i}
+              key={stepId}
               type="button"
-              onClick={() => { if (i <= currentStep) setCurrentStep(i); }}
-              className={`size-4 flex items-center justify-center text-[9px] font-mono border transition-all duration-150 rounded-full ${i === currentStep
-                ? "border-accent bg-accent text-background"
-                : i < currentStep
-                  ? "border-accent bg-background text-accent cursor-pointer hover:bg-accent/5"
-                  : "border-border text-border cursor-default"
-                }`}
+              onClick={() => {
+                if (i <= currentStep) setCurrentStep(i);
+              }}
+              className={`size-4 flex items-center justify-center text-[9px] font-mono border transition-all duration-150 rounded-full ${
+                i === currentStep
+                  ? "border-accent bg-accent text-background"
+                  : i < currentStep
+                    ? "border-accent bg-background text-accent cursor-pointer hover:bg-accent/5"
+                    : "border-border text-border cursor-default"
+              }`}
             >
               {i < currentStep ? (
                 <CheckIcon className="size-2.5" />
@@ -182,87 +184,101 @@ export function AskUserQuestionDisplay({
       {/* Content area */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Question step */}
-        {!isSummaryStep && (() => {
-          const q = questions[currentStep];
-          if (!q) return null;
-          const qIndex = currentStep;
-          const isRadio = !q.multiSelect;
+        {!isSummaryStep &&
+          (() => {
+            const q = questions[currentStep];
+            if (!q) return null;
+            const qIndex = currentStep;
+            const isRadio = !q.multiSelect;
 
-          return (
-            <div key={`step-${currentStep}`} className="wizard-step-enter space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold px-1.5 py-0.5 bg-accent text-background rounded-sm uppercase tracking-wide">
-                  {q.header}
-                </span>
-                {q.multiSelect && (
-                  <span className="text-[10px] text-muted">(Multi-select)</span>
-                )}
-              </div>
-              <p className="text-xs font-medium text-foreground-secondary leading-relaxed">{q.question}</p>
+            return (
+              <div key={`step-${q.header}-${q.question}`} className="wizard-step-enter space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-accent text-background rounded-sm uppercase tracking-wide">
+                    {q.header}
+                  </span>
+                  {q.multiSelect && <span className="text-[10px] text-muted">(Multi-select)</span>}
+                </div>
+                <p className="text-xs font-medium text-foreground-secondary leading-relaxed">
+                  {q.question}
+                </p>
 
-              <div className="space-y-1.5">
-                {q.options.map((opt, optIndex) => {
-                  const isSelected = selectedOptions[qIndex]?.includes(opt.label);
-                  return (
-                    <button
-                      key={optIndex}
-                      type="button"
-                      onClick={() => handleOptionClick(qIndex, opt.label, q.multiSelect || false)}
-                      className={`w-full text-left p-2 border rounded transition-colors ${isSelected
-                        ? "border-accent bg-accent/5"
-                        : "border-border hover:border-border-dark"
+                <div className="space-y-1.5">
+                  {q.options.map((opt) => {
+                    const isSelected = selectedOptions[qIndex]?.includes(opt.label);
+                    return (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        onClick={() => handleOptionClick(qIndex, opt.label, q.multiSelect || false)}
+                        className={`w-full text-left p-2 border rounded transition-colors ${
+                          isSelected
+                            ? "border-accent bg-accent/5"
+                            : "border-border hover:border-border-dark"
                         }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <div className={`size-3.5 flex-shrink-0 mt-0.5 border ${isSelected ? "border-accent bg-accent" : "border-border"} flex items-center justify-center ${isRadio ? 'rounded-full' : 'rounded-sm'}`}>
-                          {isSelected && <CheckIcon className="size-2.5 text-background" />}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div
+                            className={`size-3.5 flex-shrink-0 mt-0.5 border ${isSelected ? "border-accent bg-accent" : "border-border"} flex items-center justify-center ${isRadio ? "rounded-full" : "rounded-sm"}`}
+                          >
+                            {isSelected && <CheckIcon className="size-2.5 text-background" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-medium text-foreground-secondary">
+                              {opt.label}
+                            </div>
+                            {opt.description && (
+                              <div className="text-[10px] text-muted mt-0.5 leading-tight">
+                                {opt.description}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium text-foreground-secondary">{opt.label}</div>
-                          {opt.description && (
-                            <div className="text-[10px] text-muted mt-0.5 leading-tight">{opt.description}</div>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
 
-                {/* Custom input option */}
-                {isPending && (
-                  <div className="space-y-1.5">
-                    <button
-                      type="button"
-                      onClick={() => toggleCustomInput(qIndex, q.multiSelect || false)}
-                      className={`w-full text-left p-2 border rounded transition-colors ${showCustom[qIndex]
-                        ? "border-accent bg-accent/5"
-                        : "border-border hover:border-border-dark"
+                  {/* Custom input option */}
+                  {isPending && (
+                    <div className="space-y-1.5">
+                      <button
+                        type="button"
+                        onClick={() => toggleCustomInput(qIndex, q.multiSelect || false)}
+                        className={`w-full text-left p-2 border rounded transition-colors ${
+                          showCustom[qIndex]
+                            ? "border-accent bg-accent/5"
+                            : "border-border hover:border-border-dark"
                         }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <div className={`size-3.5 flex-shrink-0 mt-0.5 border ${showCustom[qIndex] ? "border-accent bg-accent" : "border-border"} flex items-center justify-center ${isRadio ? 'rounded-full' : 'rounded-sm'}`}>
-                          {showCustom[qIndex] && <CheckIcon className="size-2.5 text-background" />}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div
+                            className={`size-3.5 flex-shrink-0 mt-0.5 border ${showCustom[qIndex] ? "border-accent bg-accent" : "border-border"} flex items-center justify-center ${isRadio ? "rounded-full" : "rounded-sm"}`}
+                          >
+                            {showCustom[qIndex] && (
+                              <CheckIcon className="size-2.5 text-background" />
+                            )}
+                          </div>
+                          <div className="text-xs font-medium text-foreground-secondary">Other</div>
                         </div>
-                        <div className="text-xs font-medium text-foreground-secondary">Other</div>
-                      </div>
-                    </button>
+                      </button>
 
-                    {showCustom[qIndex] && (
-                      <input
-                        type="text"
-                        value={customInputs[qIndex] || ""}
-                        onChange={(e) => setCustomInputs(prev => ({ ...prev, [qIndex]: e.target.value }))}
-                        placeholder="Enter custom answer..."
-                        className="w-full px-2 py-1.5 text-xs border border-border focus:border-accent focus:outline-none rounded"
-                        autoFocus
-                      />
-                    )}
-                  </div>
-                )}
+                      {showCustom[qIndex] && (
+                        <input
+                          type="text"
+                          value={customInputs[qIndex] || ""}
+                          onChange={(e) =>
+                            setCustomInputs((prev) => ({ ...prev, [qIndex]: e.target.value }))
+                          }
+                          placeholder="Enter custom answer..."
+                          className="w-full px-2 py-1.5 text-xs border border-border focus:border-accent focus:outline-none rounded"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
 
         {/* Summary step */}
         {isSummaryStep && (
@@ -275,13 +291,12 @@ export function AskUserQuestionDisplay({
               const hasAnswer = !!answer;
               return (
                 <button
-                  key={qIndex}
+                  key={`${q.header}-${q.question}`}
                   type="button"
                   onClick={() => setCurrentStep(qIndex)}
-                  className={`w-full text-left p-2 border rounded transition-colors group ${hasAnswer
-                    ? "border-border hover:border-accent"
-                    : "border-red-300 bg-red-50"
-                    }`}
+                  className={`w-full text-left p-2 border rounded transition-colors group ${
+                    hasAnswer ? "border-border hover:border-accent" : "border-red-300 bg-red-50"
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
@@ -309,8 +324,9 @@ export function AskUserQuestionDisplay({
           <button
             type="button"
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-            className={`text-[10px] font-mono px-2 py-1 border border-border rounded transition-colors hover:bg-surface-secondary ${currentStep === 0 ? "opacity-0 pointer-events-none" : ""
-              }`}
+            className={`text-[10px] font-mono px-2 py-1 border border-border rounded transition-colors hover:bg-surface-secondary ${
+              currentStep === 0 ? "opacity-0 pointer-events-none" : ""
+            }`}
           >
             Back
           </button>

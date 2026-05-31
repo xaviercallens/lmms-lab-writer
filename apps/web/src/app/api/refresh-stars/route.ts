@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { GITHUB_CONFIG } from "@/lib/github/config";
 import {
-  getStoredGitHubToken,
   checkStarredRepos,
+  getStoredGitHubToken,
   updateMembershipFromStars,
 } from "@/lib/github/stars";
-import { GITHUB_CONFIG } from "@/lib/github/config";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST() {
   const supabase = await createClient();
@@ -29,15 +29,8 @@ export async function POST() {
   }
 
   try {
-    const { allStarred, eligibleCount } = await checkStarredRepos(
-      tokenInfo.accessToken,
-    );
-    const result = await updateMembershipFromStars(
-      supabase,
-      user.id,
-      allStarred,
-      eligibleCount,
-    );
+    const { allStarred, eligibleCount } = await checkStarredRepos(tokenInfo.accessToken);
+    const result = await updateMembershipFromStars(supabase, user.id, allStarred, eligibleCount);
 
     if (result.error) {
       console.error("[refresh-stars] Membership update error:", result.error);

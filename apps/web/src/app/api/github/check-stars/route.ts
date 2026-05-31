@@ -1,12 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import {
-  getStoredGitHubToken,
-  checkStarredRepos,
-  updateMembershipFromStars,
-  getMembershipInfo,
-} from "@/lib/github/stars";
 import { GITHUB_CONFIG } from "@/lib/github/config";
+import {
+  checkStarredRepos,
+  getMembershipInfo,
+  getStoredGitHubToken,
+  updateMembershipFromStars,
+} from "@/lib/github/stars";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   const supabase = await createClient();
@@ -65,16 +65,9 @@ export async function POST() {
   }
 
   try {
-    const { allStarred, eligibleCount } = await checkStarredRepos(
-      tokenInfo.accessToken,
-    );
+    const { allStarred, eligibleCount } = await checkStarredRepos(tokenInfo.accessToken);
 
-    const result = await updateMembershipFromStars(
-      supabase,
-      user.id,
-      allStarred,
-      eligibleCount,
-    );
+    const result = await updateMembershipFromStars(supabase, user.id, allStarred, eligibleCount);
 
     if (result.error) {
       return NextResponse.json(

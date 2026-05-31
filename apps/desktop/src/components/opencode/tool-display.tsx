@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import type { ToolPart } from "@/lib/opencode/types";
 import { getToolInfo } from "@/lib/opencode/types";
-import { Spinner } from "@/components/ui/spinner";
 import { ChevronIcon, ToolIcon } from "./icons";
-import { TasksDisplay, parseTasks } from "./tasks-display";
+import { parseTasks, TasksDisplay } from "./tasks-display";
 import { formatValue } from "./utils";
 
 export function ToolDisplay({
@@ -29,7 +29,9 @@ export function ToolDisplay({
     );
   const output = (part.state as { output?: string }).output;
   // Always expand if it's a task tool to show the UI
-  const isTaskTool = ['todowrite', 'todocreate', 'todolist', 'todoread', 'todoupdate'].includes(part.tool.toLowerCase());
+  const isTaskTool = ["todowrite", "todocreate", "todolist", "todoread", "todoupdate"].includes(
+    part.tool.toLowerCase(),
+  );
 
   // Try to parse tasks from input or output
   const tasksFromInput = isTaskTool ? parseTasks(part.state.input) : null;
@@ -61,39 +63,39 @@ export function ToolDisplay({
     return null;
   }, [output, part.tool]);
 
+  const toggleExpanded = () => {
+    if (hasDetails) {
+      setExpanded((value) => !value);
+    }
+  };
+
   return (
     <div
       className={`text-[13px] bg-accent-hover hover:bg-surface-secondary transition-colors ${isError ? "bg-red-50" : ""}`}
     >
-      <div
-        role="button"
-        tabIndex={hasDetails ? 0 : undefined}
-        onClick={() => hasDetails && setExpanded(!expanded)}
-        onKeyDown={(e) => {
-          if (hasDetails && (e.key === "Enter" || e.key === " ")) {
-            e.preventDefault();
-            setExpanded(!expanded);
-          }
-        }}
-        className={`w-full flex items-center gap-3 px-3 py-2.5 text-left ${hasDetails ? "cursor-pointer" : "cursor-default"}`}
-      >
-        {isRunning ? (
-          <Spinner className="size-4 flex-shrink-0" />
-        ) : (
-          <ToolIcon tool={part.tool} />
-        )}
+      <div className="w-full flex items-center gap-3 px-3 py-2.5 text-left">
+        {isRunning ? <Spinner className="size-4 flex-shrink-0" /> : <ToolIcon tool={part.tool} />}
         {isClickableFile ? (
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
+          <button
+            type="button"
+            onClick={() => {
               if (clickablePath) {
-                onFileClick!(clickablePath);
+                onFileClick?.(clickablePath);
               }
             }}
-            className="text-foreground-secondary hover:text-foreground hover:underline truncate cursor-pointer flex-1"
+            className="text-left text-foreground-secondary hover:text-foreground hover:underline truncate cursor-pointer flex-1"
           >
             {info.subtitle || info.title}
-          </span>
+          </button>
+        ) : hasDetails ? (
+          <button
+            type="button"
+            onClick={toggleExpanded}
+            className="text-left text-foreground-secondary hover:text-foreground truncate cursor-pointer flex-1"
+            aria-expanded={expanded}
+          >
+            {info.subtitle || info.title}
+          </button>
         ) : (
           <span className="text-foreground-secondary truncate flex-1">
             {info.subtitle || info.title}
@@ -101,18 +103,22 @@ export function ToolDisplay({
         )}
         {diffStats && (diffStats.added || diffStats.deleted) && (
           <span className="flex items-center gap-1 text-xs flex-shrink-0">
-            {diffStats.added && (
-              <span className="text-green-600">+{diffStats.added}</span>
-            )}
-            {diffStats.deleted && (
-              <span className="text-red-500">-{diffStats.deleted}</span>
-            )}
+            {diffStats.added && <span className="text-green-600">+{diffStats.added}</span>}
+            {diffStats.deleted && <span className="text-red-500">-{diffStats.deleted}</span>}
           </span>
         )}
         {hasDetails && (
-          <ChevronIcon
-            className={`size-4 text-muted-foreground flex-shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`}
-          />
+          <button
+            type="button"
+            onClick={toggleExpanded}
+            className="flex-shrink-0 text-muted-foreground"
+            aria-label={expanded ? "Collapse tool details" : "Expand tool details"}
+            aria-expanded={expanded}
+          >
+            <ChevronIcon
+              className={`size-4 transition-transform ${expanded ? "rotate-180" : ""}`}
+            />
+          </button>
         )}
       </div>
 
@@ -126,7 +132,7 @@ export function ToolDisplay({
           )}
 
           {/* Standard Input/Output fallback if no special display or if debugging */}
-          {(!tasksToDisplay && Object.keys(part.state.input).length > 0) && (
+          {!tasksToDisplay && Object.keys(part.state.input).length > 0 && (
             <div className="px-3 py-2 space-y-1">
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                 Input
@@ -143,13 +149,13 @@ export function ToolDisplay({
             </div>
           )}
 
-          {(!tasksToDisplay && output) && (
+          {!tasksToDisplay && output && (
             <div className="px-3 py-2 border-t border-border">
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">
                 Output
               </div>
               <pre className="text-xs text-muted whitespace-pre-wrap break-all font-mono max-h-48 overflow-auto">
-                {output.length > 2000 ? output.slice(0, 2000) + "..." : output}
+                {output.length > 2000 ? `${output.slice(0, 2000)}...` : output}
               </pre>
             </div>
           )}
@@ -158,9 +164,7 @@ export function ToolDisplay({
 
       {isError && (
         <div className="border-t border-red-200 px-3 py-2 bg-red-50">
-          <p className="text-xs text-red-600">
-            {(part.state as { error: string }).error}
-          </p>
+          <p className="text-xs text-red-600">{(part.state as { error: string }).error}</p>
         </div>
       )}
     </div>

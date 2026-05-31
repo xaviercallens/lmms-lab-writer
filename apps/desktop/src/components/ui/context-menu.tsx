@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useCallback,
-  useState,
-} from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
 
 export interface ContextMenuItem {
   label: string;
@@ -30,7 +24,7 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
   const [position, setPosition] = useState({ x, y });
 
   // Adjust position when x/y props change, keeping menu within viewport
-   
+
   useLayoutEffect(() => {
     if (!menuRef.current) {
       setPosition({ x, y });
@@ -109,9 +103,10 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
         }}
       >
         <div className="py-1">
-          {items.map((item, index) => (
+          {items.map((item) => (
             <button
-              key={index}
+              type="button"
+              key={item.label}
               onClick={() => handleItemClick(item)}
               disabled={item.disabled}
               className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors border-l-2 ${

@@ -1,8 +1,5 @@
 "use client";
 
-import { FileTree, type FileOperations } from "@/components/editor/file-tree";
-import { EditorErrorBoundary } from "@/components/editor/editor-error-boundary";
-import { pathSync } from "@/lib/path";
 import type { FileNode } from "@lmms-lab/writer-shared";
 import {
   ArrowClockwiseIcon,
@@ -10,6 +7,9 @@ import {
   FolderIcon,
   FolderPlusIcon,
 } from "@phosphor-icons/react";
+import { EditorErrorBoundary } from "@/components/editor/editor-error-boundary";
+import { type FileOperations, FileTree } from "@/components/editor/file-tree";
+import { pathSync } from "@/lib/path";
 
 type FileSidebarPanelProps = {
   projectPath: string | null;
@@ -49,11 +49,10 @@ export function FileSidebarPanel({
         className="px-3 py-2 border-b border-border flex items-center justify-between gap-2"
         title={projectPath}
       >
-        <span className="text-xs text-muted truncate">
-          {pathSync.basename(projectPath)}
-        </span>
+        <span className="text-xs text-muted truncate">{pathSync.basename(projectPath)}</span>
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
+            type="button"
             onClick={onCreateFile}
             className="p-1 text-muted hover:text-foreground hover:bg-foreground/5 transition-colors"
             title="New File"
@@ -62,6 +61,7 @@ export function FileSidebarPanel({
             <FilePlusIcon className="w-4 h-4" />
           </button>
           <button
+            type="button"
             onClick={onCreateDirectory}
             className="p-1 text-muted hover:text-foreground hover:bg-foreground/5 transition-colors"
             title="New Folder"
@@ -70,6 +70,7 @@ export function FileSidebarPanel({
             <FolderPlusIcon className="w-4 h-4" />
           </button>
           <button
+            type="button"
             onClick={onRefreshFiles}
             className="p-1 text-muted hover:text-foreground hover:bg-foreground/5 transition-colors"
             title="Refresh Files"

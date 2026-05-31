@@ -1,21 +1,21 @@
 "use client";
 
+import { normalize } from "@tauri-apps/api/path";
+import { platform } from "@tauri-apps/plugin-os";
+import { Command } from "@tauri-apps/plugin-shell";
 import {
-  useState,
-  useCallback,
+  createContext,
   memo,
-  useRef,
+  useCallback,
+  useContext,
   useEffect,
   useMemo,
-  createContext,
-  useContext,
+  useRef,
+  useState,
 } from "react";
-import { createPortal } from "react-dom";
-import { Tree } from "react-arborist";
 import type { NodeRendererProps, TreeApi } from "react-arborist";
-import { Command } from "@tauri-apps/plugin-shell";
-import { platform } from "@tauri-apps/plugin-os";
-import { normalize } from "@tauri-apps/api/path";
+import { Tree } from "react-arborist";
+import { createPortal } from "react-dom";
 import { pathSync } from "@/lib/path";
 
 async function runCommand(cmd: string, args: string[]): Promise<boolean> {
@@ -96,10 +96,8 @@ async function copyNormalizedAbsolutePath(path: string): Promise<void> {
   const normalizedPath = await normalize(path);
   await copyToClipboard(normalizedPath);
 }
+
 import type { FileNode } from "@lmms-lab/writer-shared";
-import { ContextMenu, type ContextMenuItem } from "../ui/context-menu";
-import { ConfirmDialog } from "../ui/confirm-dialog";
-import { InputDialog } from "../ui/input-dialog";
 import {
   ArchiveIcon,
   ArrowClockwiseIcon,
@@ -126,6 +124,9 @@ import {
   TrashIcon,
   VideoCameraIcon,
 } from "@phosphor-icons/react";
+import { ConfirmDialog } from "../ui/confirm-dialog";
+import { ContextMenu, type ContextMenuItem } from "../ui/context-menu";
+import { InputDialog } from "../ui/input-dialog";
 
 export interface FileOperations {
   createFile: (path: string) => Promise<void>;
@@ -334,9 +335,7 @@ function convertToArboristData(nodes: FileNode[]): ArboristFileNode[] {
       path: node.path,
     };
     if (node.type === "directory") {
-      result.children = node.children
-        ? convertToArboristData(node.children)
-        : [];
+      result.children = node.children ? convertToArboristData(node.children) : [];
     }
     return result;
   });
@@ -357,15 +356,16 @@ interface DragState {
 interface FileTreeContextValue {
   selectedFile?: string;
   highlightedFile?: string | null;
-  onContextMenu?: (
-    e: React.MouseEvent,
-    node: FileNode,
-    parentPath: string,
-  ) => void;
+  onContextMenu?: (e: React.MouseEvent, node: FileNode, parentPath: string) => void;
   onFileSelect?: (path: string) => void;
   // Mouse-based drag-and-drop
   dragState: DragState;
-  onDragMouseDown?: (e: React.MouseEvent, path: string, name: string, type: "file" | "directory") => void;
+  onDragMouseDown?: (
+    e: React.MouseEvent,
+    path: string,
+    name: string,
+    type: "file" | "directory",
+  ) => void;
 }
 
 const initialDragState: DragState = {
@@ -384,18 +384,9 @@ const FileTreeContext = createContext<FileTreeContextValue>({
 
 // --- Node renderer ---
 
-function NodeRenderer({
-  node,
-  style,
-}: NodeRendererProps<ArboristFileNode>) {
-  const {
-    selectedFile,
-    highlightedFile,
-    onContextMenu,
-    onFileSelect,
-    dragState,
-    onDragMouseDown,
-  } = useContext(FileTreeContext);
+function NodeRenderer({ node, style }: NodeRendererProps<ArboristFileNode>) {
+  const { selectedFile, highlightedFile, onContextMenu, onFileSelect, dragState, onDragMouseDown } =
+    useContext(FileTreeContext);
 
   const isDirectory = node.data.type === "directory";
   const isSelected = selectedFile === node.data.path;
@@ -416,6 +407,19 @@ function NodeRenderer({
       }
     },
     [isDirectory, node, onFileSelect, dragState.isDragging],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      if (isDirectory) {
+        node.toggle();
+      } else {
+        onFileSelect?.(node.data.path);
+      }
+    },
+    [isDirectory, node, onFileSelect],
   );
 
   const handleContextMenu = useCallback(
@@ -449,6 +453,7 @@ function NodeRenderer({
     <div
       style={style}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       onContextMenu={handleContextMenu}
       onMouseDown={handleMouseDown}
       role="treeitem"
@@ -458,9 +463,7 @@ function NodeRenderer({
       data-path={node.data.path}
       data-type={node.data.type}
       className={`w-full flex items-center gap-2 px-2 py-1 text-left text-sm transition-colors select-none ${
-        isDragging
-          ? "opacity-50"
-          : ""
+        isDragging ? "opacity-50" : ""
       } ${
         isDragOver
           ? "bg-blue-100 ring-2 ring-blue-400 ring-inset"
@@ -478,11 +481,7 @@ function NodeRenderer({
         }}
         aria-hidden="true"
       />
-      <FileIcon
-        type={node.data.type}
-        expanded={node.isOpen}
-        filename={node.data.name}
-      />
+      <FileIcon type={node.data.type} expanded={node.isOpen} filename={node.data.name} />
       <span className="truncate">{node.data.name}</span>
     </div>
   );
@@ -601,29 +600,32 @@ function FileTreeInner({
   const handleMouseUpRef = useRef<((e: MouseEvent) => void) | null>(null);
 
   // Find drop target from mouse position
-  const findDropTarget = useCallback((x: number, y: number): { path: string; type: "file" | "directory" } | null => {
-    const elements = document.elementsFromPoint(x, y);
-    for (const el of elements) {
-      const treeItem = el.closest("[data-path]") as HTMLElement | null;
-      if (treeItem && containerRef.current?.contains(treeItem)) {
-        const path = treeItem.dataset.path;
-        const type = treeItem.dataset.type as "file" | "directory";
-        if (path && type) {
-          return { path, type };
+  const findDropTarget = useCallback(
+    (x: number, y: number): { path: string; type: "file" | "directory" } | null => {
+      const elements = document.elementsFromPoint(x, y);
+      for (const el of elements) {
+        const treeItem = el.closest("[data-path]") as HTMLElement | null;
+        if (treeItem && containerRef.current?.contains(treeItem)) {
+          const path = treeItem.dataset.path;
+          const type = treeItem.dataset.type as "file" | "directory";
+          if (path && type) {
+            return { path, type };
+          }
         }
       }
-    }
 
-    // If we're inside the tree container but not over a node, treat as root drop target
-    const container = containerRef.current;
-    if (container) {
-      const rect = container.getBoundingClientRect();
-      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-        return { path: "", type: "directory" };
+      // If we're inside the tree container but not over a node, treat as root drop target
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+          return { path: "", type: "directory" };
+        }
       }
-    }
-    return null;
-  }, []);
+      return null;
+    },
+    [],
+  );
 
   // Check if drop target is valid
   const isValidDropTarget = useCallback((targetPath: string, targetType: string): boolean => {
@@ -642,7 +644,10 @@ function FileTreeInner({
     const normalizedDragged = pathSync.normalizeForCompare(dragged.path);
 
     // Cannot drop into itself or its descendants
-    if (normalizedTarget === normalizedDragged || normalizedTarget.startsWith(normalizedDragged + "/")) {
+    if (
+      normalizedTarget === normalizedDragged ||
+      normalizedTarget.startsWith(`${normalizedDragged}/`)
+    ) {
       return false;
     }
 
@@ -656,105 +661,114 @@ function FileTreeInner({
   }, []);
 
   // Perform the move operation
-  const performMove = useCallback(async (dragged: { path: string; type: "file" | "directory" }, targetPath: string) => {
-    if (!fileOperations) return;
+  const performMove = useCallback(
+    async (dragged: { path: string; type: "file" | "directory" }, targetPath: string) => {
+      if (!fileOperations) return;
 
-    const fileName = pathSync.basename(dragged.path);
-    const newPath = targetPath ? pathSync.join(targetPath, fileName) : fileName;
+      const fileName = pathSync.basename(dragged.path);
+      const newPath = targetPath ? pathSync.join(targetPath, fileName) : fileName;
 
-    // Check if target already exists
-    const targetExists = nodeMap.has(newPath);
-    if (targetExists) {
-      const confirmed = await requestConfirm({
-        title: "Confirm Replace",
-        message: `A file or folder named "${fileName}" already exists in this location.\nDo you want to replace it?`,
-        confirmLabel: "Replace",
-        cancelLabel: "Cancel",
-      });
-      if (!confirmed) return;
-    }
+      // Check if target already exists
+      const targetExists = nodeMap.has(newPath);
+      if (targetExists) {
+        const confirmed = await requestConfirm({
+          title: "Confirm Replace",
+          message: `A file or folder named "${fileName}" already exists in this location.\nDo you want to replace it?`,
+          confirmLabel: "Replace",
+          cancelLabel: "Cancel",
+        });
+        if (!confirmed) return;
+      }
 
-    try {
-      await fileOperations.renamePath(dragged.path, newPath);
-    } catch (error) {
-      console.error("Failed to move:", error);
-      alert(`Failed to move "${fileName}": ${error}`);
-    }
-  }, [fileOperations, nodeMap, requestConfirm]);
+      try {
+        await fileOperations.renamePath(dragged.path, newPath);
+      } catch (error) {
+        console.error("Failed to move:", error);
+        alert(`Failed to move "${fileName}": ${error}`);
+      }
+    },
+    [fileOperations, nodeMap, requestConfirm],
+  );
 
   // Mouse move handler (attached to document during drag)
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!draggedNodeRef.current) return;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!draggedNodeRef.current) return;
 
-    const startPos = dragStartPos.current;
-    if (startPos && !isDraggingRef.current) {
-      // Check if we've moved past threshold to start dragging
-      const dx = e.clientX - startPos.x;
-      const dy = e.clientY - startPos.y;
-      if (Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD) return;
-      isDraggingRef.current = true;
-    }
+      const startPos = dragStartPos.current;
+      if (startPos && !isDraggingRef.current) {
+        // Check if we've moved past threshold to start dragging
+        const dx = e.clientX - startPos.x;
+        const dy = e.clientY - startPos.y;
+        if (Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD) return;
+        isDraggingRef.current = true;
+      }
 
-    // Find what we're hovering over (only log occasionally to avoid spam)
-    const target = findDropTarget(e.clientX, e.clientY);
-    let dragOverPath: string | null = null;
+      // Find what we're hovering over (only log occasionally to avoid spam)
+      const target = findDropTarget(e.clientX, e.clientY);
+      let dragOverPath: string | null = null;
 
-    if (target && isValidDropTarget(target.path, target.type)) {
-      dragOverPath = target.path;
-    }
+      if (target && isValidDropTarget(target.path, target.type)) {
+        dragOverPath = target.path;
+      }
 
-    setDragState(prev => ({
-      ...prev,
-      isDragging: true,
-      dragOverPath,
-      mouseX: e.clientX,
-      mouseY: e.clientY,
-    }));
-  }, [findDropTarget, isValidDropTarget]);
+      setDragState((prev) => ({
+        ...prev,
+        isDragging: true,
+        dragOverPath,
+        mouseX: e.clientX,
+        mouseY: e.clientY,
+      }));
+    },
+    [findDropTarget, isValidDropTarget],
+  );
 
   // Mouse up handler (attached to document during drag)
-  const handleMouseUp = useCallback((e: MouseEvent) => {
-    const dragged = draggedNodeRef.current;
-    const wasDragging = isDraggingRef.current;
+  const handleMouseUp = useCallback(
+    (e: MouseEvent) => {
+      const dragged = draggedNodeRef.current;
+      const wasDragging = isDraggingRef.current;
 
-    // Clean up using refs to avoid stale closure issues
-    if (handleMouseMoveRef.current) {
-      document.removeEventListener("mousemove", handleMouseMoveRef.current);
-      handleMouseMoveRef.current = null;
-    }
-    if (handleMouseUpRef.current) {
-      document.removeEventListener("mouseup", handleMouseUpRef.current);
-      handleMouseUpRef.current = null;
-    }
-    document.body.style.cursor = "";
-    document.body.style.userSelect = "";
+      // Clean up using refs to avoid stale closure issues
+      if (handleMouseMoveRef.current) {
+        document.removeEventListener("mousemove", handleMouseMoveRef.current);
+        handleMouseMoveRef.current = null;
+      }
+      if (handleMouseUpRef.current) {
+        document.removeEventListener("mouseup", handleMouseUpRef.current);
+        handleMouseUpRef.current = null;
+      }
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
 
-    if (!dragged || !wasDragging) {
+      if (!dragged || !wasDragging) {
+        draggedNodeRef.current = null;
+        dragStartPos.current = null;
+        isDraggingRef.current = false;
+        setDragState(initialDragState);
+        return;
+      }
+
+      // Find drop target
+      const target = findDropTarget(e.clientX, e.clientY);
+      const canDrop = !!(target && isValidDropTarget(target.path, target.type));
+
+      // Snapshot dragged info before clearing refs
+      const draggedSnapshot = draggedNodeRef.current;
+
+      // Reset state
       draggedNodeRef.current = null;
       dragStartPos.current = null;
       isDraggingRef.current = false;
       setDragState(initialDragState);
-      return;
-    }
 
-    // Find drop target
-    const target = findDropTarget(e.clientX, e.clientY);
-    const canDrop = !!(target && isValidDropTarget(target.path, target.type));
-
-    // Snapshot dragged info before clearing refs
-    const draggedSnapshot = draggedNodeRef.current;
-
-    // Reset state
-    draggedNodeRef.current = null;
-    dragStartPos.current = null;
-    isDraggingRef.current = false;
-    setDragState(initialDragState);
-
-    // Perform move if valid target
-    if (target && canDrop && draggedSnapshot) {
-      performMove(draggedSnapshot, target.path);
-    }
-  }, [findDropTarget, isValidDropTarget, performMove]);
+      // Perform move if valid target
+      if (target && canDrop && draggedSnapshot) {
+        performMove(draggedSnapshot, target.path);
+      }
+    },
+    [findDropTarget, isValidDropTarget, performMove],
+  );
 
   // Mouse down handler (called from NodeRenderer)
   const handleDragMouseDown = useCallback(
@@ -815,25 +829,21 @@ function FileTreeInner({
     setDialog(null);
   }, []);
 
-
   // Handle right-click on empty area
-  const handleRootContextMenu = useCallback(
-    (e: React.MouseEvent) => {
-      // Only show if clicking on the container itself, not on a tree node
-      if ((e.target as HTMLElement).closest("[data-path]")) {
-        return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      setContextMenu({
-        x: e.clientX,
-        y: e.clientY,
-        node: { name: "", path: "", type: "directory" } as FileNode,
-        parentPath: "",
-      });
-    },
-    [],
-  );
+  const handleRootContextMenu = useCallback((e: React.MouseEvent) => {
+    // Only show if clicking on the container itself, not on a tree node
+    if ((e.target as HTMLElement).closest("[data-path]")) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      node: { name: "", path: "", type: "directory" } as FileNode,
+      parentPath: "",
+    });
+  }, []);
 
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent) => {
@@ -841,9 +851,7 @@ function FileTreeInner({
       if (!tree) return;
 
       const focusedNode = tree.focusedNode;
-      const currentNode = focusedNode
-        ? nodeMap.get(focusedNode.data.path) ?? null
-        : null;
+      const currentNode = focusedNode ? (nodeMap.get(focusedNode.data.path) ?? null) : null;
 
       switch (e.key) {
         // F2 - Rename
@@ -929,14 +937,12 @@ function FileTreeInner({
       if (isDirectory) {
         items.push({
           label: "New File",
-          onClick: () =>
-            setDialog({ type: "create-file", parentPath: node.path }),
+          onClick: () => setDialog({ type: "create-file", parentPath: node.path }),
           icon: <FilePlusIcon size={16} />,
         });
         items.push({
           label: "New Folder",
-          onClick: () =>
-            setDialog({ type: "create-directory", parentPath: node.path }),
+          onClick: () => setDialog({ type: "create-directory", parentPath: node.path }),
           icon: <FolderPlusIcon size={16} />,
         });
       }
@@ -951,8 +957,7 @@ function FileTreeInner({
       if (projectPath) {
         items.push({
           label: "Copy Absolute Path",
-          onClick: () =>
-            copyNormalizedAbsolutePath(pathSync.join(projectPath, node.path)),
+          onClick: () => copyNormalizedAbsolutePath(pathSync.join(projectPath, node.path)),
           icon: <CopyIcon size={16} />,
         });
       }
@@ -972,18 +977,14 @@ function FileTreeInner({
             const ext = node.name.includes(".")
               ? node.name.substring(node.name.lastIndexOf("."))
               : "";
-            const baseName = ext
-              ? node.name.substring(0, node.name.lastIndexOf("."))
-              : node.name;
+            const baseName = ext ? node.name.substring(0, node.name.lastIndexOf(".")) : node.name;
             const parentPath = pathSync.dirname(node.path);
             const newName = `${baseName}_copy${ext}`;
             const newPath = parentPath ? pathSync.join(parentPath, newName) : newName;
 
             try {
               // Read original file content
-              const response = await fetch(
-                `tauri://localhost/${projectPath}/${node.path}`,
-              );
+              const response = await fetch(`tauri://localhost/${projectPath}/${node.path}`);
               if (!response.ok) {
                 // Fallback: create empty file with same extension
                 await fileOperations.createFile(newPath);
@@ -1161,14 +1162,10 @@ function FileTreeInner({
 
       try {
         if (dialog.type === "create-file") {
-          const newPath = dialog.parentPath
-            ? pathSync.join(dialog.parentPath, value)
-            : value;
+          const newPath = dialog.parentPath ? pathSync.join(dialog.parentPath, value) : value;
           await fileOperations.createFile(newPath);
         } else if (dialog.type === "create-directory") {
-          const newPath = dialog.parentPath
-            ? pathSync.join(dialog.parentPath, value)
-            : value;
+          const newPath = dialog.parentPath ? pathSync.join(dialog.parentPath, value) : value;
           await fileOperations.createDirectory(newPath);
         } else if (dialog.type === "rename" && dialog.node) {
           const parentPath = pathSync.dirname(dialog.node.path);
@@ -1204,9 +1201,7 @@ function FileTreeInner({
   );
 
   if (files.length === 0) {
-    return (
-      <div className={`p-4 text-sm text-muted ${className}`}>No files</div>
-    );
+    return <div className={`p-4 text-sm text-muted ${className}`}>No files</div>;
   }
 
   return (
@@ -1289,28 +1284,30 @@ function FileTreeInner({
       )}
 
       {/* Drag preview - rendered via portal to avoid stacking context issues */}
-      {dragState.isDragging && dragState.draggedName && createPortal(
-        <div
-          className="fixed pointer-events-none z-[9999] flex items-center gap-2 px-3 py-1.5 bg-background border border-border rounded-md shadow-lg text-sm"
-          style={{
-            left: dragState.mouseX + 16,
-            top: dragState.mouseY + 16,
-          }}
-        >
-          {dragState.draggedType === "directory" ? (
-            <FolderIcon className="w-4 h-4 text-gray-600" size={16} />
-          ) : (
-            <FileIconSymbol className="w-4 h-4 text-gray-600" size={16} />
-          )}
-          <span className="truncate max-w-[200px]">{dragState.draggedName}</span>
-          {dragState.dragOverPath && (
-            <span className="text-blue-600 text-xs ml-1">
-              → {pathSync.basename(dragState.dragOverPath)}
-            </span>
-          )}
-        </div>,
-        document.body
-      )}
+      {dragState.isDragging &&
+        dragState.draggedName &&
+        createPortal(
+          <div
+            className="fixed pointer-events-none z-[9999] flex items-center gap-2 px-3 py-1.5 bg-background border border-border rounded-md shadow-lg text-sm"
+            style={{
+              left: dragState.mouseX + 16,
+              top: dragState.mouseY + 16,
+            }}
+          >
+            {dragState.draggedType === "directory" ? (
+              <FolderIcon className="w-4 h-4 text-gray-600" size={16} />
+            ) : (
+              <FileIconSymbol className="w-4 h-4 text-gray-600" size={16} />
+            )}
+            <span className="truncate max-w-[200px]">{dragState.draggedName}</span>
+            {dragState.dragOverPath && (
+              <span className="text-blue-600 text-xs ml-1">
+                → {pathSync.basename(dragState.dragOverPath)}
+              </span>
+            )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

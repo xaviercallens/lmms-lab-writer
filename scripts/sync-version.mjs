@@ -194,7 +194,9 @@ function main() {
 
   for (const result of results) {
     const status = result.changed ? (args.dryRun ? "would-update" : "updated") : "unchanged";
-    console.log(`[sync-version] ${status}: ${result.file}${result.previous ? ` (was ${result.previous})` : ""}`);
+    console.log(
+      `[sync-version] ${status}: ${result.file}${result.previous ? ` (was ${result.previous})` : ""}`,
+    );
   }
 }
 

@@ -1,42 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState, memo } from "react";
-import {
-  EditorView,
-  keymap,
-  lineNumbers,
-  highlightActiveLine,
-  highlightActiveLineGutter,
-  drawSelection,
-  rectangularSelection,
-} from "@codemirror/view";
-import { EditorState, Compartment } from "@codemirror/state";
-import {
-  defaultKeymap,
-  history,
-  historyKeymap,
-  indentWithTab,
-  selectLine,
-  deleteLine,
-  copyLineDown,
-  moveLineUp,
-  moveLineDown,
-  indentMore,
-  indentLess,
-} from "@codemirror/commands";
-import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import {
+  copyLineDown,
+  defaultKeymap,
+  deleteLine,
+  history,
+  historyKeymap,
+  indentLess,
+  indentMore,
+  indentWithTab,
+  moveLineDown,
+  moveLineUp,
+  selectLine,
+} from "@codemirror/commands";
+import {
   bracketMatching,
-  foldGutter,
-  indentOnInput,
-  syntaxHighlighting,
   defaultHighlightStyle,
-  StreamLanguage,
+  foldGutter,
   HighlightStyle,
+  indentOnInput,
+  StreamLanguage,
+  syntaxHighlighting,
 } from "@codemirror/language";
-import { tags } from "@lezer/highlight";
 import { stex } from "@codemirror/legacy-modes/mode/stex";
+import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
+import { Compartment, EditorState } from "@codemirror/state";
+import {
+  drawSelection,
+  EditorView,
+  highlightActiveLine,
+  highlightActiveLineGutter,
+  keymap,
+  lineNumbers,
+  rectangularSelection,
+} from "@codemirror/view";
+import { tags } from "@lezer/highlight";
+import { memo, useEffect, useRef, useState } from "react";
 import { EDITOR_MONO_FONT_FAMILY } from "@/lib/editor/font-stacks";
 
 const latexLanguage = StreamLanguage.define(stex);
@@ -188,8 +188,7 @@ export const LaTeXEditor = memo(function LaTeXEditor({
             key: "Mod-/",
             run: (view) => {
               const { state } = view;
-              const changes: { from: number; to: number; insert: string }[] =
-                [];
+              const changes: { from: number; to: number; insert: string }[] = [];
               for (const range of state.selection.ranges) {
                 const line = state.doc.lineAt(range.from);
                 const lineText = line.text;
@@ -197,10 +196,7 @@ export const LaTeXEditor = memo(function LaTeXEditor({
                   const commentIndex = lineText.indexOf("%");
                   changes.push({
                     from: line.from + commentIndex,
-                    to:
-                      line.from +
-                      commentIndex +
-                      (lineText[commentIndex + 1] === " " ? 2 : 1),
+                    to: line.from + commentIndex + (lineText[commentIndex + 1] === " " ? 2 : 1),
                     insert: "",
                   });
                 } else {
@@ -228,15 +224,13 @@ export const LaTeXEditor = memo(function LaTeXEditor({
           ...closeBracketsKeymap,
           indentWithTab,
         ]),
-        EditorView.updateListener.of(
-          (update: { docChanged: boolean; state: EditorState }) => {
-            if (update.docChanged && !isExternalUpdateRef.current) {
-              const newContent = update.state.doc.toString();
-              contentRef.current = newContent;
-              onContentChangeRef.current?.(newContent);
-            }
-          },
-        ),
+        EditorView.updateListener.of((update: { docChanged: boolean; state: EditorState }) => {
+          if (update.docChanged && !isExternalUpdateRef.current) {
+            const newContent = update.state.doc.toString();
+            contentRef.current = newContent;
+            onContentChangeRef.current?.(newContent);
+          }
+        }),
       ],
     });
 
@@ -252,7 +246,7 @@ export const LaTeXEditor = memo(function LaTeXEditor({
       viewRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- content is handled by separate effect below
-  }, [mounted, readOnly]);
+  }, [mounted, readOnly, content]);
 
   useEffect(() => {
     if (!viewRef.current || content === contentRef.current) return;
@@ -275,6 +269,11 @@ export const LaTeXEditor = memo(function LaTeXEditor({
   }, [content]);
 
   if (!mounted) {
+    const skeletonRows = [70, 45, 60, 80, 35].map((width) => ({
+      id: `latex-editor-skeleton-${width}`,
+      width,
+    }));
+
     return (
       <div className={`flex flex-col ${className}`}>
         <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background">
@@ -282,8 +281,8 @@ export const LaTeXEditor = memo(function LaTeXEditor({
           <div className="h-4 w-32 bg-surface-tertiary animate-pulse" />
         </div>
         <div className="flex-1 bg-background p-4 space-y-2">
-          {[70, 45, 60, 80, 35].map((width, i) => (
-            <div key={i} className="flex gap-4">
+          {skeletonRows.map(({ id, width }) => (
+            <div key={id} className="flex gap-4">
               <div className="w-8 h-4 bg-surface-secondary animate-pulse" />
               <div
                 className="flex-1 h-4 bg-surface-secondary animate-pulse"

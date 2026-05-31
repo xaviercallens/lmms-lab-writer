@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import type { Metadata } from "next";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import "./globals.css";
 
@@ -8,15 +8,7 @@ export const metadata: Metadata = {
   title: "LMMs-Lab Writer",
   description:
     "AI-native LaTeX editor. Let AI agents write your papers while you focus on research.",
-  keywords: [
-    "LaTeX",
-    "editor",
-    "AI",
-    "OpenCode",
-    "AI agents",
-    "research",
-    "academic writing",
-  ],
+  keywords: ["LaTeX", "editor", "AI", "OpenCode", "AI agents", "research", "academic writing"],
   authors: [{ name: "LMMs-Lab" }],
   icons: {
     icon: "/favicon.png",

@@ -1,8 +1,8 @@
 "use client";
 
+import { WarningIcon, XIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import { WarningIcon, XIcon } from "@phosphor-icons/react";
 
 type ErrorType = "port_in_use" | "not_installed" | "generic";
 
@@ -25,13 +25,7 @@ function parseErrorType(error: string): { type: ErrorType; port?: number } {
   return { type: "generic" };
 }
 
-export function OpenCodeErrorDialog({
-  open,
-  error,
-  onClose,
-  onRetry,
-  onKillPort,
-}: Props) {
+export function OpenCodeErrorDialog({ open, error, onClose, onRetry, onKillPort }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [killing, setKilling] = useState(false);
@@ -108,11 +102,7 @@ export function OpenCodeErrorDialog({
       aria-modal="true"
       aria-labelledby="error-dialog-title"
     >
-      <div
-        className="absolute inset-0 bg-foreground/50"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0 bg-foreground/50" onClick={onClose} aria-hidden="true" />
 
       <div
         ref={dialogRef}
@@ -123,6 +113,7 @@ export function OpenCodeErrorDialog({
             OpenCode Error
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="p-1 text-muted hover:text-foreground transition-colors"
             aria-label="Close dialog"
@@ -148,9 +139,7 @@ export function OpenCodeErrorDialog({
                 </p>
               )}
               {errorType === "generic" && (
-                <p className="text-sm text-foreground mb-2">
-                  Failed to start OpenCode.
-                </p>
+                <p className="text-sm text-foreground mb-2">Failed to start OpenCode.</p>
               )}
             </div>
           </div>
@@ -160,6 +149,7 @@ export function OpenCodeErrorDialog({
               {error}
             </div>
             <button
+              type="button"
               onClick={handleCopy}
               className="absolute top-2 right-2 px-2 py-1 text-xs bg-background border border-border hover:border-foreground transition-colors"
             >
@@ -170,10 +160,11 @@ export function OpenCodeErrorDialog({
           {errorType === "port_in_use" && onKillPort && (
             <div className="mt-4 p-3 border border-border bg-accent-hover">
               <p className="text-xs text-muted mb-2">
-                Would you like to automatically kill the process using port{" "}
-                {port} and restart OpenCode?
+                Would you like to automatically kill the process using port {port} and restart
+                OpenCode?
               </p>
               <button
+                type="button"
                 onClick={handleKillPort}
                 disabled={killing}
                 className="w-full px-3 py-2 text-xs bg-background text-foreground border border-foreground shadow-[2px_2px_0px_0px_var(--foreground)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
@@ -205,13 +196,13 @@ export function OpenCodeErrorDialog({
           )}
 
           <p className="mt-4 text-xs text-muted">
-            Copy this error and paste it to your local OpenCode or Claude for
-            debugging assistance.
+            Copy this error and paste it to your local OpenCode or Claude for debugging assistance.
           </p>
         </div>
 
         <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border bg-accent-hover">
           <button
+            type="button"
             onClick={onClose}
             className="px-3 py-1.5 text-xs border border-border hover:border-foreground transition-colors"
           >
@@ -219,6 +210,7 @@ export function OpenCodeErrorDialog({
           </button>
           {errorType !== "port_in_use" && (
             <button
+              type="button"
               onClick={onRetry}
               className="px-3 py-1.5 text-xs bg-background text-foreground border border-foreground shadow-[2px_2px_0px_0px_var(--foreground)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
             >

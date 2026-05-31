@@ -1,33 +1,25 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Header } from "@/components/header";
-import { createClient } from "@/lib/supabase/server";
-import { GITHUB_CONFIG, canDownload } from "@/lib/github/config";
 import {
-  SUPPORTED_LOCALES,
-  DEFAULT_LOCALE,
-  isLocale,
-  interpolate,
-  type Locale,
-} from "@/lib/i18n";
-import { getMessages } from "@/lib/messages";
-import {
-  InstallationPolicySection,
+  BuildSection,
   DownloadSection,
   HomebrewSection,
-  RELEASE_VERSION,
-  NpmPackageSection,
-  InstallationSection,
-  RequirementsSection,
-  BuildSection,
   InksGate,
+  InstallationPolicySection,
+  InstallationSection,
+  NpmPackageSection,
+  RELEASE_VERSION,
+  RequirementsSection,
 } from "@/components/download-sections";
+import { Header } from "@/components/header";
+import { canDownload, GITHUB_CONFIG } from "@/lib/github/config";
+import { DEFAULT_LOCALE, interpolate, isLocale, type Locale, SUPPORTED_LOCALES } from "@/lib/i18n";
+import { getMessages } from "@/lib/messages";
+import { createClient } from "@/lib/supabase/server";
 
 export function generateStaticParams() {
-  return SUPPORTED_LOCALES.filter((l) => l !== DEFAULT_LOCALE).map(
-    (locale) => ({ locale }),
-  );
+  return SUPPORTED_LOCALES.filter((l) => l !== DEFAULT_LOCALE).map((locale) => ({ locale }));
 }
 
 function DownloadSkeleton() {
@@ -90,13 +82,9 @@ async function DownloadContent({ locale }: { locale: Locale }) {
             <p className="text-sm font-medium">
               {interpolate(messages.readyBannerTitle, { inks })}
             </p>
-            <p className="text-xs text-muted mt-1">
-              {messages.readyBannerNote}
-            </p>
+            <p className="text-xs text-muted mt-1">{messages.readyBannerNote}</p>
           </div>
-          <span className="text-xs font-mono text-muted uppercase tracking-wider">
-            {inks} inks
-          </span>
+          <span className="text-xs font-mono text-muted uppercase tracking-wider">{inks} inks</span>
         </div>
       </div>
       <HomebrewSection locale={locale} />
@@ -129,9 +117,7 @@ export default async function LocaleDownloadPage({
 
       <main className="flex-1 py-16 px-6">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-2xl font-medium tracking-tight mb-2">
-            {messages.pageTitle}
-          </h1>
+          <h1 className="text-2xl font-medium tracking-tight mb-2">{messages.pageTitle}</h1>
           <p className="text-muted mb-6">
             {messages.versionLabel} {RELEASE_VERSION}
           </p>

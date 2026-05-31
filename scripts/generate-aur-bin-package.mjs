@@ -146,12 +146,7 @@ const ARCH_DEPENDS = [
   "texlive-langcjk",
 ];
 
-function buildPkgbuild({
-  version,
-  sourceFileName,
-  sourceUrl,
-  sha256,
-}) {
+function buildPkgbuild({ version, sourceFileName, sourceUrl, sha256 }) {
   const depends = ARCH_DEPENDS.map((dependency) => `'${dependency}'`).join(" ");
 
   return `pkgname=lmms-lab-writer-bin
@@ -186,12 +181,7 @@ package() {
 `;
 }
 
-function buildSrcinfo({
-  version,
-  sourceFileName,
-  sourceUrl,
-  sha256,
-}) {
+function buildSrcinfo({ version, sourceFileName, sourceUrl, sha256 }) {
   const depends = ARCH_DEPENDS.map((dependency) => `\tdepends = ${dependency}`).join("\n");
 
   return `pkgbase = lmms-lab-writer-bin

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { pathSync } from "@/lib/path";
-import type { MainFileDetectionResult } from "@/lib/latex/types";
 import { CheckIcon, FileTextIcon } from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import type { MainFileDetectionResult } from "@/lib/latex/types";
+import { pathSync } from "@/lib/path";
 
 interface MainFileSelectionDialogProps {
   open: boolean;
@@ -21,7 +21,7 @@ export function MainFileSelectionDialog({
   onCancel,
 }: MainFileSelectionDialogProps) {
   const [selected, setSelected] = useState<string | null>(
-    detectionResult.main_file || detectionResult.tex_files[0] || null
+    detectionResult.main_file || detectionResult.tex_files[0] || null,
   );
 
   useEffect(() => {
@@ -72,9 +72,7 @@ export function MainFileSelectionDialog({
           {/* Header */}
           <div className="px-5 py-4 border-b border-border">
             <h3 className="text-sm font-medium">Select Main File</h3>
-            <p className="mt-1 text-sm text-muted">
-              {detectionResult.message}
-            </p>
+            <p className="mt-1 text-sm text-muted">{detectionResult.message}</p>
           </div>
 
           {/* Content */}
@@ -92,12 +90,11 @@ export function MainFileSelectionDialog({
 
                   return (
                     <button
+                      type="button"
                       key={file}
                       onClick={() => setSelected(file)}
                       className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between group ${
-                        isSelected
-                          ? "bg-foreground text-background"
-                          : "hover:bg-surface-secondary"
+                        isSelected ? "bg-foreground text-background" : "hover:bg-surface-secondary"
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
@@ -108,9 +105,13 @@ export function MainFileSelectionDialog({
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {isRecommended && (
-                          <span className={`text-xs px-1.5 py-0.5 ${
-                            isSelected ? "bg-background/20 text-background" : "bg-green-100 text-green-700"
-                          }`}>
+                          <span
+                            className={`text-xs px-1.5 py-0.5 ${
+                              isSelected
+                                ? "bg-background/20 text-background"
+                                : "bg-green-100 text-green-700"
+                            }`}
+                          >
                             Recommended
                           </span>
                         )}
@@ -126,7 +127,8 @@ export function MainFileSelectionDialog({
           {/* Footer */}
           <div className="flex items-center justify-between px-5 py-4 border-t border-border">
             <p className="text-xs text-muted">
-              {detectionResult.tex_files.length} file{detectionResult.tex_files.length !== 1 ? "s" : ""} found
+              {detectionResult.tex_files.length} file
+              {detectionResult.tex_files.length !== 1 ? "s" : ""} found
             </p>
             <div className="flex items-center gap-2">
               <button type="button" onClick={onCancel} className="btn btn-sm btn-secondary">
@@ -145,6 +147,6 @@ export function MainFileSelectionDialog({
         </motion.div>
       </div>
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

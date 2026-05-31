@@ -3,9 +3,9 @@
 import {
   basename as tauriBasename,
   dirname as tauriDirname,
+  extname as tauriExtname,
   join as tauriJoin,
   normalize as tauriNormalize,
-  extname as tauriExtname,
   sep as tauriSep,
 } from "@tauri-apps/api/path";
 
@@ -73,9 +73,7 @@ export const pathSync = {
     const normalized = path.replace(/\\/g, "/");
     const isDriveRoot = /^[a-zA-Z]:\/?$/.test(normalized);
     const trimmed =
-      !isDriveRoot && normalized.length > 1
-        ? normalized.replace(/\/+$/, "")
-        : normalized;
+      !isDriveRoot && normalized.length > 1 ? normalized.replace(/\/+$/, "") : normalized;
     const lastSlash = trimmed.lastIndexOf("/");
     if (lastSlash === -1) return "";
     if (lastSlash === 0) return sep === "\\" ? "\\" : "/";
@@ -136,9 +134,7 @@ export const pathSync = {
       if (/^[a-zA-Z]:$/.test(ancestorPath)) {
         ancestorPath = `${ancestorPath}/`;
       }
-      ancestors.push(
-        sep === "\\" ? ancestorPath.replace(/\//g, "\\") : ancestorPath,
-      );
+      ancestors.push(sep === "\\" ? ancestorPath.replace(/\//g, "\\") : ancestorPath);
     }
     return ancestors;
   },
