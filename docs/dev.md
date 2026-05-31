@@ -75,17 +75,17 @@ lmms-lab-writer/
 | Serialization | serde + serde_json | 1.x |
 | Database / Auth | Supabase | 2.93.1 |
 | CRDT / Realtime | Yjs | 13.6.29 |
-| Build Orchestration | Turbo | 2.7.6 |
-| Package Manager | pnpm | 10.28.2 |
-| Language | TypeScript 5.9.3 (strict), Rust 2021 edition | |
-| Node.js | >= 20.0.0 | |
+| Build Orchestration | Turbo | 2.9.16 |
+| Package Manager | pnpm | 11.5.0 |
+| Language | TypeScript 6.0.3 (strict), Rust 2021 edition | |
+| Node.js | >= 24.0.0 | Active LTS; required by CI |
 
 ## Prerequisites
 
 Ensure you have the following installed:
 
-1. **Node.js** >= 20.0.0 — [nodejs.org](https://nodejs.org/)
-2. **pnpm** 10.x — `npm install -g pnpm`
+1. **Node.js** >= 24.0.0 — [nodejs.org](https://nodejs.org/)
+2. **pnpm** 11.x — managed by Corepack / `corepack enable`
 3. **Rust** toolchain — [rustup.rs](https://rustup.rs/)
 4. **Platform-specific Tauri dependencies**:
    - **macOS**: Xcode Command Line Tools (`xcode-select --install`)

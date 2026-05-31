@@ -1,6 +1,6 @@
 # AGENTS.md - LMMs-Lab Writer
 
-**Updated:** 2026-02-08 | **Branch:** main
+**Updated:** 2026-05-31 | **Branch:** main
 
 ## Overview
 
@@ -23,7 +23,7 @@ lmms-lab-writer/
 │   │   │   └── lib/tauri/    # Tauri IPC hooks
 │   │   └── src-tauri/        # Rust backend
 │   │       └── src/commands/ # Tauri commands (fs, git, latex, terminal, opencode, auth)
-│   ├── web/                  # Marketing website (Next.js 15, Vercel)
+│   ├── web/                  # Marketing website (Next.js 16, Vercel)
 │   │   ├── src/app/          # Next.js pages (landing, docs, auth, download)
 │   │   ├── content/docs/     # MDX documentation
 │   │   └── src/lib/supabase/ # Supabase auth client
@@ -104,9 +104,10 @@ cd apps/desktop/src-tauri && cargo check    # Check Rust
 cd apps/web && pnpm tsc --noEmit            # Check website TypeScript
 
 # Lint & Format
-pnpm lint                                   # Biome lint check
+pnpm exec biome check .                     # Biome lint + format check
+pnpm lint                                   # Biome lint
 pnpm lint:fix                               # Biome safe fixes
-pnpm format                                 # Biome formatter
+pnpm format                                 # Biome formatter write
 ```
 
 ## Conventions
@@ -115,6 +116,14 @@ pnpm format                                 # Biome formatter
 
 - `noUncheckedIndexedAccess: true` - Array access returns `T | undefined`
 - Strict mode. No `as any`, no `@ts-ignore`
+
+### Biome
+
+- Biome replaces ESLint and Prettier for TypeScript, JavaScript, JSON, CSS, and formatting.
+- `biome.json` keeps `recommended: true`; do not globally disable rules to make legacy UI pass.
+- Prefer refactoring code to satisfy Biome rules. Use local `biome-ignore` only for real platform constraints or intentional syntax, and include a short reason.
+- Common fixes: add explicit `type="button"`, use stable React keys, associate labels with controls, mark decorative SVGs with `aria-hidden`, avoid non-null assertions, and use `next/image` instead of raw `<img>` where applicable.
+- Monaco snippets that intentionally contain `${1:placeholder}` should use escaped template literals, e.g. `` `textbf{\${1:text}}` ``.
 
 ### File Naming
 
