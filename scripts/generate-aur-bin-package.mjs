@@ -132,12 +132,28 @@ function pickDebAsset(files, version) {
   return debs[0];
 }
 
+const ARCH_DEPENDS = [
+  "gtk3",
+  "webkit2gtk-4.1",
+  "libappindicator-gtk3",
+  "opencode",
+  "texlive-bin",
+  "texlive-binextra",
+  "texlive-latex",
+  "texlive-latexrecommended",
+  "texlive-latexextra",
+  "texlive-fontsrecommended",
+  "texlive-langcjk",
+];
+
 function buildPkgbuild({
   version,
   sourceFileName,
   sourceUrl,
   sha256,
 }) {
+  const depends = ARCH_DEPENDS.map((dependency) => `'${dependency}'`).join(" ");
+
   return `pkgname=lmms-lab-writer-bin
 pkgver=${version}
 pkgrel=1
@@ -145,7 +161,7 @@ pkgdesc="AI-native LaTeX editor desktop application (prebuilt binary)"
 arch=('x86_64')
 url="https://github.com/EvolvingLMMs-Lab/lmms-lab-writer"
 license=('MIT')
-depends=('gtk3' 'webkit2gtk-4.1' 'libappindicator-gtk3')
+depends=(${depends})
 provides=('lmms-lab-writer')
 conflicts=('lmms-lab-writer')
 options=(!strip)
@@ -176,6 +192,8 @@ function buildSrcinfo({
   sourceUrl,
   sha256,
 }) {
+  const depends = ARCH_DEPENDS.map((dependency) => `\tdepends = ${dependency}`).join("\n");
+
   return `pkgbase = lmms-lab-writer-bin
 \tpkgdesc = AI-native LaTeX editor desktop application (prebuilt binary)
 \tpkgver = ${version}
@@ -183,9 +201,7 @@ function buildSrcinfo({
 \turl = https://github.com/EvolvingLMMs-Lab/lmms-lab-writer
 \tarch = x86_64
 \tlicense = MIT
-\tdepends = gtk3
-\tdepends = webkit2gtk-4.1
-\tdepends = libappindicator-gtk3
+${depends}
 \tprovides = lmms-lab-writer
 \tconflicts = lmms-lab-writer
 \toptions = !strip

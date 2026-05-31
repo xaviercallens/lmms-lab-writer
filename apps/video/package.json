@@ -8,10 +8,10 @@
     "render": "npx remotion render MarketingVideo out/marketing.mp4"
   },
   "dependencies": {
-    "@remotion/cli": "4.0.466",
+    "@remotion/cli": "4.0.469",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "remotion": "4.0.466",
+    "remotion": "4.0.469",
     "zod": "^4.4.3"
   },
   "devDependencies": {

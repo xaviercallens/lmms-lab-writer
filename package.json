@@ -5,15 +5,9 @@
   "description": "AI-native LaTeX editor - Tauri desktop application",
   "author": "LMMs Lab",
   "license": "MIT",
-  "packageManager": "pnpm@10.29.3",
+  "packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1",
   "engines": {
     "node": ">=20.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "react-dnd": "^16.0.1",
-      "react-dnd-html5-backend": "^16.0.1"
-    }
   },
   "scripts": {
     "build": "turbo build",
@@ -33,16 +27,16 @@
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9.39.4",
     "@next/eslint-plugin-next": "^16.2.6",
-    "@typescript-eslint/eslint-plugin": "^8.59.4",
-    "@typescript-eslint/parser": "^8.59.4",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
     "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
     "prettier": "^3.8.3",
-    "turbo": "^2.9.14",
+    "turbo": "^2.9.16",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.4",
+    "typescript-eslint": "^8.60.0",
     "vitest": "^4.1.7"
   }
 }
