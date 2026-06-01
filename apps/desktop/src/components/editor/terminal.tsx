@@ -138,6 +138,8 @@ export const Terminal = memo(function Terminal({
     let dataDisposable: XTermDisposable | null = null;
     let resizeDisposable: XTermDisposable | null = null;
     let fitFrameId: number | null = null;
+    const pendingOutput = new Map<string, string[]>();
+    const pendingExit = new Map<string, number>();
 
     const term = new XTerm({
       fontFamily: fontRef.current.fontFamily,
@@ -164,25 +166,21 @@ export const Terminal = memo(function Terminal({
         // Check if already cleaned up before spawning
         if (isCleanedUp) return;
 
-        const spawnedPtyId = await invoke<string>("spawn_pty", {
-          cwd: projectPath,
-          cols: term.cols,
-          rows: term.rows,
-          shell: preferredShell,
-        });
-
-        // Check again after async operation
-        if (isCleanedUp) {
-          // Component unmounted during spawn - kill the orphan process
-          invoke("kill_pty", { id: spawnedPtyId }).catch(console.error);
-          return;
-        }
-
-        ptyId = spawnedPtyId;
-
         unlistenOutput = await listen<{ id: string; data: string }>("pty-output", (event) => {
-          if (event.payload.id === ptyId && !isCleanedUp) {
-            term.write(event.payload.data);
+          if (isCleanedUp) {
+            return;
+          }
+
+          const { id, data } = event.payload;
+          if (id === ptyId) {
+            term.write(data);
+            return;
+          }
+
+          if (ptyId === null) {
+            const bufferedOutput = pendingOutput.get(id) ?? [];
+            bufferedOutput.push(data);
+            pendingOutput.set(id, bufferedOutput);
           }
         });
 
@@ -194,9 +192,19 @@ export const Terminal = memo(function Terminal({
         }
 
         unlistenExit = await listen<{ id: string; code: number }>("pty-exit", (event) => {
-          if (event.payload.id === ptyId && !isCleanedUp) {
-            term.write(`\r\n[Process exited with code ${event.payload.code}]\r\n`);
+          if (isCleanedUp) {
+            return;
+          }
+
+          const { id, code } = event.payload;
+          if (id === ptyId) {
+            term.write(`\r\n[Process exited with code ${code}]\r\n`);
             ptyId = null;
+            return;
+          }
+
+          if (ptyId === null) {
+            pendingExit.set(id, code);
           }
         });
 
@@ -219,6 +227,37 @@ export const Terminal = memo(function Terminal({
             invoke("resize_pty", { id: ptyId, cols, rows }).catch(console.error);
           }
         });
+
+        const spawnedPtyId = await invoke<string>("spawn_pty", {
+          cwd: projectPath,
+          cols: term.cols,
+          rows: term.rows,
+          shell: preferredShell,
+        });
+
+        // Check again after async operation
+        if (isCleanedUp) {
+          // Component unmounted during spawn - kill the orphan process
+          invoke("kill_pty", { id: spawnedPtyId }).catch(console.error);
+          return;
+        }
+
+        ptyId = spawnedPtyId;
+
+        const bufferedOutput = pendingOutput.get(spawnedPtyId);
+        if (bufferedOutput) {
+          for (const data of bufferedOutput) {
+            term.write(data);
+          }
+          pendingOutput.delete(spawnedPtyId);
+        }
+
+        const exitCode = pendingExit.get(spawnedPtyId);
+        if (exitCode !== undefined) {
+          term.write(`\r\n[Process exited with code ${exitCode}]\r\n`);
+          ptyId = null;
+          pendingExit.delete(spawnedPtyId);
+        }
       } catch (err) {
         if (!isCleanedUp) {
           console.error("Failed to spawn PTY:", err);
