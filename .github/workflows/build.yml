@@ -111,7 +111,16 @@ jobs:
 
       - name: Generate PKGBUILD and .SRCINFO
         if: ${{ !contains(github.ref_name, '-') }}
-        run: node scripts/generate-aur-bin-package.mjs --tag ${{ github.ref_name }} --linux-artifacts-dir aur-input --out-dir aur-dist/lmms-lab-writer-bin
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/generate-aur-bin-package.mjs \
+            --tag "${{ github.ref_name }}" \
+            --linux-artifacts-dir aur-input \
+            --out-dir aur-dist/lmms-lab-writer-bin
+          node scripts/generate-aur-source-package.mjs \
+            --tag "${{ github.ref_name }}" \
+            --out-dir aur-dist/lmms-lab-writer
 
       - name: Archive AUR package files
         if: ${{ !contains(github.ref_name, '-') }}
@@ -120,6 +129,7 @@ jobs:
           set -euo pipefail
           mkdir -p aur-dist
           tar -czf "aur-dist/lmms-lab-writer-bin-${{ github.ref_name }}-aur.tar.gz" -C aur-dist/lmms-lab-writer-bin .
+          tar -czf "aur-dist/lmms-lab-writer-${{ github.ref_name }}-aur.tar.gz" -C aur-dist/lmms-lab-writer .
 
       - name: Upload AUR package files
         if: ${{ !contains(github.ref_name, '-') }}
@@ -128,6 +138,7 @@ jobs:
           name: build-AUR
           path: |
             aur-dist/lmms-lab-writer-bin/**
+            aur-dist/lmms-lab-writer/**
             aur-dist/*.tar.gz
           include-hidden-files: true
           retention-days: 7
@@ -207,8 +218,6 @@ jobs:
             release-artifacts/**/*.rpm
             release-artifacts/**/*.sig
             release-artifacts/**/*.json
-            release-artifacts/**/PKGBUILD
-            release-artifacts/**/.SRCINFO
 
   release-arch-package:
     name: Build and Release Arch Package
@@ -219,6 +228,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: archlinux:base-devel
+    env:
+      AUR_PKGNAME: lmms-lab-writer-bin
     permissions:
       contents: write
     steps:
@@ -246,13 +257,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          pkgbuild="$(find aur-package -type f -name PKGBUILD | head -n 1 || true)"
-          srcinfo="$(find aur-package -type f -name .SRCINFO | head -n 1 || true)"
+          pkgbuild="$(find aur-package -type f -path "*/${AUR_PKGNAME}/PKGBUILD" | head -n 1 || true)"
+          srcinfo="$(find aur-package -type f -path "*/${AUR_PKGNAME}/.SRCINFO" | head -n 1 || true)"
 
           if [[ -z "$pkgbuild" || -z "$srcinfo" ]]; then
-            archive="$(find aur-package -type f -name 'lmms-lab-writer-bin-*-aur.tar.gz' | head -n 1 || true)"
+            archive="$(find aur-package -type f -name "${AUR_PKGNAME}-${{ github.ref_name }}-aur.tar.gz" | head -n 1 || true)"
             if [[ -z "$archive" ]]; then
-              echo "AUR package files were not found in the build-AUR artifact." >&2
+              echo "AUR package files for $AUR_PKGNAME were not found in the build-AUR artifact." >&2
               exit 1
             fi
 
@@ -315,7 +326,12 @@ jobs:
     env:
       AUR_HOME: /tmp/aur-home
       AUR_WORKDIR: /tmp/aur-packages
-      AUR_PKGNAME: lmms-lab-writer-bin
+    strategy:
+      fail-fast: false
+      matrix:
+        aur_pkgname:
+          - lmms-lab-writer-bin
+          - lmms-lab-writer
     steps:
       - name: Install dependencies
         run: |
@@ -333,21 +349,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          AUR_PKGNAME="${{ matrix.aur_pkgname }}"
 
-          pkgbuild="$(find aur-package -type f -name PKGBUILD | head -n 1 || true)"
-          srcinfo="$(find aur-package -type f -name .SRCINFO | head -n 1 || true)"
+          pkgbuild="$(find aur-package -type f -path "*/${AUR_PKGNAME}/PKGBUILD" | head -n 1 || true)"
+          srcinfo="$(find aur-package -type f -path "*/${AUR_PKGNAME}/.SRCINFO" | head -n 1 || true)"
 
           if [[ -z "$pkgbuild" || -z "$srcinfo" ]]; then
-            archive="$(find aur-package -type f -name 'lmms-lab-writer-bin-*-aur.tar.gz' | head -n 1 || true)"
+            archive="$(find aur-package -type f -name "${AUR_PKGNAME}-${{ github.ref_name }}-aur.tar.gz" | head -n 1 || true)"
             if [[ -z "$archive" ]]; then
-              echo "AUR package files were not found in the build-AUR artifact." >&2
+              echo "AUR package files for $AUR_PKGNAME were not found in the build-AUR artifact." >&2
               exit 1
             fi
 
-            mkdir -p aur-package/extracted
-            tar -xzf "$archive" -C aur-package/extracted
-            pkgbuild="$(find aur-package/extracted -type f -name PKGBUILD | head -n 1 || true)"
-            srcinfo="$(find aur-package/extracted -type f -name .SRCINFO | head -n 1 || true)"
+            rm -rf aur-package/extracted
+            mkdir -p "aur-package/extracted/${AUR_PKGNAME}"
+            tar -xzf "$archive" -C "aur-package/extracted/${AUR_PKGNAME}"
+            pkgbuild="$(find "aur-package/extracted/${AUR_PKGNAME}" -type f -name PKGBUILD | head -n 1 || true)"
+            srcinfo="$(find "aur-package/extracted/${AUR_PKGNAME}" -type f -name .SRCINFO | head -n 1 || true)"
           fi
 
           if [[ -z "$pkgbuild" || -z "$srcinfo" ]]; then
@@ -399,6 +417,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          AUR_PKGNAME="${{ matrix.aur_pkgname }}"
 
           export GIT_SSH_COMMAND="ssh -F $AUR_HOME/.ssh/config"
           aur_url="ssh://aur@aur.archlinux.org/${AUR_PKGNAME}.git"

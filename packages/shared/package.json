@@ -1,6 +1,6 @@
 {
   "name": "@lmms-lab/writer-shared",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Shared types and utilities for LaTeX Writer",
   "type": "module",
   "main": "./dist/index.js",

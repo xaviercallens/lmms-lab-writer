@@ -12,6 +12,7 @@ PKG_SCRIPTS_DIR="$SCRIPT_DIR"
 APP_NAME="LMMs-Lab Writer"
 APP_BUNDLE="$TARGET_DIR/$APP_NAME.app"
 PKG_OUTPUT="$TARGET_DIR/$APP_NAME.pkg"
+VERSION="$(node -p "require('$TAURI_DIR/tauri.conf.json').version")"
 
 # Check if app bundle exists
 if [ ! -d "$APP_BUNDLE" ]; then
@@ -40,7 +41,7 @@ pkgbuild \
     --install-location "/Applications/$APP_NAME.app" \
     --scripts "$TEMP_SCRIPTS" \
     --identifier "com.lmms-lab.writer" \
-    --version "0.1.0" \
+    --version "$VERSION" \
     "$COMPONENT_PKG"
 
 # Build final product package

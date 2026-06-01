@@ -24,7 +24,7 @@ const GPU_SPRING = {
   mass: 0.5,
 } as const;
 
-export const RELEASE_VERSION = "0.1.0";
+export const RELEASE_VERSION = "0.1.3";
 const RELEASE_BASE_URL = "https://github.com/EvolvingLMMs-Lab/lmms-lab-writer/releases";
 const RELEASE_TAG = `v${RELEASE_VERSION}`;
 const RELEASE_PAGE_URL = `${RELEASE_BASE_URL}/tag/${RELEASE_TAG}`;
