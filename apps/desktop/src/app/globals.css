@@ -191,6 +191,18 @@ body {
   -ms-overflow-style: none;
 }
 
+.terminal-xterm,
+.terminal-xterm .xterm,
+.terminal-xterm .xterm-rows {
+  letter-spacing: 0;
+  font-kerning: none;
+  font-synthesis: none;
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "calt" 0;
+}
+
 .scrollbar-sharp {
   overflow: auto;
 }

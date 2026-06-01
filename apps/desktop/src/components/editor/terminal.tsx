@@ -6,7 +6,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { useTheme } from "next-themes";
 import { memo, useEffect, useRef, useState } from "react";
-import { resolveMonoFontFamily } from "@/lib/editor/font-stacks";
+import { resolveTerminalFontFamily } from "@/lib/editor/font-stacks";
 
 // GitHub Light terminal colors
 const LIGHT_TERMINAL_THEME = {
@@ -86,7 +86,7 @@ export const Terminal = memo(function Terminal({
   const fitAddonRef = useRef<FitAddon | null>(null);
   const themeRef = useRef(LIGHT_TERMINAL_THEME);
   const fontRef = useRef({
-    fontFamily: resolveMonoFontFamily(fontFamily),
+    fontFamily: resolveTerminalFontFamily(fontFamily),
     fontSize,
     lineHeight,
   });
@@ -110,7 +110,7 @@ export const Terminal = memo(function Terminal({
 
   useEffect(() => {
     const nextFont = {
-      fontFamily: resolveMonoFontFamily(fontFamily),
+      fontFamily: resolveTerminalFontFamily(fontFamily),
       fontSize,
       lineHeight,
     };
@@ -143,11 +143,12 @@ export const Terminal = memo(function Terminal({
       fontFamily: fontRef.current.fontFamily,
       fontSize: fontRef.current.fontSize,
       lineHeight: fontRef.current.lineHeight,
+      letterSpacing: 0,
       theme: themeRef.current,
       cursorBlink: true,
       cursorStyle: "block",
       scrollback: 10000,
-      screenReaderMode: true,
+      screenReaderMode: false,
     });
 
     const fitAddon = new FitAddon();
@@ -293,7 +294,7 @@ export const Terminal = memo(function Terminal({
 
   return (
     <div className={`bg-background ${className}`}>
-      <div ref={containerRef} className="w-full h-full p-2" />
+      <div ref={containerRef} className="terminal-xterm w-full h-full p-2" />
     </div>
   );
 });
