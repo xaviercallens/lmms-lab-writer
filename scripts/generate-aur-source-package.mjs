@@ -13,6 +13,7 @@ function parseArgs(argv) {
   const args = {
     tag: "",
     version: "",
+    pkgrel: "1",
     outDir: "aur-dist/lmms-lab-writer",
     repo: "EvolvingLMMs-Lab/lmms-lab-writer",
     sha256: "",
@@ -27,6 +28,11 @@ function parseArgs(argv) {
     }
     if (arg === "--version") {
       args.version = argv[i + 1] ?? "";
+      i += 1;
+      continue;
+    }
+    if (arg === "--pkgrel") {
+      args.pkgrel = argv[i + 1] ?? "";
       i += 1;
       continue;
     }
@@ -52,6 +58,7 @@ function parseArgs(argv) {
 Options:
   --tag <vX.Y.Z>       Git tag used in release URL
   --version <X.Y.Z>    Package version (overrides --tag)
+  --pkgrel <N>         AUR package release number (default: 1)
   --out-dir <dir>      Output directory for PKGBUILD/.SRCINFO
   --repo <owner/repo>  GitHub repo for source archive URL
   --sha256 <hash>      Override source archive SHA-256`);
@@ -84,6 +91,14 @@ function inferVersionFromTagOrArg(args) {
   return version;
 }
 
+function validatePkgrel(input) {
+  const pkgrel = input.trim();
+  if (!/^[1-9]\d*$/.test(pkgrel)) {
+    fail(`Invalid pkgrel '${input}'`);
+  }
+  return pkgrel;
+}
+
 async function sha256Url(url) {
   const response = await fetch(url);
   if (!response.ok) {
@@ -114,13 +129,13 @@ const RUNTIME_DEPENDS = [
 
 const MAKE_DEPENDS = ["git", "nodejs", "pnpm", "rust", "cargo", "curl", "wget", "file", "patchelf"];
 
-function buildPkgbuild({ version, sourceUrl, sha256 }) {
+function buildPkgbuild({ version, pkgrel, sourceUrl, sha256 }) {
   const depends = RUNTIME_DEPENDS.map((dependency) => `'${dependency}'`).join(" ");
   const makedepends = MAKE_DEPENDS.map((dependency) => `'${dependency}'`).join(" ");
 
   return `pkgname=lmms-lab-writer
 pkgver=${version}
-pkgrel=1
+pkgrel=${pkgrel}
 pkgdesc="AI-native LaTeX editor desktop application"
 arch=('x86_64')
 url="https://github.com/EvolvingLMMs-Lab/lmms-lab-writer"
@@ -151,7 +166,12 @@ prepare() {
   export PATH="\${PNPM_HOME}:\${PATH}"
 
   pnpm config set store-dir "\${srcdir}/pnpm-store"
-  pnpm install --frozen-lockfile
+  pnpm config set network-timeout 300000
+  pnpm config set fetch-retries 5
+  pnpm config set fetch-retry-mintimeout 20000
+  pnpm config set fetch-retry-maxtimeout 120000
+  pnpm config set network-concurrency 8
+  pnpm --filter @lmms-lab/writer-desktop... install --frozen-lockfile
 }
 
 build() {
@@ -193,14 +213,14 @@ EOF
 `;
 }
 
-function buildSrcinfo({ version, sourceUrl, sha256 }) {
+function buildSrcinfo({ version, pkgrel, sourceUrl, sha256 }) {
   const depends = RUNTIME_DEPENDS.map((dependency) => `\tdepends = ${dependency}`).join("\n");
   const makedepends = MAKE_DEPENDS.map((dependency) => `\tmakedepends = ${dependency}`).join("\n");
 
   return `pkgbase = lmms-lab-writer
 \tpkgdesc = AI-native LaTeX editor desktop application
 \tpkgver = ${version}
-\tpkgrel = 1
+\tpkgrel = ${pkgrel}
 \turl = https://github.com/EvolvingLMMs-Lab/lmms-lab-writer
 \tarch = x86_64
 \tlicense = MIT
@@ -219,6 +239,7 @@ pkgname = lmms-lab-writer
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const version = inferVersionFromTagOrArg(args);
+  const pkgrel = validatePkgrel(args.pkgrel);
   const tag = args.tag || `v${version}`;
   const sourceUrl = `https://github.com/${args.repo}/archive/refs/tags/${tag}.tar.gz`;
   const sha256 = args.sha256 || (await sha256Url(sourceUrl));
@@ -229,6 +250,7 @@ async function main() {
     path.join(args.outDir, "PKGBUILD"),
     buildPkgbuild({
       version,
+      pkgrel,
       sourceUrl,
       sha256,
     }),
@@ -238,6 +260,7 @@ async function main() {
     path.join(args.outDir, ".SRCINFO"),
     buildSrcinfo({
       version,
+      pkgrel,
       sourceUrl,
       sha256,
     }),
