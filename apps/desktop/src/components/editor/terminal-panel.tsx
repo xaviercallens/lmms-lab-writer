@@ -46,6 +46,9 @@ type TerminalPanelProps = {
   open: boolean;
   shellMode: TerminalShellMode;
   customShell: string;
+  fontFamily: string;
+  fontSize: number;
+  lineHeight: number;
   prefersReducedMotion: boolean;
   onClose: () => void;
 };
@@ -92,6 +95,9 @@ export function TerminalPanel({
   open,
   shellMode,
   customShell,
+  fontFamily,
+  fontSize,
+  lineHeight,
   prefersReducedMotion,
   onClose,
 }: TerminalPanelProps) {
@@ -311,6 +317,9 @@ export function TerminalPanel({
             projectPath={projectPath}
             shellMode={shellMode}
             customShell={customShell}
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            lineHeight={lineHeight}
             className="flex-1 min-h-0"
           />
         </motion.div>

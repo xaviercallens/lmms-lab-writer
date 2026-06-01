@@ -4,7 +4,8 @@ import { DiffEditor, type DiffOnMount, type Monaco } from "@monaco-editor/react"
 import type { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
 import { memo, useCallback, useEffect, useRef } from "react";
-import { EDITOR_MONO_FONT_FAMILY } from "@/lib/editor/font-stacks";
+import { resolveMonoFontFamily } from "@/lib/editor/font-stacks";
+import type { EditorSettings } from "@/lib/editor/types";
 
 // Define diff themes for both light and dark
 const defineDiffThemes = (monaco: Monaco) => {
@@ -124,6 +125,7 @@ type Props = {
   filePath?: string;
   language?: string;
   className?: string;
+  editorSettings?: Partial<EditorSettings>;
 };
 
 export const MonacoDiffEditor = memo(function MonacoDiffEditor({
@@ -132,6 +134,7 @@ export const MonacoDiffEditor = memo(function MonacoDiffEditor({
   filePath,
   language,
   className = "",
+  editorSettings,
 }: Props) {
   const editorRef = useRef<editor.IStandaloneDiffEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
@@ -216,10 +219,10 @@ export const MonacoDiffEditor = memo(function MonacoDiffEditor({
           scrollBeyondLastLine: false,
           wordWrap: "on",
           diffWordWrap: "on",
-          fontSize: 13,
-          fontFamily: EDITOR_MONO_FONT_FAMILY,
+          fontSize: editorSettings?.fontSize ?? 13,
+          fontFamily: resolveMonoFontFamily(editorSettings?.fontFamily),
           lineNumbers: "on",
-          lineHeight: 1.5,
+          lineHeight: editorSettings?.lineHeight ?? 1.5,
           padding: { top: 12, bottom: 12 },
           scrollbar: {
             vertical: "visible",

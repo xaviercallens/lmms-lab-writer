@@ -20,6 +20,11 @@ describe("DEFAULT_EDITOR_SETTINGS", () => {
     expect(DEFAULT_EDITOR_SETTINGS.fontSize).toBe(14);
   });
 
+  it("uses default font stacks by default", () => {
+    expect(DEFAULT_EDITOR_SETTINGS.fontFamily).toBe("");
+    expect(DEFAULT_EDITOR_SETTINGS.terminalFontFamily).toBe("");
+  });
+
   it("has tab size 2", () => {
     expect(DEFAULT_EDITOR_SETTINGS.tabSize).toBe(2);
   });
@@ -30,5 +35,10 @@ describe("DEFAULT_EDITOR_SETTINGS", () => {
 
   it("has terminal shell mode set to auto", () => {
     expect(DEFAULT_EDITOR_SETTINGS.terminalShellMode).toBe("auto");
+  });
+
+  it("has terminal font defaults", () => {
+    expect(DEFAULT_EDITOR_SETTINGS.terminalFontSize).toBe(13);
+    expect(DEFAULT_EDITOR_SETTINGS.terminalLineHeight).toBe(1.4);
   });
 });

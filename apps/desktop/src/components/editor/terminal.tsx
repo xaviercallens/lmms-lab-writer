@@ -6,7 +6,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { useTheme } from "next-themes";
 import { memo, useEffect, useRef, useState } from "react";
-import { EDITOR_MONO_FONT_FAMILY } from "@/lib/editor/font-stacks";
+import { resolveMonoFontFamily } from "@/lib/editor/font-stacks";
 
 // GitHub Light terminal colors
 const LIGHT_TERMINAL_THEME = {
@@ -62,6 +62,9 @@ type Props = {
   projectPath?: string;
   shellMode?: "auto" | "custom";
   customShell?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  lineHeight?: number;
   className?: string;
 };
 
@@ -73,12 +76,20 @@ export const Terminal = memo(function Terminal({
   projectPath,
   shellMode = "auto",
   customShell = "",
+  fontFamily = "",
+  fontSize = 13,
+  lineHeight = 1.4,
   className = "",
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<XTerm | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
   const themeRef = useRef(LIGHT_TERMINAL_THEME);
+  const fontRef = useRef({
+    fontFamily: resolveMonoFontFamily(fontFamily),
+    fontSize,
+    lineHeight,
+  });
   // Client-side mount check - intentionally set in effect for hydration safety
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -98,6 +109,22 @@ export const Terminal = memo(function Terminal({
   }, [resolvedTheme]);
 
   useEffect(() => {
+    const nextFont = {
+      fontFamily: resolveMonoFontFamily(fontFamily),
+      fontSize,
+      lineHeight,
+    };
+    fontRef.current = nextFont;
+
+    if (termRef.current) {
+      termRef.current.options.fontFamily = nextFont.fontFamily;
+      termRef.current.options.fontSize = nextFont.fontSize;
+      termRef.current.options.lineHeight = nextFont.lineHeight;
+      fitAddonRef.current?.fit();
+    }
+  }, [fontFamily, fontSize, lineHeight]);
+
+  useEffect(() => {
     if (!mounted || !containerRef.current || !projectPath) return;
 
     const preferredShell =
@@ -113,9 +140,9 @@ export const Terminal = memo(function Terminal({
     let fitFrameId: number | null = null;
 
     const term = new XTerm({
-      fontFamily: EDITOR_MONO_FONT_FAMILY,
-      fontSize: 13,
-      lineHeight: 1.4,
+      fontFamily: fontRef.current.fontFamily,
+      fontSize: fontRef.current.fontSize,
+      lineHeight: fontRef.current.lineHeight,
       theme: themeRef.current,
       cursorBlink: true,
       cursorStyle: "block",

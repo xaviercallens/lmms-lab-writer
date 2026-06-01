@@ -9,6 +9,22 @@ import {
 
 const STORAGE_KEY = "editor-settings";
 
+function clampNumber(value: unknown, fallback: number, min: number, max: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.max(min, value));
+}
+
+function clampInteger(value: unknown, fallback: number, min: number, max: number): number {
+  return Math.round(clampNumber(value, fallback, min, max));
+}
+
+function sanitizeString(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value.trim() : fallback;
+}
+
 // Migration helper for backward compatibility
 function migrateSettings(parsed: Record<string, unknown>): EditorSettings {
   const settings = { ...DEFAULT_EDITOR_SETTINGS, ...parsed };
@@ -35,15 +51,37 @@ function migrateSettings(parsed: Record<string, unknown>): EditorSettings {
     );
   }
 
+  settings.fontFamily = sanitizeString(settings.fontFamily);
+  settings.fontSize = clampInteger(settings.fontSize, DEFAULT_EDITOR_SETTINGS.fontSize, 8, 32);
+  settings.lineHeight =
+    Math.round(
+      clampNumber(settings.lineHeight, DEFAULT_EDITOR_SETTINGS.lineHeight, 1.0, 3.0) * 10,
+    ) / 10;
+
   if (settings.terminalShellMode !== "auto" && settings.terminalShellMode !== "custom") {
     settings.terminalShellMode = DEFAULT_EDITOR_SETTINGS.terminalShellMode;
   }
 
-  if (typeof settings.terminalShellPath !== "string") {
-    settings.terminalShellPath = DEFAULT_EDITOR_SETTINGS.terminalShellPath;
-  } else {
-    settings.terminalShellPath = settings.terminalShellPath.trim();
-  }
+  settings.terminalShellPath = sanitizeString(
+    settings.terminalShellPath,
+    DEFAULT_EDITOR_SETTINGS.terminalShellPath,
+  );
+  settings.terminalFontFamily = sanitizeString(settings.terminalFontFamily);
+  settings.terminalFontSize = clampInteger(
+    settings.terminalFontSize,
+    DEFAULT_EDITOR_SETTINGS.terminalFontSize,
+    8,
+    32,
+  );
+  settings.terminalLineHeight =
+    Math.round(
+      clampNumber(
+        settings.terminalLineHeight,
+        DEFAULT_EDITOR_SETTINGS.terminalLineHeight,
+        1.0,
+        3.0,
+      ) * 10,
+    ) / 10;
 
   return settings as EditorSettings;
 }

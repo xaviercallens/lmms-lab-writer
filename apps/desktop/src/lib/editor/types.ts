@@ -17,6 +17,7 @@ export interface EditorSettings {
   vimMode: boolean;
 
   // Display
+  fontFamily: string;
   fontSize: number;
   lineHeight: number;
   wordWrap: "off" | "on" | "wordWrapColumn" | "bounded";
@@ -47,6 +48,9 @@ export interface EditorSettings {
   // Terminal
   terminalShellMode: TerminalShellMode;
   terminalShellPath: string;
+  terminalFontFamily: string;
+  terminalFontSize: number;
+  terminalLineHeight: number;
 }
 
 export const DEFAULT_MINIMAP_SETTINGS: MinimapSettings = {
@@ -62,6 +66,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   vimMode: false,
 
   // Display
+  fontFamily: "",
   fontSize: 14,
   lineHeight: 1.6,
   wordWrap: "off",
@@ -92,4 +97,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   // Terminal
   terminalShellMode: "auto",
   terminalShellPath: "",
+  terminalFontFamily: "",
+  terminalFontSize: 13,
+  terminalLineHeight: 1.4,
 };

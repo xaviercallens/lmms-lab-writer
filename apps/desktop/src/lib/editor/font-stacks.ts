@@ -36,3 +36,12 @@ export const EDITOR_MONO_FONT_FAMILY = [
   ...CJK_SANS_FALLBACK_FONTS,
   "monospace",
 ].join(", ");
+
+export function resolveMonoFontFamily(customFontFamily?: string | null): string {
+  const trimmedFontFamily = customFontFamily?.trim();
+  if (!trimmedFontFamily) {
+    return EDITOR_MONO_FONT_FAMILY;
+  }
+
+  return `${trimmedFontFamily}, ${EDITOR_MONO_FONT_FAMILY}`;
+}

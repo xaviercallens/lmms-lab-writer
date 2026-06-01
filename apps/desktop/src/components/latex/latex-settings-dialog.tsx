@@ -281,6 +281,27 @@ export function LaTeXSettingsDialog({
 
               <SectionHeader>Display</SectionHeader>
 
+              <div className="flex items-center justify-between py-2 gap-4">
+                <label
+                  htmlFor="editor-font-family"
+                  className="text-sm font-medium text-foreground-secondary shrink-0"
+                >
+                  Font Family
+                </label>
+                <input
+                  id="editor-font-family"
+                  type="text"
+                  value={editorSettings.fontFamily}
+                  onChange={(e) =>
+                    onUpdateEditorSettings({
+                      fontFamily: e.target.value,
+                    })
+                  }
+                  placeholder="Default monospace stack"
+                  className="w-full max-w-sm px-3 py-2 text-sm border border-border hover:border-border-dark focus:outline-none focus:border-foreground font-mono bg-background"
+                />
+              </div>
+
               <div className="flex items-center justify-between py-2">
                 <label
                   htmlFor="editor-font-size"
@@ -700,6 +721,139 @@ export function LaTeXSettingsDialog({
               </div>
 
               <SectionHeader>Terminal</SectionHeader>
+
+              <div className="flex items-center justify-between py-2 gap-4">
+                <label
+                  htmlFor="editor-terminal-font-family"
+                  className="text-sm font-medium text-foreground-secondary shrink-0"
+                >
+                  Font Family
+                </label>
+                <input
+                  id="editor-terminal-font-family"
+                  type="text"
+                  value={editorSettings.terminalFontFamily}
+                  onChange={(e) =>
+                    onUpdateEditorSettings({
+                      terminalFontFamily: e.target.value,
+                    })
+                  }
+                  placeholder="Default monospace stack"
+                  className="w-full max-w-sm px-3 py-2 text-sm border border-border hover:border-border-dark focus:outline-none focus:border-foreground font-mono bg-background"
+                />
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <label
+                  htmlFor="editor-terminal-font-size"
+                  className="text-sm font-medium text-foreground-secondary"
+                >
+                  Font Size
+                </label>
+                <div className="flex items-center border border-border hover:border-border-dark transition-colors">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onUpdateEditorSettings({
+                        terminalFontSize: Math.max(8, editorSettings.terminalFontSize - 1),
+                      })
+                    }
+                    className="w-8 h-8 flex items-center justify-center text-muted hover:text-foreground hover:bg-accent-hover transition-colors border-r border-border"
+                    aria-label="Decrease terminal font size"
+                  >
+                    <MinusIcon className="size-3" />
+                  </button>
+                  <input
+                    id="editor-terminal-font-size"
+                    type="number"
+                    min="8"
+                    max="32"
+                    value={editorSettings.terminalFontSize}
+                    onChange={(e) =>
+                      onUpdateEditorSettings({
+                        terminalFontSize: Math.min(
+                          32,
+                          Math.max(8, parseInt(e.target.value, 10) || 13),
+                        ),
+                      })
+                    }
+                    className="w-12 h-8 text-sm text-center border-0 focus:outline-none focus:ring-0 font-mono bg-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onUpdateEditorSettings({
+                        terminalFontSize: Math.min(32, editorSettings.terminalFontSize + 1),
+                      })
+                    }
+                    className="w-8 h-8 flex items-center justify-center text-muted hover:text-foreground hover:bg-accent-hover transition-colors border-l border-border"
+                    aria-label="Increase terminal font size"
+                  >
+                    <PlusIcon className="size-3" />
+                  </button>
+                  <span className="text-xs text-muted-foreground px-2 border-l border-border">
+                    px
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <label
+                  htmlFor="editor-terminal-line-height"
+                  className="text-sm font-medium text-foreground-secondary"
+                >
+                  Line Height
+                </label>
+                <div className="flex items-center border border-border hover:border-border-dark transition-colors">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onUpdateEditorSettings({
+                        terminalLineHeight: Math.max(
+                          1.0,
+                          Math.round((editorSettings.terminalLineHeight - 0.1) * 10) / 10,
+                        ),
+                      })
+                    }
+                    className="w-8 h-8 flex items-center justify-center text-muted hover:text-foreground hover:bg-accent-hover transition-colors border-r border-border"
+                    aria-label="Decrease terminal line height"
+                  >
+                    <MinusIcon className="size-3" />
+                  </button>
+                  <input
+                    id="editor-terminal-line-height"
+                    type="number"
+                    min="1.0"
+                    max="3.0"
+                    step="0.1"
+                    value={editorSettings.terminalLineHeight.toFixed(1)}
+                    onChange={(e) =>
+                      onUpdateEditorSettings({
+                        terminalLineHeight: Math.min(
+                          3.0,
+                          Math.max(1.0, parseFloat(e.target.value) || 1.4),
+                        ),
+                      })
+                    }
+                    className="w-12 h-8 text-sm text-center border-0 focus:outline-none focus:ring-0 font-mono bg-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onUpdateEditorSettings({
+                        terminalLineHeight: Math.min(
+                          3.0,
+                          Math.round((editorSettings.terminalLineHeight + 0.1) * 10) / 10,
+                        ),
+                      })
+                    }
+                    className="w-8 h-8 flex items-center justify-center text-muted hover:text-foreground hover:bg-accent-hover transition-colors border-l border-border"
+                    aria-label="Increase terminal line height"
+                  >
+                    <PlusIcon className="size-3" />
+                  </button>
+                </div>
+              </div>
 
               <SelectField
                 label="Shell Selection"

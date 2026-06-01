@@ -2456,6 +2456,7 @@ The AI assistant will read and update this file during compilation.
                   original={parsedGitDiff.original}
                   modified={parsedGitDiff.modified}
                   filePath={gitDiffPreview.path}
+                  editorSettings={editorSettings.settings}
                   className="h-full"
                 />
               ) : (
@@ -2854,6 +2855,9 @@ The AI assistant will read and update this file during compilation.
             open={showTerminal}
             shellMode={editorSettings.settings.terminalShellMode}
             customShell={editorSettings.settings.terminalShellPath}
+            fontFamily={editorSettings.settings.terminalFontFamily}
+            fontSize={editorSettings.settings.terminalFontSize}
+            lineHeight={editorSettings.settings.terminalLineHeight}
             prefersReducedMotion={Boolean(prefersReducedMotion)}
             onClose={() => setShowTerminal(false)}
           />
