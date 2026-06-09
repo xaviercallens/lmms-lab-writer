@@ -25,12 +25,12 @@ export default function AlexandriePage() {
       {/* Left side: PDF Viewer */}
       <div className="w-1/2 p-6 border-r border-slate-200 flex flex-col">
         <h1 className="text-2xl font-bold mb-2">Alexandrie Librairie</h1>
-        <p className="text-sm text-slate-500 mb-4">Viewing: Alien Mathematics & Formal Proofs</p>
+        <p className="text-sm text-slate-500 mb-4">Viewing: The Callens Conjectures Monograph</p>
         <div className="flex-1 bg-white shadow-lg rounded-xl overflow-hidden border border-slate-200">
           <iframe 
-            src="/alexandrie/alien_math.pdf" 
+            src="/alexandrie/symbrain_callens_conjectures_monograph.pdf" 
             className="w-full h-full border-none"
-            title="Alien Mathematics PDF"
+            title="The Callens Conjectures Monograph"
           />
         </div>
       </div>
@@ -45,7 +45,7 @@ export default function AlexandriePage() {
         <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-white rounded-xl shadow-lg border border-slate-200 mb-4">
           {messages.length === 0 ? (
             <div className="text-slate-400 text-center mt-10">
-              Ask me anything about the Pathological Lyapunov Functional, Tensor Networks, or the Lean 4 formal proofs!
+              Ask me anything about the Callens Conjectures, Lean 4 formalization, or the Galileo numerical simulations!
             </div>
           ) : (
             messages.map((m) => (
